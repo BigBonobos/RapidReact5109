@@ -12,40 +12,56 @@ import os
 
 
 def main() :
+
+    # Initialization of object
     videos = []
     ytdl = YoutubeDL()
     
+    # Gets Video URLS from playlist
     for i in range(3):
         videos.append(f"https://www.youtube.com/watch?v=OXkeAkWwex8&list=PLZT9pIgNOV6a_P3_HDTolvzprSdYB_zd3&index={i + 1}")
+
+    # Downloads videos from generated list
     ytdl.download(videos)
 
+    # Gets all files into list
     for (dirpath, dirnames, filenames) in os.walk(os.getcwd()):
 
+        # Iterates through all files in directory
         for file in filenames:
 
-            extension = file.split(".")[1]
+            # Splits file string by . to get file extension
+            split_file = file.split(".")
+            extension = split_file[split_file.len() - 1]
 
+            # only run code if file is mp3
             if (extension == "mp4"):
-
+                
+                # Reads video into cv2 Video Object
                 cam = cv2.VideoCapture(file)
-                if not os.path.exists("./image_data"):
-                    os.makedirs("./image_data")
 
+                # Creates Directory to store images
+                if not os.path.exists(f"./image_data {split_file[0]}"):
+                    os.makedirs(f"./image_data {split_file[0]}")
+
+                # Initializes variables needed in next part of the code
                 ret = True
                 current_frame = 0
 
+                # While there are frames, run
                 while (ret):
+
+                    # reads individual imgae
                     ret, frame = cam.read()
 
-                    name = f"./image_data/frame {current_frame}.jpg"
+                    # Saves indiv images
+                    name = f"./image_data {split_file[0]}/frame {current_frame}.jpg"
                     print(f"Creating {name}")
-
                     cv2.imwrite(name, frame)
-
                     current_frame += 1
 
                 cam.release()
-                cv2.destroyAllWindows()
+    cv2.destroyAllWindows()
 
 
 

@@ -32,10 +32,10 @@ def main() :
 
             # Splits file string by . to get file extension
             split_file = file.split(".")
-            extension = split_file[split_file.len() - 1]
+            extension = split_file[len(split_file) - 1]
 
             # only run code if file is mp3
-            if (extension == "mp4"):
+            if (extension == "mp4" or extension == "webm" or extension == "mkv"):
                 
                 # Reads video into cv2 Video Object
                 cam = cv2.VideoCapture(file)
@@ -50,15 +50,17 @@ def main() :
 
                 # While there are frames, run
                 while (ret):
+                    try:
+                        # reads individual imgae
+                        ret, frame = cam.read()
 
-                    # reads individual imgae
-                    ret, frame = cam.read()
-
-                    # Saves indiv images
-                    name = f"./image_data {split_file[0]}/frame {current_frame}.jpg"
-                    print(f"Creating {name}")
-                    cv2.imwrite(name, frame)
-                    current_frame += 1
+                        # Saves indiv images
+                        name = f"./image_data {split_file[0]}/frame {current_frame}.jpg"
+                        print(f"Creating {name}")
+                        cv2.imwrite(name, frame)
+                        current_frame += 1
+                    except:
+                        ret = False
 
                 cam.release()
     cv2.destroyAllWindows()

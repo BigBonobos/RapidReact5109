@@ -4,11 +4,13 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.AnalogGyro;
+import edu.wpi.first.wpilibj.SPI;
+import com.kauailabs.navx.frc.*;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 
 /** Represents a swerve drive style drivetrain. */
 public class Drivetrain {
@@ -24,18 +26,17 @@ public class Drivetrain {
   private final SwerveModule m_frontRight = new SwerveModule(3, 4);
   private final SwerveModule m_backLeft = new SwerveModule(5, 6);
   private final SwerveModule m_backRight = new SwerveModule(7, 8);
-
-  private final AnalogGyro m_gyro = new AnalogGyro(0);
+  private final AHRS navX = new AHRS(SPI.Port.kMXP);
 
   private final SwerveDriveKinematics m_kinematics =
       new SwerveDriveKinematics(
           m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
 
   private final SwerveDriveOdometry m_odometry =
-      new SwerveDriveOdometry(m_kinematics, m_gyro.getRotation2d());
+      new SwerveDriveOdometry(m_kinematics, new Rotation2d(navX.getYaw() * 180/Math.PI));
 
   public Drivetrain() {
-    m_gyro.reset();
+    navX.reset();
   }
 
   /**
@@ -51,7 +52,7 @@ public class Drivetrain {
     var swerveModuleStates =
         m_kinematics.toSwerveModuleStates(
             fieldRelative
-                ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, m_gyro.getRotation2d())
+                ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, new Rotation2d(navX.getYaw() * 180/Math.PI))
                 : new ChassisSpeeds(xSpeed, ySpeed, rot));
     SwerveDriveKinematics.normalizeWheelSpeeds(swerveModuleStates, kMaxSpeed);
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
@@ -63,7 +64,7 @@ public class Drivetrain {
   /** Updates the field relative position of the robot. */
   public void updateOdometry() {
     m_odometry.update(
-        m_gyro.getRotation2d(),
+        new Rotation2d(navX.getYaw() * 180/Math.PI),
         m_frontLeft.getState(),
         m_frontRight.getState(),
         m_backLeft.getState(),

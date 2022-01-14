@@ -1,6 +1,5 @@
 '''
 Part of Project for Getting Images to put into Axon
-Doing this because I'm bored as fuck
 Vidur Modgil
 5109 Gladiator Robotics
 '''

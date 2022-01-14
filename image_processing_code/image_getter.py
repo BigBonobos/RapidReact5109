@@ -13,7 +13,12 @@ from superviselyClient import Supervisely
 
 
 def main():
-
+    api_key = input("Enter your api key for supervisely: ")
+    project_id = input("Enter you supervisely project_id: ")
+    playlist_url = input("Enter playlist url here: ")
+    playlist_url = playlist_url.split("index")[0]
+    playlist_url = playlist_url + "index="
+    sly = Supervisely(api_key, project_id)
     ytdl = YoutubeDL()
 
     # Initialization of object
@@ -21,10 +26,12 @@ def main():
     
     # Gets Video URLS from playlist
     for i in range(3):
-        videos.append(f"https://www.youtube.com/watch?v=OXkeAkWwex8&list=PLZT9pIgNOV6a_P3_HDTolvzprSdYB_zd3&index={i + 1}")
+        print(playlist_url + str(i + 1))
+        videos.append(playlist_url + str(i + 1))
 
     # Downloads videos from generated list
     ytdl.download(videos)
+    sly.create_dataset("FRC Game Piece Sorting", "Machine Vision Labelling for FRC")
 
     # Gets all files into list
     for (dirpath, dirnames, filenames) in os.walk(os.getcwd()):
@@ -58,6 +65,7 @@ def main():
 
                         # Saves indiv images
                         name = f"./image_data {split_file[0]}/frame {current_frame}.jpg"
+                        sly.upload_image(name)
                         print(f"Creating {name}")
                         cv2.imwrite(name, frame)
                         current_frame += 1

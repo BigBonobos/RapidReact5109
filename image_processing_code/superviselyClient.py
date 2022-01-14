@@ -1,8 +1,13 @@
-
+'''
+Vidur Modgil
+Gladiator Robotics
+Team 5109
+Supervisely Client interaction for python
+'''
 
 # Preprossescor Directives
 import requests
-from json import loads
+from json import dumps
 import base64
 
 

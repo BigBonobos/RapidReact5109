@@ -2,3 +2,5 @@
 *.mkv
 *.webm
 *.mp4
+/__pycache__
+.DS_Store

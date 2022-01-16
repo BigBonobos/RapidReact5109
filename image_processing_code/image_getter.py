@@ -23,14 +23,14 @@ async def create_and_upload_frame(current_frame: int, filename: list, cam, sly):
 
 async def main():
     api_key = input("Enter your api key for supervisely: ")
-    project_id = input("Enter you supervisely project_id: ")
+    project_id = int(input("Enter your supervisely project_id: "))
     playlist_url = input("Enter playlist url here: ")
     playlist_url = playlist_url.split("index")[0]
     playlist_url = playlist_url + "index="
     sly = Supervisely(api_key, project_id)
     ytdl = YoutubeDL()
 
-    # Initialization of object
+    # # Initialization of object
     videos = []
     
     # Gets Video URLS from playlist

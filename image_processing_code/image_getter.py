@@ -9,9 +9,19 @@ from youtube_dl import YoutubeDL
 import cv2
 import os
 from superviselyClient import Supervisely
+import asyncio
 
+async def create_and_upload_frame(current_frame: int, filename: list, cam, sly):
+    # reads individual imgae
+    ret, frame = cam.read()
 
-def main():
+    # Saves indiv images
+    name = f"./image_data {filename[0]}/frame {current_frame}.jpg"
+    print(f"Creating {name}")
+    cv2.imwrite(name, frame)
+    sly.upload_image(name)
+
+async def main():
     api_key = input("Enter your api key for supervisely: ")
     project_id = input("Enter you supervisely project_id: ")
     playlist_url = input("Enter playlist url here: ")
@@ -33,7 +43,7 @@ def main():
     sly.create_dataset("FRC Game Piece Sorting", "Machine Vision Labelling for FRC")
 
     # Gets all files into list
-    for (dirpath, dirnames, filenames) in os.walk(os.getcwd()):
+    for (_, _, filenames) in os.walk(os.getcwd()):
 
         # Iterates through all files in directory
         for file in filenames:
@@ -59,14 +69,7 @@ def main():
                 # While there are frames, run
                 while (ret):
                     try:
-                        # reads individual imgae
-                        ret, frame = cam.read()
-
-                        # Saves indiv images
-                        name = f"./image_data {split_file[0]}/frame {current_frame}.jpg"
-                        sly.upload_image(name)
-                        print(f"Creating {name}")
-                        cv2.imwrite(name, frame)
+                        asyncio.create_task(create_and_upload_frame(current_frame, split_file[0], cam, sly))
                         current_frame += 1
                     except:
                         ret = False
@@ -79,4 +82,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

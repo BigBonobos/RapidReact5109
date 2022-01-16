@@ -11,15 +11,18 @@ import os
 from superviselyClient import Supervisely
 import asyncio
 
-async def create_and_upload_frame(current_frame: int, filename: list, cam, sly):
-    # reads individual imgae
-    ret, frame = cam.read()
+async def create_and_upload_frame(current_frame: int, filename: list, cam, sly, subcounter):
+    # reads individual image
 
-    # Saves indiv images
-    name = f"./image_data {filename[0]}/frame {current_frame}.jpg"
-    print(f"Creating {name}")
-    cv2.imwrite(name, frame)
-    sly.upload_image(name)
+    if (subcounter == 4):
+        ret, frame = cam.read()
+
+        # Saves indiv images
+        name = f"./image_data {filename[0]}/frame {current_frame}.jpg"
+        print(f"Creating {name}")
+        cv2.imwrite(name, frame)
+        sly.upload_image(name)
+        os.remove(name)
 
 async def main():
     api_key = input("Enter your api key for supervisely: ")
@@ -65,12 +68,17 @@ async def main():
                 # Initializes variables needed in next part of the code
                 ret = True
                 current_frame = 0
+                subcounter = 0
 
                 # While there are frames, run
                 while (ret):
                     try:
                         asyncio.create_task(create_and_upload_frame(current_frame, split_file[0], cam, sly))
                         current_frame += 1
+                        if (subcounter == 4):
+                            subcounter = 0
+                        else:
+                            subcounter += 1
                     except:
                         ret = False
 

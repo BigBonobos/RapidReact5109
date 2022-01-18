@@ -9,6 +9,7 @@ from youtube_dl import YoutubeDL
 import cv2
 import os
 from superviselyClient import Supervisely
+from concurrent.futures import ThreadPoolExecutor
 
 def create_and_upload_frame(current_frame: int, filename: list, cam, sly, subcounter):
     # reads individual image
@@ -30,26 +31,26 @@ def create_and_upload_frame(current_frame: int, filename: list, cam, sly, subcou
 def main():
     api_key = input("Enter your api key for supervisely: ")
     project_id = int(input("Enter your supervisely project_id: "))
-    playlist_url = input("Enter playlist url here: ")
-    try:
-        playlist_url = playlist_url.split("index")[0]
-    except:
-        playlist_url = playlist_url
-    playlist_url = playlist_url + "index="
+    # playlist_url = input("Enter playlist url here: ")
+    # try:
+    #     playlist_url = playlist_url.split("index")[0]
+    # except:
+    #     playlist_url = playlist_url
+    # playlist_url = playlist_url + "index="
     sly = Supervisely(api_key, project_id)
-    ytdl = YoutubeDL()
+    # ytdl = YoutubeDL()
 
-    # Initialization of object
-    videos = []
+    # # Initialization of object
+    # videos = []
     
-    # Gets Video URLS from playlist
-    for i in range(3):
-        print(playlist_url + str(i + 1))
-        videos.append(playlist_url + str(i + 1))
+    # # Gets Video URLS from playlist
+    # for i in range(3):
+    #     print(playlist_url + str(i + 1))
+    #     videos.append(playlist_url + str(i + 1))
 
     # Downloads videos from generated list
-    ytdl.download(videos)
-    sly.create_dataset("FRC Game Piece Sorting14", "Machine Vision Labelling for FRC")
+    # ytdl.download(videos)
+    sly.create_dataset("FRC Game Piece Sorting16", "Machine Vision Labelling for FRC")
 
     # Gets all files into list
     for (_, _, filenames) in os.walk(os.getcwd()):
@@ -79,7 +80,9 @@ def main():
                 # While there are frames, run
                 while (ret):
                     try:
-                        ret = create_and_upload_frame(current_frame, split_file, cam, sly, subcounter)
+                        ret = True
+                        with ThreadPoolExecutor() as pool:
+                            pool.submit(create_and_upload_frame, current_frame, split_file, cam, sly, subcounter)
                         current_frame += 1
                         if (subcounter == 4):
                             subcounter = 0

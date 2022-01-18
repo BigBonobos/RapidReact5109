@@ -27,10 +27,7 @@ def create_and_upload_frame(current_frame: int, filename: list, cam, sly, subcou
     
     return ret
 
-def main():
-    api_key = input("Enter your api key for supervisely: ")
-    project_id = int(input("Enter your supervisely project_id: "))
-    playlist_url = input("Enter playlist url here: ")
+def upload_video(api_key: str, project_id: str, plalist_url: str, amt_videos: int):
     try:
         playlist_url = playlist_url.split("index")[0]
     except:
@@ -43,7 +40,7 @@ def main():
     videos = []
     
     # Gets Video URLS from playlist
-    for i in range(3):
+    for i in range(amt_videos - 1):
         print(playlist_url + str(i + 1))
         videos.append(playlist_url + str(i + 1))
 
@@ -93,10 +90,3 @@ def main():
 
                 cam.release()
     cv2.destroyAllWindows()
-
-
-
-
-
-if __name__ == '__main__':
-    main()

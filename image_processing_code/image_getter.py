@@ -9,9 +9,8 @@ from youtube_dl import YoutubeDL
 import cv2
 import os
 from superviselyClient import Supervisely
-import asyncio
 
-async def create_and_upload_frame(current_frame: int, filename: list, cam, sly, subcounter):
+def create_and_upload_frame(current_frame: int, filename: list, cam, sly, subcounter):
     # reads individual image
 
     if (subcounter == 4):
@@ -23,17 +22,24 @@ async def create_and_upload_frame(current_frame: int, filename: list, cam, sly, 
         cv2.imwrite(name, frame)
         sly.upload_image(name)
         os.remove(name)
+    else:
+        ret = True
+    
+    return ret
 
-async def main():
+def main():
     api_key = input("Enter your api key for supervisely: ")
     project_id = int(input("Enter your supervisely project_id: "))
     playlist_url = input("Enter playlist url here: ")
-    playlist_url = playlist_url.split("index")[0]
+    try:
+        playlist_url = playlist_url.split("index")[0]
+    except:
+        playlist_url = playlist_url
     playlist_url = playlist_url + "index="
     sly = Supervisely(api_key, project_id)
     ytdl = YoutubeDL()
 
-    # # Initialization of object
+    # Initialization of object
     videos = []
     
     # Gets Video URLS from playlist
@@ -43,7 +49,7 @@ async def main():
 
     # Downloads videos from generated list
     ytdl.download(videos)
-    sly.create_dataset("FRC Game Piece Sorting", "Machine Vision Labelling for FRC")
+    sly.create_dataset("FRC Game Piece Sorting14", "Machine Vision Labelling for FRC")
 
     # Gets all files into list
     for (_, _, filenames) in os.walk(os.getcwd()):
@@ -73,13 +79,14 @@ async def main():
                 # While there are frames, run
                 while (ret):
                     try:
-                        asyncio.create_task(create_and_upload_frame(current_frame, split_file[0], cam, sly))
+                        ret = create_and_upload_frame(current_frame, split_file, cam, sly, subcounter)
                         current_frame += 1
                         if (subcounter == 4):
                             subcounter = 0
                         else:
                             subcounter += 1
-                    except:
+                    except Exception as e:
+                        print(f"Error: {e}")
                         ret = False
 
                 cam.release()
@@ -90,4 +97,4 @@ async def main():
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()

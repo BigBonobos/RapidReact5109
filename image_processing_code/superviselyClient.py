@@ -7,9 +7,23 @@ Supervisely Client interaction for python
 
 # Preprossescor Directives
 import requests
-from json import dumps
 import base64
+from json import dumps
+import re
 
+
+def decode_base64(data, altchars=b'+/'):
+    """Decode base64, padding being optional.
+
+    :param data: Base64 data as an ASCII byte string
+    :returns: The decoded byte string.
+
+    """
+    data = re.sub(rb'[^a-zA-Z0-9%s]+' % altchars, b'', data)  # normalize
+    missing_padding = len(data) % 4
+    if missing_padding:
+        data += b'='* (4 - missing_padding)
+    return base64.b64decode(data, altchars)
 
 class Supervisely:
     def __init__(self, api_key: str, project_id: int):
@@ -36,17 +50,19 @@ class Supervisely:
         with open(image_path, "rb") as file:
             image_name = image_path.split("/")
             image_name = image_name[len(image_name) - 1]
-            body = file.read()
             headers = self.headers.copy()
             headers['Content-Type'] = "application/octet-stream"
-            resp = requests.post(self.base_url + "images.upload", data=body, headers=headers)
+            resp = requests.post(self.base_url + "images.upload", data=file, headers=headers)
         resp = resp.json()
+        print(resp)
         hashFinal = resp['hash']
         data = {
-            "dataset_id": self.dataset_id,
+            "datasetId": self.dataset_id,
             "images": [{
-                "hash": hashFinal
+                "hash": hashFinal,
+                "name": image_name,
             }],
-            generate_unique_names: True
+            "generate_unique_names": True
         }
-        resp = requests.post(self.base_url + "images.bulk.add", json=body, headers=self.headers)
+        resp = requests.post(self.base_url + "images.bulk.add", json=data, headers=self.headers)
+        print(resp.text)

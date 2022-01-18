@@ -4,7 +4,7 @@ Vidur Modgil
 5109 Gladiator Robotics
 '''
 
-# Imports
+# Preprossecor Directives
 from youtube_dl import YoutubeDL
 import cv2
 import os
@@ -13,7 +13,6 @@ from concurrent.futures import ThreadPoolExecutor
 
 def create_and_upload_frame(current_frame: int, filename: list, cam, sly, subcounter):
     # reads individual image
-
     if (subcounter == 4):
         ret, frame = cam.read()
 

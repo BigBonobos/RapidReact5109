@@ -4,14 +4,13 @@
 
 package frc.robot;
 
-import com.revrobotics.CANEncoder;
-import com.revrobotics.CANPIDController;
-import com.revrobotics.CANPIDController.AccelStrategy;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 public class SwerveModule {
   private static final double kWheelRadius = 0.0508;
@@ -24,13 +23,13 @@ public class SwerveModule {
   private final CANSparkMax m_driveMotor;
   private final CANSparkMax m_turningMotor;
 
-  private final CANEncoder m_driveEncoder;
-  private final CANEncoder m_turningEncoder;
+  private final RelativeEncoder m_driveEncoder;
+  private final RelativeEncoder m_turningEncoder;
 
-  private final CANPIDController m_drivePIDController;
+  private final SparkMaxPIDController m_drivePIDController;
 
 
-  private final CANPIDController m_turningPIDController;
+  private final SparkMaxPIDController m_turningPIDController;
 
   // Gains are for example purposes only - must be determined for your own robot!
   private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(1, 3);
@@ -68,7 +67,7 @@ public class SwerveModule {
     
 
     // Setting turn constraints
-    m_turningPIDController.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, 0);
+    m_turningPIDController.setSmartMotionAccelStrategy(com.revrobotics.SparkMaxPIDController.AccelStrategy.kTrapezoidal, 0);
     m_turningPIDController.setSmartMotionMaxAccel(kModuleMaxAngularAcceleration, 0);
     m_turningPIDController.setSmartMotionMaxVelocity(kModuleMaxAngularVelocity, 0);
     

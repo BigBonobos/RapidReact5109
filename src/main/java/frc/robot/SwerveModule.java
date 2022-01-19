@@ -4,14 +4,14 @@
 
 package frc.robot;
 
-import com.revrobotics.CANEncoder;
-import com.revrobotics.CANPIDController;
-import com.revrobotics.CANPIDController.AccelStrategy;
-import com.revrobotics.CANSparkMax;
+
+import com.revrobotics.*;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
+import com.revrobotics.SparkMaxPIDController.AccelStrategy;
+
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 public class SwerveModule {
   private static final double kWheelRadius = 0.0508;
@@ -21,16 +21,14 @@ public class SwerveModule {
   private static final double kModuleMaxAngularAcceleration =
       2 * Math.PI; // radians per second squared
 
-  private final CANSparkMax m_driveMotor;
-  private final CANSparkMax m_turningMotor;
+  private final CANSparkMax m_drive;
+  private final CANSparkMax m_turning;
 
-  private final CANEncoder m_driveEncoder;
-  private final CANEncoder m_turningEncoder;
+  private final RelativeEncoder e_drive;
+  private final RelativeEncoder e_turning;
 
-  private final CANPIDController m_drivePIDController;
-
-
-  private final CANPIDController m_turningPIDController;
+  private final SparkMaxPIDController m_drivePIDController;
+  private final SparkMaxPIDController m_turningPIDController;
 
   // Gains are for example purposes only - must be determined for your own robot!
   private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(1, 3);
@@ -45,18 +43,17 @@ public class SwerveModule {
   public SwerveModule(int driveMotorChannel, int turningMotorChannel) {
 
     // Motor Instantiation
-    m_driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
-    m_turningMotor = new CANSparkMax(turningMotorChannel, MotorType.kBrushless);
+    m_drive = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
+    m_turning = new CANSparkMax(turningMotorChannel, MotorType.kBrushless);
 
     // Encoder Instantiation
-    m_driveEncoder = m_driveMotor.getEncoder();
-    m_turningEncoder = m_turningMotor.getEncoder();
+    e_drive = m_drive.getEncoder();
+    e_turning = m_turning.getEncoder();
 
     // PID Instantiation
-    m_drivePIDController = m_driveMotor.getPIDController();
-    m_turningPIDController = m_turningMotor.getPIDController();
+    m_drivePIDController = m_drive.getPIDController();
+    m_turningPIDController = m_turning.getPIDController();
     
-
     // Setting PID Values
     m_drivePIDController.setP(1);
     m_drivePIDController.setI(0);
@@ -76,12 +73,12 @@ public class SwerveModule {
     // Set the distance per pulse for the drive encoder. We can simply use the
     // distance traveled for one rotation of the wheel divided by the encoder
     // resolution.
-    m_driveEncoder.setPositionConversionFactor(2 * Math.PI * kWheelRadius / kEncoderResolution);
+    e_drive.setPositionConversionFactor(2 * Math.PI * kWheelRadius / kEncoderResolution);
 
     // Set the distance (in this case, angle) per pulse for the turning encoder.
     // This is the the angle through an entire rotation (2 * wpi::math::pi)
     // divided by the encoder resolution.
-    m_turningEncoder.setPositionConversionFactor(2 * Math.PI / kEncoderResolution);
+    e_turning.setPositionConversionFactor(2 * Math.PI / kEncoderResolution);
 
     // Limit the PID Controller's input range between -pi and pi and set the input
     // to be continuous.
@@ -94,7 +91,7 @@ public class SwerveModule {
    * @return The current state of the module.
    */
   public SwerveModuleState getState() {
-    return new SwerveModuleState(m_driveEncoder.getVelocity(), new Rotation2d(m_turningEncoder.getPosition()));
+    return new SwerveModuleState(e_drive.getVelocity(), new Rotation2d(e_turning.getPosition()));
   }
 
   /**
@@ -107,7 +104,7 @@ public class SwerveModule {
     final double driveFeedforward = m_driveFeedforward.calculate(state.speedMetersPerSecond);
 
     final double turnFeedforward =
-        m_turnFeedforward.calculate(m_turningEncoder.getVelocity());
+        m_turnFeedforward.calculate(e_turning.getVelocity());
 
     m_drivePIDController.setFF(driveFeedforward);
     m_turningPIDController.setFF(turnFeedforward);

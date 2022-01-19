@@ -6,7 +6,6 @@ package frc.robot;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.XboxController;
 
 public class Robot extends TimedRobot {
   private final Joystick l_joystick = new Joystick(0);

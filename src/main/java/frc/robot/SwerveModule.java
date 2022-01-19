@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 
 public class SwerveModule {
   private static final double kWheelRadius = 0.0508;
-  private static final int kEncoderResolution = 42;
+  private static final double kEncoderResolution = 42 * 8.14;
 
   private static final double kModuleMaxAngularVelocity = Drivetrain.kMaxAngularSpeed;
   private static final double kModuleMaxAngularAcceleration =

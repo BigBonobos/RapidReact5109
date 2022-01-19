@@ -28,13 +28,14 @@ public class Drivetrain {
   private final SwerveModule m_backLeft = new SwerveModule(5, 6);
   private final SwerveModule m_backRight = new SwerveModule(7, 8);
   private final AHRS navX = new AHRS(SPI.Port.kMXP);
+  private final Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * 180/Math.PI);
 
   private final SwerveDriveKinematics m_kinematics =
       new SwerveDriveKinematics(
           m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
 
   private final SwerveDriveOdometry m_odometry =
-      new SwerveDriveOdometry(m_kinematics, new Rotation2d(navX.getYaw() * 180/Math.PI));
+      new SwerveDriveOdometry(m_kinematics, initialMeasurement);
 
   public Drivetrain() {
     navX.reset();
@@ -50,10 +51,11 @@ public class Drivetrain {
    */
   @SuppressWarnings("ParameterName")
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
+    var navXVal = new Rotation2d((navX.getYaw() % 360 )* 180/Math.PI);
     var swerveModuleStates =
         m_kinematics.toSwerveModuleStates(
             fieldRelative
-                ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, new Rotation2d(navX.getYaw() * 180/Math.PI))
+                ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, navXVal)
                 : new ChassisSpeeds(xSpeed, ySpeed, rot));
     SwerveDriveKinematics.normalizeWheelSpeeds(swerveModuleStates, kMaxSpeed);
     m_frontLeft.setDesiredState(swerveModuleStates[0]);

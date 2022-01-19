@@ -55,7 +55,6 @@ public class SwerveModule {
     m_drivePIDController = m_driveMotor.getPIDController();
     m_turningPIDController = m_turningMotor.getPIDController();
     
-
     // Setting PID Values
     m_drivePIDController.setP(1);
     m_drivePIDController.setI(0);

@@ -8,6 +8,12 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.robot.swerveCode.Drivetrain;
 
+enum DriveDirection {
+  Angular,
+  XDir,
+  YDir
+}
+
 public class Robot extends TimedRobot {
   private final double shooterRangeCm = 5.0; // Enter shooter distance here(cm)
   private final Limelight limelight = new Limelight(61.49125);
@@ -61,17 +67,55 @@ public class Robot extends TimedRobot {
   }
 
   private void autoAlign() {
-    double distance = limelight.calculate3dDistance();
-    double startAngle = m_swerve.navX.getYaw();
-    if (Math.abs(shooterRangeCm - distance) <= 5.0) {
-      double angle = limelight.calculateAngleOffset();
-      double currentAngle = m_swerve.navX.getYaw();
-
-      if(Math.abs(angle - (currentAngle - startAngle)) <= 2){
-        m_swerve.drive(0, 0, Math.PI/2, true);
+    double[] distanceInformation = limelight.calculate3dDistance();
+    double straightDistance = distanceInformation[0];
+    double angledDistance = distanceInformation[1];
+    if (Math.abs(shooterRangeCm - straightDistance) <= 5.0) {
+      driveUntilAdjusted(DriveDirection.XDir);
+    }
+    else if (Math.abs(shooterRangeCm - angledDistance) <= 5.0) {
+      driveUntilAdjusted(DriveDirection.Angular);
+    } else {
+      double offset = straightDistance - shooterRangeCm;
+      if (offset < 0) {
+        while (Math.abs(offset) > 5.0) {
+          m_swerve.drive(0, -Math.PI/2, 0.0, true);
+          distanceInformation = limelight.calculate3dDistance();
+          straightDistance = distanceInformation[0];
+          offset = straightDistance - shooterRangeCm;
+        }
+        driveUntilAdjusted(DriveDirection.XDir);
       } else {
-        m_swerve.drive(0, 0, 0, true);
+        while (Math.abs(offset) > 5.0) {
+          m_swerve.drive(0, Math.PI/2, 0.0, true);
+          distanceInformation = limelight.calculate3dDistance();
+          angledDistance = distanceInformation[1];
+          offset = angledDistance - shooterRangeCm;
+        }
+        driveUntilAdjusted(DriveDirection.Angular);
       }
     }
   }
+
+  private void driveUntilAdjusted(DriveDirection direction) {
+    double angle = limelight.calculateAngleOffset();
+    double currentAngle = m_swerve.navX.getYaw();
+    double startAngle = m_swerve.navX.getYaw();
+
+    switch (direction) {
+      case Angular:
+        m_swerve.drive(0, 0, Integer.signum((int) angle) * Math.PI/2, true);
+        break;
+      case XDir:
+        m_swerve.drive(Integer.signum((int) angle) * Math.PI/2, 0, 0.0, true);
+        break;
+      case YDir:
+        m_swerve.drive(0, Integer.signum((int) angle) * Math.PI/2, 0.0, true);
+        break;
+    }
+    while(Math.abs(angle - (currentAngle - startAngle)) > 2){
+      angle = limelight.calculateAngleOffset();
+    }
+    m_swerve.drive(0, 0, 0, true);
+  };
 }

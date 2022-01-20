@@ -11,6 +11,7 @@ public class Limelight {
 
 
     /**
+     * Constructor for Limelight
      * @param targetSize The size of the longer side of the vision target(cm). For rapid react should be around 61.49125 cm.
      */
     public Limelight(double targetSize) {
@@ -50,9 +51,11 @@ public class Limelight {
     /**
      * Calculates the angle of the vision target relative to the bot
      * @return Either 0 or angle offset (theta, degrees)
-     * @apiNote 0 degrees is bot facing target
-     * -theta means the target is to the left
-     * +theta means the target is to the right
+     * <ul>
+     * <li>0 degrees is bot facing target</li>
+     * <li>-theta means the target is to the left of the bot</li>
+     * <li>+theta means the target is to the right of the bot</li>
+     * </ul>
      */
     public double calculateAngleOffset(){
         NetworkTable limelight = ntwrkInst.getTable("limelight");

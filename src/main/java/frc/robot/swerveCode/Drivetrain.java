@@ -13,9 +13,18 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.Limelight;
 
 /** Represents a swerve drive style drivetrain. */
 public class Drivetrain {
+
+  /** Enum to represent three directions of movement possible with swerve drive. */
+  private enum DriveDirection {
+    Angular,
+    XDir,
+    YDir
+  }
+
   public static final double kMaxSpeed = 3.0; // 3 meters per second
   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
 
@@ -29,8 +38,11 @@ public class Drivetrain {
   private final SwerveModule m_frontRight = new SwerveModule(3, 4);
   private final SwerveModule m_backLeft = new SwerveModule(5, 6);
   private final SwerveModule m_backRight = new SwerveModule(7, 8);
-  public final AHRS navX = new AHRS(SPI.Port.kMXP);
+  private final AHRS navX = new AHRS(SPI.Port.kMXP);
   private final Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * 180/Math.PI);
+
+  private final double shooterRangeCm = 5.0; // Enter shooter distance here(cm)
+  private final Limelight limelight = new Limelight(61.49125);
 
   private final SwerveDriveKinematics m_kinematics =
       new SwerveDriveKinematics(
@@ -75,4 +87,57 @@ public class Drivetrain {
         m_backLeft.getState(),
         m_backRight.getState());
   }
+
+  public void autoAlign() {
+    double[] distanceInformation = limelight.calculate3dDistance();
+    double straightDistance = distanceInformation[0];
+    double angledDistance = distanceInformation[1];
+    if (Math.abs(shooterRangeCm - straightDistance) <= 5.0) {
+      driveUntilAdjusted(DriveDirection.XDir);
+    }
+    else if (Math.abs(shooterRangeCm - angledDistance) <= 5.0) {
+      driveUntilAdjusted(DriveDirection.Angular);
+    } else {
+      double offset = straightDistance - shooterRangeCm;
+      if (offset < 0) {
+        while (Math.abs(offset) > 5.0) {
+          drive(0, -Math.PI/2, 0.0, true);
+          distanceInformation = limelight.calculate3dDistance();
+          angledDistance = distanceInformation[1];
+          offset = angledDistance - shooterRangeCm;
+        }
+        driveUntilAdjusted(DriveDirection.XDir);
+      } else {
+        while (Math.abs(offset) > 5.0) {
+          drive(0, Math.PI/2, 0.0, true);
+          distanceInformation = limelight.calculate3dDistance();
+          straightDistance = distanceInformation[0];
+          offset = straightDistance - shooterRangeCm;
+        }
+        driveUntilAdjusted(DriveDirection.Angular);
+      }
+    }
+  }
+
+  private void driveUntilAdjusted(DriveDirection direction) {
+    double angle = limelight.calculateAngleOffset();
+    double currentAngle = navX.getYaw();
+    double startAngle = navX.getYaw();
+
+    switch (direction) {
+      case Angular:
+        drive(0, 0, Integer.signum((int) angle) * Math.PI/2, true);
+        break;
+      case XDir:
+        drive(Integer.signum((int) angle) * Math.PI/2, 0, 0.0, true);
+        break;
+      case YDir:
+        drive(0, Integer.signum((int) angle) * Math.PI/2, 0.0, true);
+        break;
+    }
+    while(Math.abs(angle - (currentAngle - startAngle)) > 2){
+      angle = limelight.calculateAngleOffset();
+    }
+    drive(0, 0, 0, true);
+  };
 }

@@ -68,9 +68,9 @@ public class Robot extends TimedRobot {
       double currentAngle = m_swerve.navX.getYaw();
 
       if(Math.abs(angle - (currentAngle - startAngle)) <= 2){
-        m_swerve.drive(0, 0, Math.PI/2, false);
+        m_swerve.drive(0, 0, Math.PI/2, true);
       } else {
-        m_swerve.drive(0, 0, 0, false);
+        m_swerve.drive(0, 0, 0, true);
       }
     }
   }

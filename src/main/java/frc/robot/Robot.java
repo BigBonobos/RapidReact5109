@@ -8,8 +8,9 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.robot.swerveCode.Drivetrain;
 
-public class Robot extends TimedRobot implements Limelight {
+public class Robot extends TimedRobot {
   private final double shooterRangeCm = 5.0; // Enter shooter distance here(cm)
+  private final Limelight limelight = new Limelight(61.49125);
 
   private final Joystick l_joystick = new Joystick(0);
   private final Joystick r_joystick = new Joystick(1);
@@ -60,10 +61,10 @@ public class Robot extends TimedRobot implements Limelight {
   }
 
   private void autoAlign() {
-    double distance = calculate3dDistance();
+    double distance = limelight.calculate3dDistance();
     double startAngle = m_swerve.navX.getYaw();
     if (Math.abs(shooterRangeCm - distance) <= 5.0) {
-      double angle = calculateAngleOffset();
+      double angle = limelight.calculateAngleOffset();
       double currentAngle = m_swerve.navX.getYaw();
 
       if(Math.abs(angle - (currentAngle - startAngle)) <= 2){

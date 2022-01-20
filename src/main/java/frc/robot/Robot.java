@@ -6,6 +6,7 @@ package frc.robot;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import frc.robot.swerveCode.Drivetrain;
 
 public class Robot extends TimedRobot implements Limelight {
   private final double shooterRangeCm = 5.0; // Enter shooter distance here(cm)
@@ -38,14 +39,14 @@ public class Robot extends TimedRobot implements Limelight {
     // negative values when we push forward.
     final double xSpeed =
         -m_xspeedLimiter.calculate(l_joystick.getY())
-            * frc.robot.Drivetrain.kMaxSpeed;
+            * frc.robot.swerveCode.Drivetrain.kMaxSpeed;
 
     // Get the y speed or sideways/strafe speed. We are inverting this because
     // we want a positive value when we pull to the left. Xbox controllers
     // return positive values when you pull to the right by default.
     final double ySpeed =
         -m_yspeedLimiter.calculate(l_joystick.getX())
-            * frc.robot.Drivetrain.kMaxSpeed;
+            * frc.robot.swerveCode.Drivetrain.kMaxSpeed;
 
     // Get the rate of angular rotation. We are inverting this because we want a
     // positive value when we pull to the left (remember, CCW is positive in
@@ -53,7 +54,7 @@ public class Robot extends TimedRobot implements Limelight {
     // the right by default.
     final double rot =
         -m_rotLimiter.calculate(r_joystick.getX())
-            * frc.robot.Drivetrain.kMaxAngularSpeed;
+            * frc.robot.swerveCode.Drivetrain.kMaxAngularSpeed;
 
     m_swerve.drive(xSpeed, ySpeed, rot, fieldRelative);
   }

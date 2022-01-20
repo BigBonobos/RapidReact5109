@@ -7,10 +7,11 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 
-public class Robot extends TimedRobot {
+public class Robot extends TimedRobot implements Limelight {
+  private final double shooterRangeCm = 5.0; // Enter shooter distance here(cm)
+
   private final Joystick l_joystick = new Joystick(0);
   private final Joystick r_joystick = new Joystick(1);
-
   private final Drivetrain m_swerve = new Drivetrain();
 
   // Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
@@ -27,6 +28,9 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     driveWithJoystick(true);
+    if (l_joystick.getTrigger()) {
+      autoAlign();
+    }
   }
 
   private void driveWithJoystick(boolean fieldRelative) {
@@ -52,5 +56,20 @@ public class Robot extends TimedRobot {
             * frc.robot.Drivetrain.kMaxAngularSpeed;
 
     m_swerve.drive(xSpeed, ySpeed, rot, fieldRelative);
+  }
+
+  private void autoAlign() {
+    double distance = calculate3dDistance();
+    double startAngle = m_swerve.navX.getYaw();
+    if (Math.abs(shooterRangeCm - distance) <= 5.0) {
+      double angle = calculateAngleOffset();
+      double currentAngle = m_swerve.navX.getYaw();
+
+      if(Math.abs(angle - (currentAngle - startAngle)) <= 2){
+        m_swerve.drive(0, 0, Math.PI/2, false);
+      } else {
+        m_swerve.drive(0, 0, 0, false);
+      }
+    }
   }
 }

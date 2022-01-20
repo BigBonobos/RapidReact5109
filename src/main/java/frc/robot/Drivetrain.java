@@ -27,7 +27,7 @@ public class Drivetrain {
   private final SwerveModule m_frontRight = new SwerveModule(3, 4);
   private final SwerveModule m_backLeft = new SwerveModule(5, 6);
   private final SwerveModule m_backRight = new SwerveModule(7, 8);
-  private final AHRS navX = new AHRS(SPI.Port.kMXP);
+  public final AHRS navX = new AHRS(SPI.Port.kMXP);
   private final Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * 180/Math.PI);
 
   private final SwerveDriveKinematics m_kinematics =

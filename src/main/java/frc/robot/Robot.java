@@ -4,7 +4,7 @@
 
 package frc.robot;
 import frc.robot.swerveCode.Drivetrain;
-
+import frc.robot.swerveCode.Drivetrain.AlignmentMode;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Notifier;
@@ -17,7 +17,9 @@ public class Robot extends TimedRobot {
   private final Joystick r_joystick = new Joystick(1);
   private final Drivetrain m_swerve = new Drivetrain();
   private final DriverStation.Alliance alliance = DriverStation.getAlliance();
-  private boolean autoAlignRunning = false;
+
+  private boolean autoAlignRunningShooter = false;
+  private boolean autoAlignRunningBall = false;
 
   private final Notifier autoAlignNotif = new Notifier(m_swerve);
 
@@ -35,10 +37,21 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     driveWithJoystick(true);
-    if (l_joystick.getTrigger() && !autoAlignRunning) {
+    if (l_joystick.getTrigger() && !autoAlignRunningShooter) {
+      m_swerve.alignmentMode = AlignmentMode.Shooter;
+      autoAlignRunningShooter = true;
       autoAlignNotif.startSingle(0);
-    } else if (l_joystick.getTrigger() && autoAlignRunning) {
+    } else if (l_joystick.getTrigger() && autoAlignRunningShooter) {
       autoAlignNotif.stop();
+      autoAlignRunningShooter = false;
+    }
+    if (l_joystick.getRawButton(1) && !autoAlignRunningBall) {
+      m_swerve.alignmentMode = AlignmentMode.Ball;
+      autoAlignRunningBall = true;
+      autoAlignNotif.startSingle(0);
+    } else if(l_joystick.getRawButton(0) && autoAlignRunningBall) {
+      autoAlignNotif.stop();
+      autoAlignRunningBall = false;
     }
   }
 

@@ -16,7 +16,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Limelight;
 
 /** Represents a swerve drive style drivetrain. */
-public class Drivetrain implements Runnable{
+public class Drivetrain implements Runnable {
 
   /** Enum to represent three directions of movement possible with swerve drive. */
   private enum DriveDirection {
@@ -25,8 +25,14 @@ public class Drivetrain implements Runnable{
     YDir
   }
 
+  public enum AlignmentMode {
+    Shooter,
+    Ball
+  }
+
   public static final double kMaxSpeed = 3.0; // 3 meters per second
   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
+  public AlignmentMode alignmentMode = AlignmentMode.Shooter;
 
   
   private final Translation2d m_frontLeftLocation = new Translation2d(0.381, 0.381);
@@ -143,6 +149,13 @@ public class Drivetrain implements Runnable{
 
   @Override
   public void run() {
-    autoAlign();
+    switch (alignmentMode) {
+      case Shooter:
+        autoAlign();
+        break;
+      case Ball:
+        // Insert ball align method here
+        break;
+    }
   };
 }

@@ -8,6 +8,9 @@ package frc.robot.swerveCode;
 import frc.robot.Limelight;
 
 import edu.wpi.first.wpilibj.SPI;
+
+import java.util.OptionalDouble;
+
 import com.kauailabs.navx.frc.*;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -95,55 +98,73 @@ public class Drivetrain implements Runnable {
         m_backRight.getState());
   }
 
-  private void autoAlign() {
-    double[] distanceInformation = limelight.calculate3dDistance();
-    double straightDistance = distanceInformation[0];
-    double angledDistance = distanceInformation[1];
+  private void autoAlign() throws Throwable {
+    OptionalDouble[] distanceInformation = limelight.calculate3dDistance();
+    double straightDistance = distanceInformation[0].getAsDouble();
+    double angledDistance = distanceInformation[1].getAsDouble();
     if (Math.abs(shooterRangeCm - straightDistance) <= 5.0) {
       driveUntilAdjusted(DriveDirection.XDir);
     }
     else if (Math.abs(shooterRangeCm - angledDistance) <= 5.0) {
       driveUntilAdjusted(DriveDirection.Angular);
     } else {
+      int errorCount = 0;
       double offset = straightDistance - shooterRangeCm;
       if (offset < 0) {
         while (Math.abs(offset) > 5.0) {
-          drive(0, -Math.PI/2, 0.0, true);
+          drive(0, -Math.PI/4, 0.0, true);
           distanceInformation = limelight.calculate3dDistance();
-          angledDistance = distanceInformation[1];
+          try {
+            angledDistance = distanceInformation[1].getAsDouble();
+            errorCount = 0;
+          } catch (Exception e) {
+            if (errorCount == 10) {
+              throw e.getCause();
+            }
+            System.out.println("Limelight did not recieve values this iteration. Courses of action are:\1. Make sure vision target is in frame\n 2. Stop this thread from runnning by toggling AutoAlign off (Left Joystick Trigger)");
+            errorCount++;
+          }
           offset = angledDistance - shooterRangeCm;
         }
-        driveUntilAdjusted(DriveDirection.XDir);
+        driveUntilAdjusted(DriveDirection.Angular);
       } else {
         while (Math.abs(offset) > 5.0) {
-          drive(0, Math.PI/2, 0.0, true);
+          drive(Math.PI * limelight.getXOffset().getAsDouble(), Math.PI/4 * offset, 0.0, true);
           distanceInformation = limelight.calculate3dDistance();
-          straightDistance = distanceInformation[0];
+          try{
+            straightDistance = distanceInformation[0].getAsDouble();
+            errorCount = 0;
+          } catch (Exception e) {
+            if (errorCount == 10) {
+              throw e.getCause();
+            }
+            System.out.println("Limelight did not recieve values this iteration. Courses of action are:\1. Make sure vision target is in frame\n 2. Stop this thread from runnning by toggling AutoAlign off (Left Joystick Trigger)");
+            errorCount++;
+          }
           offset = straightDistance - shooterRangeCm;
         }
-        driveUntilAdjusted(DriveDirection.Angular);
       }
     }
   }
 
   private void driveUntilAdjusted(DriveDirection direction) {
-    double angle = limelight.calculateAngleOffset();
+    double angle = limelight.calculateAngleOffset().getAsDouble();
     double currentAngle = navX.getYaw();
     double startAngle = navX.getYaw();
 
     switch (direction) {
       case Angular:
-        drive(0, 0, Integer.signum((int) angle) * Math.PI/2, true);
+        drive(0, 0, Integer.signum((int) angle) * Math.PI/4, true);
         break;
       case XDir:
-        drive(Integer.signum((int) angle) * Math.PI/2, 0, 0.0, true);
+        drive(Integer.signum((int) angle) * Math.PI/4, 0, 0.0, true);
         break;
       case YDir:
-        drive(0, Integer.signum((int) angle) * Math.PI/2, 0.0, true);
+        drive(0, Integer.signum((int) angle) * Math.PI/4, 0.0, true);
         break;
     }
     while(Math.abs(angle - (currentAngle - startAngle)) > 2){
-      angle = limelight.calculateAngleOffset();
+      angle = limelight.calculateAngleOffset().getAsDouble();
     }
     drive(0, 0, 0, true);
   }
@@ -152,7 +173,13 @@ public class Drivetrain implements Runnable {
   public void run() {
     switch (alignmentMode) {
       case Shooter:
-        autoAlign();
+        try {
+          autoAlign();
+        } catch (Exception e) {
+          System.out.println("Vision target not detected (try pointing the robot towards the goal");
+        } catch (Throwable e) {
+          e.printStackTrace();
+        }
         break;
       case Ball:
         // Insert ball align method here

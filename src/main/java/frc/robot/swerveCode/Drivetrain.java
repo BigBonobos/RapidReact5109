@@ -39,7 +39,7 @@ public class Drivetrain implements Runnable{
   private final SwerveModule m_backLeft = new SwerveModule(5, 6);
   private final SwerveModule m_backRight = new SwerveModule(7, 8);
   private final AHRS navX = new AHRS(SPI.Port.kMXP);
-  private final Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * 180/Math.PI);
+  private final Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * Math.PI/180);
 
   private final double shooterRangeCm = 5.0; // Enter shooter distance here(cm)
   private final Limelight limelight = new Limelight(61.49125);
@@ -88,7 +88,7 @@ public class Drivetrain implements Runnable{
         m_backRight.getState());
   }
 
-  public void autoAlign() {
+  private void autoAlign() {
     double[] distanceInformation = limelight.calculate3dDistance();
     double straightDistance = distanceInformation[0];
     double angledDistance = distanceInformation[1];

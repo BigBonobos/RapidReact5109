@@ -5,6 +5,7 @@
 package frc.robot;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.robot.swerveCode.Drivetrain;
 
@@ -13,6 +14,9 @@ public class Robot extends TimedRobot {
   private final Joystick l_joystick = new Joystick(0);
   private final Joystick r_joystick = new Joystick(1);
   private final Drivetrain m_swerve = new Drivetrain();
+  private boolean autoAlignRunning = false;
+
+  private final Notifier autoAlignNotif = new Notifier(m_swerve);
 
   // Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
   private final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(3);
@@ -28,8 +32,10 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     driveWithJoystick(true);
-    if (l_joystick.getTrigger()) {
-      m_swerve.autoAlign();
+    if (l_joystick.getTrigger() && !autoAlignRunning) {
+      autoAlignNotif.startSingle(0);
+    } else if (l_joystick.getTrigger() && autoAlignRunning) {
+      autoAlignNotif.stop();
     }
   }
 

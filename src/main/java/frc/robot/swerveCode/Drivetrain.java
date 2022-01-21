@@ -16,7 +16,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Limelight;
 
 /** Represents a swerve drive style drivetrain. */
-public class Drivetrain {
+public class Drivetrain implements Runnable{
 
   /** Enum to represent three directions of movement possible with swerve drive. */
   private enum DriveDirection {
@@ -139,5 +139,11 @@ public class Drivetrain {
       angle = limelight.calculateAngleOffset();
     }
     drive(0, 0, 0, true);
+  }
+
+  @Override
+  public void run() {
+    // TODO Auto-generated method stub
+    autoAlign();
   };
 }

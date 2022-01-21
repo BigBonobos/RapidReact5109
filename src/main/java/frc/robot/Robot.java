@@ -3,17 +3,20 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+import frc.robot.swerveCode.Drivetrain;
+
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.TimedRobot;
-import frc.robot.swerveCode.Drivetrain;
+import edu.wpi.first.wpilibj.DriverStation;
 
 public class Robot extends TimedRobot {
 
   private final Joystick l_joystick = new Joystick(0);
   private final Joystick r_joystick = new Joystick(1);
   private final Drivetrain m_swerve = new Drivetrain();
+  private final DriverStation.Alliance alliance = DriverStation.getAlliance();
   private boolean autoAlignRunning = false;
 
   private final Notifier autoAlignNotif = new Notifier(m_swerve);

@@ -9,6 +9,7 @@ import frc.robot.Limelight;
 
 import edu.wpi.first.wpilibj.SPI;
 
+import java.util.NoSuchElementException;
 import java.util.OptionalDouble;
 
 import com.kauailabs.navx.frc.*;
@@ -175,7 +176,7 @@ public class Drivetrain implements Runnable {
       case Shooter:
         try {
           autoAlign();
-        } catch (Exception e) {
+        } catch (NoSuchElementException e) {
           System.out.println("Vision target not detected (try pointing the robot towards the goal");
         } catch (Throwable e) {
           e.printStackTrace();

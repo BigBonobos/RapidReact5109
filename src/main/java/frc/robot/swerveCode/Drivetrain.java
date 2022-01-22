@@ -52,7 +52,7 @@ public class Drivetrain implements Runnable {
   private final AHRS navX = new AHRS(SPI.Port.kMXP);
   private final Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * Math.PI/180);
 
-  private final double shooterRangeCm = 5.0; // Enter shooter distance here(cm)
+  private final double shooterRangeCm; // Enter shooter distance here(cm)
   private final Limelight limelight = new Limelight(61.49125);
 
   private final SwerveDriveKinematics m_kinematics =
@@ -62,8 +62,14 @@ public class Drivetrain implements Runnable {
   private final SwerveDriveOdometry m_odometry =
       new SwerveDriveOdometry(m_kinematics, initialMeasurement);
 
-  public Drivetrain() {
+
+  /**
+   * Constructor for the swerve drivetrain
+   * @param shooterRange The optimal shooting distance in cm for the robot (used for auto aligment with limelight)
+   */
+  public Drivetrain(double shooterRange) {
     navX.reset();
+    this.shooterRangeCm = shooterRange;
   }
 
   /**
@@ -130,7 +136,7 @@ public class Drivetrain implements Runnable {
         driveUntilAdjusted(DriveDirection.Angular);
       } else {
         while (Math.abs(offset) > 5.0) {
-          drive(Math.PI * limelight.getXOffset().getAsDouble(), Math.PI/4 * offset, 0.0, true);
+          drive(0.5 * limelight.getXOffset().getAsDouble(), 0.5 * offset, 0.0, true);
           distanceInformation = limelight.calculate3dDistance();
           try{
             straightDistance = distanceInformation[0].getAsDouble();

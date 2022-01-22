@@ -13,13 +13,15 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 public class Robot extends TimedRobot {
 
-  private final Joystick l_joystick = new Joystick(0);
-  private final Joystick r_joystick = new Joystick(1);
-  private final Drivetrain m_swerve = new Drivetrain();
-  private final DriverStation.Alliance alliance = DriverStation.getAlliance();
-
+  // Variables for limelight alignment
   private boolean autoAlignRunningShooter = false;
   private boolean autoAlignRunningBall = false;
+  private double autoAlignRange = 300.0;
+
+  private final Joystick l_joystick = new Joystick(0);
+  private final Joystick r_joystick = new Joystick(1);
+  private final Drivetrain m_swerve = new Drivetrain(autoAlignRange);
+  private final DriverStation.Alliance alliance = DriverStation.getAlliance();
 
   private final Notifier autoAlignNotif = new Notifier(m_swerve);
 

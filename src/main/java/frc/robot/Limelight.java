@@ -17,6 +17,7 @@ public class Limelight {
      */
     public Limelight(double targetSize) {
         this.ntwrkInst = NetworkTableInstance.getDefault();
+        ntwrkInst.startClientTeam(5109);
         this.targetSize = targetSize;
     }
 

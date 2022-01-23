@@ -9,7 +9,6 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.DriverStation;
 
 public class Robot extends TimedRobot {
 
@@ -17,11 +16,11 @@ public class Robot extends TimedRobot {
   private boolean autoAlignRunningShooter = false;
   private boolean autoAlignRunningBall = false;
   private double autoAlignRange = 300.0;
+  private int autoCounter = 0;
 
   private final Joystick l_joystick = new Joystick(0);
   private final Joystick r_joystick = new Joystick(1);
   private final Drivetrain m_swerve = new Drivetrain(autoAlignRange);
-  private final DriverStation.Alliance alliance = DriverStation.getAlliance();
 
   private final Notifier autoAlignNotif = new Notifier(m_swerve);
 
@@ -33,12 +32,28 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     driveWithJoystick(false);
+    switch(autoCounter) {
+      case 1:
+        m_swerve.pathfindToBall();
+        m_swerve.aligningBalls = false;
+        autoCounter++;
+        break;
+      case 2:
+        try {
+          m_swerve.autoAlign();
+        } catch (Throwable e) {
+          e.printStackTrace();
+        }
+        break;
+    }
     m_swerve.updateOdometry();
   }
 
   @Override
   public void teleopPeriodic() {
     driveWithJoystick(true);
+
+    // Comment the below code out for swerve testing
     if (l_joystick.getTrigger() && !autoAlignRunningShooter) {
       m_swerve.alignmentMode = AlignmentMode.Shooter;
       autoAlignRunningShooter = true;
@@ -50,8 +65,10 @@ public class Robot extends TimedRobot {
     if (l_joystick.getRawButton(1) && !autoAlignRunningBall) {
       m_swerve.alignmentMode = AlignmentMode.Ball;
       autoAlignRunningBall = true;
+      m_swerve.aligningBalls = true;
       autoAlignNotif.startSingle(0);
     } else if(l_joystick.getRawButton(0) && autoAlignRunningBall) {
+      m_swerve.aligningBalls = false;
       autoAlignNotif.stop();
       autoAlignRunningBall = false;
     }

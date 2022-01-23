@@ -18,7 +18,10 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.*;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 
 /** Represents a swerve drive style drivetrain. */
 public class Drivetrain implements Runnable {
@@ -38,12 +41,15 @@ public class Drivetrain implements Runnable {
   public static final double kMaxSpeed = 3.0; // 3 meters per second
   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
   public AlignmentMode alignmentMode = AlignmentMode.Shooter;
+  public boolean aligningBalls = false;
 
   
   private final Translation2d m_frontLeftLocation = new Translation2d(0.381, 0.381);
   private final Translation2d m_frontRightLocation = new Translation2d(0.381, -0.381);
   private final Translation2d m_backLeftLocation = new Translation2d(-0.381, 0.381);
   private final Translation2d m_backRightLocation = new Translation2d(-0.381, -0.381);
+  private static final NetworkTableInstance ntwrkInst = NetworkTableInstance.getDefault();
+  private static final DriverStation.Alliance alliance = DriverStation.getAlliance();
 
   private final SwerveModule m_frontLeft = new SwerveModule(1, 2);
   private final SwerveModule m_frontRight = new SwerveModule(3, 4);
@@ -69,6 +75,7 @@ public class Drivetrain implements Runnable {
    */
   public Drivetrain(double shooterRange) {
     navX.reset();
+    ntwrkInst.startClientTeam(5109);
     this.shooterRangeCm = shooterRange;
   }
 
@@ -105,7 +112,7 @@ public class Drivetrain implements Runnable {
         m_backRight.getState());
   }
 
-  private void autoAlign() throws Throwable {
+  public void autoAlign() throws Throwable {
     OptionalDouble[] distanceInformation = limelight.calculate3dDistance();
     double straightDistance = distanceInformation[0].getAsDouble();
     double angledDistance = distanceInformation[1].getAsDouble();
@@ -176,6 +183,40 @@ public class Drivetrain implements Runnable {
     drive(0, 0, 0, true);
   }
 
+  /**
+   * Alignment and pathfindin method to get path to most optimal ball
+   * Uses NetworkTables from jetson (table name is 'ballAlignment')
+   */
+  public void pathfindToBall() {
+    Pose2d position  = m_odometry.getPoseMeters();
+    double positionX = position.getX();
+    double positionY = position.getY();
+    double rotation = (navX.getYaw() % 360) * 180/Math.PI;
+    NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
+    NetworkTableEntry posXEntry = ballAlignmentValues.getEntry("PosX");
+    NetworkTableEntry posYEntry = ballAlignmentValues.getEntry("PosY");
+    NetworkTableEntry rotEntry = ballAlignmentValues.getEntry("rot");
+    NetworkTableEntry allianceEntry = ballAlignmentValues.getEntry("alliance");
+    posXEntry.setDouble(positionX);
+    posYEntry.setDouble(positionY);
+    rotEntry.setDouble(rotation);
+    allianceEntry.setString(alliance.toString());
+    int listenerHandle = ballAlignmentValues.addEntryListener("tVelocity", (table, key, entry, value, flags) -> {
+      double[] velocity = value.getDoubleArray();
+      double xVel = velocity[0];
+      double yVel = velocity[1];
+      drive(xVel, yVel, 0, true);
+      Pose2d updatedPosition  = m_odometry.getPoseMeters();
+      double updatedX = updatedPosition.getX();
+      double updatedY = updatedPosition.getY();
+      posXEntry.setDouble(updatedX);
+      posYEntry.setDouble(updatedY);
+   }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+   if (!aligningBalls || ballAlignmentValues.getEntry("ballCount").getDouble(0.0) == 0.0 ) {
+    ballAlignmentValues.removeEntryListener(listenerHandle);
+   }
+  }
+
   @Override
   public void run() {
     switch (alignmentMode) {
@@ -190,7 +231,7 @@ public class Drivetrain implements Runnable {
         }
         break;
       case Ball:
-        // Insert ball align method here
+        pathfindToBall();
         break;
     }
   };

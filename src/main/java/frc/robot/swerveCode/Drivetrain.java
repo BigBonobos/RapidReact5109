@@ -41,7 +41,10 @@ public class Drivetrain implements Runnable {
   public static final double kMaxSpeed = 3.0; // 3 meters per second
   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
   public AlignmentMode alignmentMode = AlignmentMode.Shooter;
-  public boolean aligningBalls = false;
+
+  // Network Table instantiation
+  public NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
+  public int listenerHandle;
 
   
   private final Translation2d m_frontLeftLocation = new Translation2d(0.381, 0.381);
@@ -192,7 +195,6 @@ public class Drivetrain implements Runnable {
     double positionX = position.getX();
     double positionY = position.getY();
     double rotation = (navX.getYaw() % 360) * 180/Math.PI;
-    NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
     NetworkTableEntry posXEntry = ballAlignmentValues.getEntry("PosX");
     NetworkTableEntry posYEntry = ballAlignmentValues.getEntry("PosY");
     NetworkTableEntry rotEntry = ballAlignmentValues.getEntry("rot");
@@ -201,7 +203,7 @@ public class Drivetrain implements Runnable {
     posYEntry.setDouble(positionY);
     rotEntry.setDouble(rotation);
     allianceEntry.setString(alliance.toString());
-    int listenerHandle = ballAlignmentValues.addEntryListener("tVelocity", (table, key, entry, value, flags) -> {
+    listenerHandle = ballAlignmentValues.addEntryListener("tVelocity", (table, key, entry, value, flags) -> {
       double[] velocity = value.getDoubleArray();
       double xVel = velocity[0];
       double yVel = velocity[1];
@@ -212,9 +214,6 @@ public class Drivetrain implements Runnable {
       posXEntry.setDouble(updatedX);
       posYEntry.setDouble(updatedY);
    }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-   if (!aligningBalls || ballAlignmentValues.getEntry("ballCount").getDouble(0.0) == 0.0 ) {
-    ballAlignmentValues.removeEntryListener(listenerHandle);
-   }
   }
 
   @Override

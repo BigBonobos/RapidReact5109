@@ -35,7 +35,7 @@ public class Robot extends TimedRobot {
     switch(autoCounter) {
       case 1:
         m_swerve.pathfindToBall();
-        m_swerve.aligningBalls = false;
+        m_swerve.ballAlignmentValues.removeEntryListener(m_swerve.listenerHandle);
         autoCounter++;
         break;
       case 2:
@@ -65,10 +65,9 @@ public class Robot extends TimedRobot {
     if (l_joystick.getRawButton(1) && !autoAlignRunningBall) {
       m_swerve.alignmentMode = AlignmentMode.Ball;
       autoAlignRunningBall = true;
-      m_swerve.aligningBalls = true;
       autoAlignNotif.startSingle(0);
     } else if(l_joystick.getRawButton(0) && autoAlignRunningBall) {
-      m_swerve.aligningBalls = false;
+      m_swerve.ballAlignmentValues.removeEntryListener(m_swerve.listenerHandle);
       autoAlignNotif.stop();
       autoAlignRunningBall = false;
     }

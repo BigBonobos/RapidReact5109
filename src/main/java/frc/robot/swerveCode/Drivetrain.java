@@ -125,7 +125,7 @@ public class Drivetrain implements Runnable {
             angledDistance = distanceInformation[1].getAsDouble();
             errorCount = 0;
           } catch (Exception e) {
-            if (errorCount == 10) {
+            if (errorCount >= 2) {
               throw e.getCause();
             }
             System.out.println("Limelight did not recieve values this iteration. Courses of action are:\1. Make sure vision target is in frame\n 2. Stop this thread from runnning by toggling AutoAlign off (Left Joystick Trigger)");
@@ -142,7 +142,7 @@ public class Drivetrain implements Runnable {
             straightDistance = distanceInformation[0].getAsDouble();
             errorCount = 0;
           } catch (Exception e) {
-            if (errorCount == 10) {
+            if (errorCount >= 2) {
               throw e.getCause();
             }
             System.out.println("Limelight did not recieve values this iteration. Courses of action are:\1. Make sure vision target is in frame\n 2. Stop this thread from runnning by toggling AutoAlign off (Left Joystick Trigger)");
@@ -185,6 +185,7 @@ public class Drivetrain implements Runnable {
         } catch (NoSuchElementException e) {
           System.out.println("Vision target not detected (try pointing the robot towards the goal");
         } catch (Throwable e) {
+          System.out.println("There is a likely an error with the limelight.\nIt is reccomended you do not use auto-align for the rest of the match.\nPlease report this issue to programming.");
           e.printStackTrace();
         }
         break;

@@ -5,7 +5,7 @@ from image_getter import upload_video
 
 app = Flask(__name__)
 
-@app.route("/api/get_image", methods=["POST"])
+@app.route("/api/post_playlist", methods=["POST"])
 def get_image():
     print(request)
     if (request.method == "POST"):

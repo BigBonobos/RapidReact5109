@@ -9,6 +9,7 @@ public class Limelight {
     // Initialization of variables
     public final NetworkTableInstance ntwrkInst;
     private final double targetSize;
+    private final static double limelightFOV = 59.6;
 
 
     /**
@@ -36,7 +37,7 @@ public class Limelight {
         if (tv) {
             // Returns distance from goal (calculated using trig)
             double adjustedTlong = (100*targetSize)/(limelight.getEntry("tlong").getDouble(0)/420);
-            double thirdDimension = adjustedTlong/Math.tan(59.6);
+            double thirdDimension = adjustedTlong/Math.tan(limelightFOV);
             double hypotenuseDistance = Math.sqrt((thirdDimension * thirdDimension) + (limelight.getEntry("tx").getDouble(0) * limelight.getEntry("tx").getDouble(0)));
             returnValues[0] = OptionalDouble.of(thirdDimension);
             returnValues[1] = OptionalDouble.of(hypotenuseDistance);

@@ -46,7 +46,7 @@ def upload_video(api_key: str, project_id: str, playlist_url: str, amt_videos: i
 
     # Downloads videos from generated list
     ytdl.download(videos)
-    sly.create_dataset("FRC Game Piece Sorting16", "Machine Vision Labelling for FRC")
+    sly.create_dataset("FRC Game Piece Sorting20", "Machine Vision Labelling for FRC")
 
     # Gets all files into list
     for (_, _, filenames) in os.walk(os.getcwd()):

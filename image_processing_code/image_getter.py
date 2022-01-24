@@ -27,7 +27,7 @@ def create_and_upload_frame(current_frame: int, filename: list, cam, sly, subcou
     
     return ret
 
-def upload_video(api_key: str, project_id: str, plalist_url: str, amt_videos: int):
+def upload_video(api_key: str, project_id: str, playlist_url: str, amt_videos: int):
     try:
         playlist_url = playlist_url.split("index")[0]
     except:

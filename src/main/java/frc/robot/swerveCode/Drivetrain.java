@@ -26,13 +26,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 /** Represents a swerve drive style drivetrain. */
 public class Drivetrain implements Runnable {
 
-  /** Enum to represent three directions of movement possible with swerve drive. */
-  private enum DriveDirection {
-    Angular,
-    XDir,
-    YDir
-  }
-
+  /** Alignment Mode enum, used to switch between ball alignment and shooter alignment */
   public enum AlignmentMode {
     Shooter,
     Ball
@@ -119,7 +113,7 @@ public class Drivetrain implements Runnable {
     OptionalDouble straightDistanceOption = limelight.calculate3dDistance();
     double straightDistance = straightDistanceOption.getAsDouble();
     if (Math.abs(shooterRangeCm - straightDistance) <= 5.0) {
-      driveUntilAdjusted(DriveDirection.XDir);
+      driveUntilAdjusted();
     } else {
       int errorCount = 0;
       double offset = straightDistance - shooterRangeCm;
@@ -139,7 +133,7 @@ public class Drivetrain implements Runnable {
           }
           offset = straightDistance - shooterRangeCm;
         }
-        driveUntilAdjusted(DriveDirection.XDir);
+        driveUntilAdjusted();
       } else {
         while (Math.abs(offset) > 5.0) {
           drive(0.5 * limelight.getXOffset().getAsDouble(), 0.5 * offset, 0.0, true);
@@ -160,22 +154,11 @@ public class Drivetrain implements Runnable {
     }
   }
 
-  private void driveUntilAdjusted(DriveDirection direction) {
+  private void driveUntilAdjusted() {
     double angle = limelight.calculateAngleOffset().getAsDouble();
     double currentAngle = navX.getYaw();
     double startAngle = navX.getYaw();
-
-    switch (direction) {
-      case Angular:
-        drive(0, 0, Integer.signum((int) angle) * Math.PI/4, true);
-        break;
-      case XDir:
-        drive(Integer.signum((int) angle) * Math.PI/4, 0, 0.0, true);
-        break;
-      case YDir:
-        drive(0, Integer.signum((int) angle) * Math.PI/4, 0.0, true);
-        break;
-    }
+    drive(Integer.signum((int) angle) * Math.PI/4, 0, 0.0, true);
     while(Math.abs(angle - (currentAngle - startAngle)) > 2){
       angle = limelight.calculateAngleOffset().getAsDouble();
     }

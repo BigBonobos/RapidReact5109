@@ -109,9 +109,14 @@ public class Drivetrain implements Runnable {
         m_backRight.getState());
   }
 
+  /** Limelight autoalign method */
   public void autoAlign() throws Throwable {
+
+    // Calls limelight method to get the z-distance from goal
     OptionalDouble straightDistanceOption = limelight.calculate3dDistance();
     double straightDistance = straightDistanceOption.getAsDouble();
+
+    // handles driving
     if (Math.abs(shooterRangeCm - straightDistance) <= 5.0) {
       driveUntilAdjusted();
     } else {

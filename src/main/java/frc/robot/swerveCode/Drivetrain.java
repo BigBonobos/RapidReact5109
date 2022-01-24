@@ -116,8 +116,8 @@ public class Drivetrain implements Runnable {
   }
 
   public void autoAlign() throws Throwable {
-    OptionalDouble[] distanceInformation = limelight.calculate3dDistance();
-    double straightDistance = distanceInformation[0].getAsDouble();
+    OptionalDouble straightDistanceOption = limelight.calculate3dDistance();
+    double straightDistance = straightDistanceOption.getAsDouble();
     if (Math.abs(shooterRangeCm - straightDistance) <= 5.0) {
       driveUntilAdjusted(DriveDirection.XDir);
     } else {
@@ -126,9 +126,9 @@ public class Drivetrain implements Runnable {
       if (offset < 0) {
         while (Math.abs(offset) > 5.0) {
           drive(0, -Math.PI/4, 0.0, true);
-          distanceInformation = limelight.calculate3dDistance();
+          straightDistanceOption = limelight.calculate3dDistance();
           try {
-            straightDistance = distanceInformation[0].getAsDouble();
+            straightDistance = straightDistanceOption.getAsDouble();
             errorCount = 0;
           } catch (Exception e) {
             if (errorCount >= 2) {
@@ -143,9 +143,9 @@ public class Drivetrain implements Runnable {
       } else {
         while (Math.abs(offset) > 5.0) {
           drive(0.5 * limelight.getXOffset().getAsDouble(), 0.5 * offset, 0.0, true);
-          distanceInformation = limelight.calculate3dDistance();
+          straightDistanceOption = limelight.calculate3dDistance();
           try{
-            straightDistance = distanceInformation[0].getAsDouble();
+            straightDistance = straightDistanceOption.getAsDouble();
             errorCount = 0;
           } catch (Exception e) {
             if (errorCount >= 2) {

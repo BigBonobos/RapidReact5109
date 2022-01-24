@@ -26,29 +26,23 @@ public class Limelight {
      * Uses Limelight values and trig to find the distance the robot is from the goal
      * @return Either 0 if no vision tape is in frame or the distance the robot is from the vision target
      */
-    public OptionalDouble[] calculate3dDistance(){
+    public OptionalDouble calculate3dDistance(){
 
         // Gets the NetworkTable called limelight, containing the nessescary values
         NetworkTable limelight = ntwrkInst.getTable("limelight");
         boolean tv = limelight.getEntry("tv").getBoolean(false);
-        OptionalDouble[] returnValues = new OptionalDouble[2];
 
         // Checks if limelight is returning values
         if (tv) {
             // Returns distance from goal (calculated using trig)
             double adjustedTlong = (100*targetSize)/(limelight.getEntry("tlong").getDouble(0)/420);
-            double thirdDimension = adjustedTlong/Math.tan(limelightFOV);
-            double hypotenuseDistance = Math.sqrt((thirdDimension * thirdDimension) + (limelight.getEntry("tx").getDouble(0) * limelight.getEntry("tx").getDouble(0)));
-            returnValues[0] = OptionalDouble.of(thirdDimension);
-            returnValues[1] = OptionalDouble.of(hypotenuseDistance);
+            OptionalDouble thirdDimension = OptionalDouble.of(adjustedTlong/Math.tan(limelightFOV));
+            return thirdDimension;
 
         } else {
             // Returns empty if limelight isn't returning values
-            returnValues[0] = OptionalDouble.empty();
-            returnValues[1] = OptionalDouble.empty();
+            return OptionalDouble.empty();
         }
-
-        return returnValues;
     }
 
     /**
@@ -64,7 +58,7 @@ public class Limelight {
         NetworkTable limelight = ntwrkInst.getTable("limelight");
         boolean tv = limelight.getEntry("tv").getBoolean(false);
         if(tv) {
-            double zValue = calculate3dDistance()[0].getAsDouble();
+            double zValue = calculate3dDistance().getAsDouble();
             double tx = limelight.getEntry("tx").getDouble(0);
             double theta = Math.atan(tx/zValue);
             return OptionalDouble.of(theta);

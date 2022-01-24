@@ -118,12 +118,8 @@ public class Drivetrain implements Runnable {
   public void autoAlign() throws Throwable {
     OptionalDouble[] distanceInformation = limelight.calculate3dDistance();
     double straightDistance = distanceInformation[0].getAsDouble();
-    double angledDistance = distanceInformation[1].getAsDouble();
     if (Math.abs(shooterRangeCm - straightDistance) <= 5.0) {
       driveUntilAdjusted(DriveDirection.XDir);
-    }
-    else if (Math.abs(shooterRangeCm - angledDistance) <= 5.0) {
-      driveUntilAdjusted(DriveDirection.Angular);
     } else {
       int errorCount = 0;
       double offset = straightDistance - shooterRangeCm;
@@ -132,7 +128,7 @@ public class Drivetrain implements Runnable {
           drive(0, -Math.PI/4, 0.0, true);
           distanceInformation = limelight.calculate3dDistance();
           try {
-            angledDistance = distanceInformation[1].getAsDouble();
+            straightDistance = distanceInformation[0].getAsDouble();
             errorCount = 0;
           } catch (Exception e) {
             if (errorCount >= 2) {
@@ -141,9 +137,9 @@ public class Drivetrain implements Runnable {
             System.out.println("Limelight did not recieve values this iteration. Courses of action are:\1. Make sure vision target is in frame\n 2. Stop this thread from runnning by toggling AutoAlign off (Left Joystick Trigger)");
             errorCount++;
           }
-          offset = angledDistance - shooterRangeCm;
+          offset = straightDistance - shooterRangeCm;
         }
-        driveUntilAdjusted(DriveDirection.Angular);
+        driveUntilAdjusted(DriveDirection.XDir);
       } else {
         while (Math.abs(offset) > 5.0) {
           drive(0.5 * limelight.getXOffset().getAsDouble(), 0.5 * offset, 0.0, true);

@@ -26,19 +26,12 @@ import edu.wpi.first.wpilibj.DriverStation;
 /** Represents a swerve drive style drivetrain. */
 public class Drivetrain implements Runnable {
 
-  /** Alignment Mode enum, used to switch between ball alignment and shooter alignment */
-  public enum AlignmentMode {
-    Shooter,
-    Ball
-  }
-
   public static final double kMaxSpeed = 3.0; // 3 meters per second
   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
-  public AlignmentMode alignmentMode = AlignmentMode.Shooter;
 
   // Network Table instantiation
-  public NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
-  public int listenerHandle;
+  private NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
+  public boolean runListener = false;
 
   
   private final Translation2d m_frontLeftLocation = new Translation2d(0.381, 0.381);
@@ -170,11 +163,7 @@ public class Drivetrain implements Runnable {
     drive(0, 0, 0, true);
   }
 
-  /**
-   * Alignment and pathfindin method to get path to most optimal ball
-   * Uses NetworkTables from jetson (table name is 'ballAlignment')
-   */
-  public void pathfindToBall() {
+  public int initListener() {
     Pose2d position  = m_odometry.getPoseMeters();
     double positionX = position.getX();
     double positionY = position.getY();
@@ -187,35 +176,31 @@ public class Drivetrain implements Runnable {
     posYEntry.setDouble(positionY);
     rotEntry.setDouble(rotation);
     allianceEntry.setString(alliance.toString());
-    listenerHandle = ballAlignmentValues.addEntryListener("tVelocity", (table, key, entry, value, flags) -> {
-      double[] velocity = value.getDoubleArray();
-      double xVel = velocity[0];
-      double yVel = velocity[1];
-      drive(xVel, yVel, 0, true);
-      Pose2d updatedPosition  = m_odometry.getPoseMeters();
-      double updatedX = updatedPosition.getX();
-      double updatedY = updatedPosition.getY();
-      posXEntry.setDouble(updatedX);
-      posYEntry.setDouble(updatedY);
+    int listenerHandle = ballAlignmentValues.addEntryListener("tVelocity", (table, key, entry, value, flags) -> {
+      if (runListener) {
+        double[] velocity = value.getDoubleArray();
+        double xVel = velocity[0];
+        double yVel = velocity[1];
+        drive(xVel, yVel, 0, true);
+        Pose2d updatedPosition  = m_odometry.getPoseMeters();
+        double updatedX = updatedPosition.getX();
+        double updatedY = updatedPosition.getY();
+        posXEntry.setDouble(updatedX);
+        posYEntry.setDouble(updatedY);
+      }
    }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+   return listenerHandle;
   }
 
   @Override
   public void run() {
-    switch (alignmentMode) {
-      case Shooter:
-        try {
-          autoAlign();
-        } catch (NoSuchElementException e) {
-          System.out.println("Vision target not detected (try pointing the robot towards the goal");
-        } catch (Throwable e) {
-          System.out.println("There is a likely an error with the limelight.\nIt is reccomended you do not use auto-align for the rest of the match.\nPlease report this issue to programming.");
-          e.printStackTrace();
-        }
-        break;
-      case Ball:
-        pathfindToBall();
-        break;
+    try {
+      autoAlign();
+    } catch (NoSuchElementException e) {
+      System.out.println("Vision target not detected (try pointing the robot towards the goal");
+    } catch (Throwable e) {
+      System.out.println("There is a likely an error with the limelight.\nIt is reccomended you do not use auto-align for the rest of the match.\nPlease report this issue to programming.");
+      e.printStackTrace();
     }
   };
 }

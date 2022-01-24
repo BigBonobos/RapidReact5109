@@ -4,7 +4,6 @@
 
 package frc.robot;
 import frc.robot.swerveCode.Drivetrain;
-import frc.robot.swerveCode.Drivetrain.AlignmentMode;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Notifier;
@@ -30,15 +29,20 @@ public class Robot extends TimedRobot {
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3);
 
   @Override
+  public void autonomousInit() {
+    m_swerve.initListener();
+  }
+  @Override
   public void autonomousPeriodic() {
     driveWithJoystick(false);
     switch(autoCounter) {
       case 1:
-        m_swerve.pathfindToBall();
-        m_swerve.ballAlignmentValues.removeEntryListener(m_swerve.listenerHandle);
+        m_swerve.runListener = true;
+        // BallIndexer here
         autoCounter++;
         break;
       case 2:
+        m_swerve.runListener = false;
         try {
           m_swerve.autoAlign();
         } catch (Throwable e) {
@@ -50,12 +54,15 @@ public class Robot extends TimedRobot {
   }
 
   @Override
+  public void teleopInit() {
+    m_swerve.initListener();
+  }
+  @Override
   public void teleopPeriodic() {
     driveWithJoystick(true);
 
     // Comment the below code out for swerve testing
     if (l_joystick.getTrigger() && !autoAlignRunningShooter) {
-      m_swerve.alignmentMode = AlignmentMode.Shooter;
       autoAlignRunningShooter = true;
       autoAlignNotif.startSingle(0);
     } else if (l_joystick.getTrigger() && autoAlignRunningShooter) {
@@ -63,12 +70,10 @@ public class Robot extends TimedRobot {
       autoAlignRunningShooter = false;
     }
     if (l_joystick.getRawButton(1) && !autoAlignRunningBall) {
-      m_swerve.alignmentMode = AlignmentMode.Ball;
+      m_swerve.runListener = true;
       autoAlignRunningBall = true;
-      autoAlignNotif.startSingle(0);
     } else if(l_joystick.getRawButton(0) && autoAlignRunningBall) {
-      m_swerve.ballAlignmentValues.removeEntryListener(m_swerve.listenerHandle);
-      autoAlignNotif.stop();
+      m_swerve.runListener = false;
       autoAlignRunningBall = false;
     }
   }

@@ -24,6 +24,7 @@ public class Robot extends TimedRobot {
   private final Intake m_intake = new Intake();
 
   private final Notifier autoAlignNotif = new Notifier(m_swerve);
+  private final Notifier intakeNotif = new Notifier(m_intake);
 
   // Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
   private final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(3);
@@ -46,10 +47,12 @@ public class Robot extends TimedRobot {
     switch(autoCounter) {
       case 1:
         m_swerve.runListener = true;
-        m_intake.intake(true);
+        intakeNotif.startSingle(0);
+        intakeNotif.notify();
         while(m_intake.ballIndexer == 1) {
           Timer.delay(0.001);
         }
+        intakeNotif.stop();
         autoCounter++;
         break;
       case 2:
@@ -76,6 +79,7 @@ public class Robot extends TimedRobot {
     if (l_joystick.getTrigger() && !autoAlignRunningShooter) {
       autoAlignRunningShooter = true;
       autoAlignNotif.startSingle(0);
+      autoAlignNotif.notify();
     } else if (l_joystick.getTrigger() && autoAlignRunningShooter) {
       autoAlignNotif.stop();
       autoAlignRunningShooter = false;

@@ -6,30 +6,33 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-//wpilib imports
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
 
-public class Intake {
+public class Intake implements Runnable {
     
     //neos
-    public CANSparkMax m_Intake = new CANSparkMax(-1, MotorType.kBrushless); //negative power for in, positive power for out //OG 6
+    private CANSparkMax m_Intake = new CANSparkMax(-1, MotorType.kBrushless); //negative power for in, positive power for out //OG 6
 
     // Ball indexer variable
     public int ballIndexer = 0;
 
     //neo encoders
-    public RelativeEncoder e_Intake = m_Intake.getEncoder(); //negative when intaking
+    private RelativeEncoder e_Intake = m_Intake.getEncoder(); //negative when intaking
+
+    // Limit switch
+    private DigitalInput indexLimitSwitch = new DigitalInput(0); // Plug into PWM I think (JavaDocs not present)
 
     //neo pidcontrollers
-    public SparkMaxPIDController pc_Intake = m_Intake.getPIDController();
+    private SparkMaxPIDController pc_Intake = m_Intake.getPIDController();
 
     //solenoid variables
-    public Solenoid s_LeftIntake = new Solenoid(null, -1);
-    public Solenoid s_RightIntake = new Solenoid(null, -1);
+    private Solenoid s_LeftIntake = new Solenoid(null, -1);
+    private Solenoid s_RightIntake = new Solenoid(null, -1);
 
     //logic variables
     public boolean intakeOn = false;
-    public boolean intakeExtended = false;
+    private boolean intakeExtended = false;
 
     //functions
     public void extendIntake(){
@@ -57,9 +60,6 @@ public class Intake {
             if (intakeOn == false){
                 m_Intake.set(.3);
                 intakeOn = true;
-
-                // Await sensors here
-                ballIndexer += 1;
             }
             else{
                 m_Intake.set(0);
@@ -68,5 +68,17 @@ public class Intake {
         }
 
         return intakeOn;
+    }
+
+    public void run() {
+        intake(intakeOn);
+        if (intakeOn && indexLimitSwitch.get()) {
+            ballIndexer++;
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -31,8 +31,8 @@ public class Drivetrain implements Runnable {
   // Network Table instantiation
   private final NetworkTableInstance ntwrkInst = NetworkTableInstance.getDefault();
   private NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
-  public boolean runListener = false;
-
+  public volatile boolean runListener = false;
+  public volatile boolean runAutoAlign = true;
 
   private final Translation2d m_frontLeftLocation = new Translation2d(0.381, 0.381);
   private final Translation2d m_frontRightLocation = new Translation2d(0.381, -0.381);
@@ -181,11 +181,17 @@ public class Drivetrain implements Runnable {
   @Override
   public void run() {
     try {
-      autoAlign();
+      while (runAutoAlign) {
+        autoAlign();
+        
+        if (runAutoAlign) {
+          runAutoAlign = false;
+        }
+      }
     } catch (NoSuchElementException e) {
       System.out.println("Vision target not detected (try pointing the robot towards the goal");
     } catch (Throwable e) {
-      System.out.println("There is a likely an error with the limelight.\nIt is reccomended you do not use auto-align for the rest of the match.\nPlease report this issue to programming.");
+      System.out.println("There is a likely an error with the limelight\nIt is reccomended you do not use auto-align for the rest of the match.\nPlease report this issue to programming.");
       e.printStackTrace();
     }
   };

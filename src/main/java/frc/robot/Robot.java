@@ -78,6 +78,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     m_swerve.runListener = false;
+    m_swerve.runAutoAlign = true;
   }
   @Override
   public void teleopPeriodic() {
@@ -85,10 +86,11 @@ public class Robot extends TimedRobot {
 
     // Comment the below code out for swerve testing
     if (l_joystick.getTrigger() && !autoAlignRunningShooter) {
+      m_swerve.runAutoAlign = true;
       autoAlignRunningShooter = true;
       autoAlignNotif.startSingle(0);
     } else if (l_joystick.getTrigger() && autoAlignRunningShooter) {
-      autoAlignNotif.stop();
+      m_swerve.runAutoAlign = false;
       autoAlignRunningShooter = false;
     }
     if (l_joystick.getRawButton(1) && !autoAlignRunningBall) {

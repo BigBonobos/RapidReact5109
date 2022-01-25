@@ -8,6 +8,7 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends TimedRobot {
 
@@ -20,6 +21,7 @@ public class Robot extends TimedRobot {
   private final Joystick l_joystick = new Joystick(0);
   private final Joystick r_joystick = new Joystick(1);
   private final Drivetrain m_swerve = new Drivetrain(autoAlignRange);
+  private final Intake m_intake = new Intake();
 
   private final Notifier autoAlignNotif = new Notifier(m_swerve);
 
@@ -36,6 +38,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_swerve.initListener();
+    m_intake.ballIndexer = 1;
   }
   @Override
   public void autonomousPeriodic() {
@@ -43,7 +46,10 @@ public class Robot extends TimedRobot {
     switch(autoCounter) {
       case 1:
         m_swerve.runListener = true;
-        // BallIndexer here
+        m_intake.intake(true);
+        while(m_intake.ballIndexer == 1) {
+          Timer.delay(0.001);
+        }
         autoCounter++;
         break;
       case 2:

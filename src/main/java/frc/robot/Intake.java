@@ -14,6 +14,9 @@ public class Intake {
     //neos
     public CANSparkMax m_Intake = new CANSparkMax(-1, MotorType.kBrushless); //negative power for in, positive power for out //OG 6
 
+    // Ball indexer variable
+    public int ballIndexer = 0;
+
     //neo encoders
     public RelativeEncoder e_Intake = m_Intake.getEncoder(); //negative when intaking
 
@@ -43,6 +46,7 @@ public class Intake {
         if(intakeExtended) {
             m_Intake.set(-1);
             intakeOn = true;
+            ballIndexer  -= 1;
         }
     }
 
@@ -53,6 +57,9 @@ public class Intake {
             if (intakeOn == false){
                 m_Intake.set(.3);
                 intakeOn = true;
+
+                // Await sensors here
+                ballIndexer += 1;
             }
             else{
                 m_Intake.set(0);

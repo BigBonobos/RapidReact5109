@@ -7,8 +7,8 @@ import java.util.OptionalDouble;
 public class Limelight {
 
     // Initialization of variables
-    public final NetworkTableInstance ntwrkInst;
-    private final double targetSize;
+    private NetworkTableInstance ntwrkInst;
+    private double targetSize;
     private final static double limelightFOV = 59.6;
 
 
@@ -16,10 +16,9 @@ public class Limelight {
      * Constructor for Limelight
      * @param targetSize The size of the longer side of the vision target(cm). For rapid react should be around 61.49125 cm.
      */
-    public Limelight(double targetSize) {
-        this.ntwrkInst = NetworkTableInstance.getDefault();
-        ntwrkInst.startClientTeam(5109);
-        this.targetSize = targetSize;
+    public Limelight(double targetSizeParam) {
+        ntwrkInst = NetworkTableInstance.getDefault();
+        targetSize = targetSizeParam;
     }
 
     /**

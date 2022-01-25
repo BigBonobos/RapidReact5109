@@ -29,15 +29,15 @@ public class Drivetrain implements Runnable {
   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
 
   // Network Table instantiation
+  private final NetworkTableInstance ntwrkInst = NetworkTableInstance.getDefault();
   private NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
   public boolean runListener = false;
 
-  
+
   private final Translation2d m_frontLeftLocation = new Translation2d(0.381, 0.381);
   private final Translation2d m_frontRightLocation = new Translation2d(0.381, -0.381);
   private final Translation2d m_backLeftLocation = new Translation2d(-0.381, 0.381);
   private final Translation2d m_backRightLocation = new Translation2d(-0.381, -0.381);
-  private static final NetworkTableInstance ntwrkInst = NetworkTableInstance.getDefault();
   private static final DriverStation.Alliance alliance = DriverStation.getAlliance();
 
   private final SwerveModule m_frontLeft = new SwerveModule(1, 2);
@@ -47,9 +47,8 @@ public class Drivetrain implements Runnable {
   private final AHRS navX = new AHRS(SPI.Port.kMXP);
   private final Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * Math.PI/180);
 
-  private final double shooterRangeCm; // Enter shooter distance here(cm)
+  private double shooterRangeCm; // Enter shooter distance here(cm)
   private final Limelight limelight = new Limelight(61.49125);
-
   private final SwerveDriveKinematics m_kinematics =
       new SwerveDriveKinematics(
           m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
@@ -64,8 +63,8 @@ public class Drivetrain implements Runnable {
    */
   public Drivetrain(double shooterRange) {
     navX.reset();
+    shooterRangeCm = shooterRange;
     ntwrkInst.startClientTeam(5109);
-    this.shooterRangeCm = shooterRange;
   }
 
   /**

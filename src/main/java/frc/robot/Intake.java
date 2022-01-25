@@ -5,6 +5,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
 
 /**
@@ -13,21 +14,35 @@ import edu.wpi.first.wpilibj.Solenoid;
 public class Intake implements Runnable {
     
     //neos
-    private CANSparkMax m_Intake = new CANSparkMax(-1, MotorType.kBrushless); //negative power for in, positive power for out //OG 6
+    private CANSparkMax m_Intake; //negative power for in, positive power for out //OG 6
 
     // Ball indexer variable
     public int ballIndexer = 0;
 
     // Limit switch
-    private DigitalInput indexLimitSwitch = new DigitalInput(0); // Plug into DIO channel 0
+    private DigitalInput indexLimitSwitch; // Plug into DIO channel 0
 
     // solenoid variables
-    private Solenoid s_LeftIntake = new Solenoid(null, -1);
-    private Solenoid s_RightIntake = new Solenoid(null, -1);
+    private Solenoid s_LeftIntake;
+    private Solenoid s_RightIntake;
 
     // logic variables
     public boolean intakeOn = false;
     private boolean intakeExtended = false;
+
+    /**
+     * Constructor for Intake Object
+     * @param intakeChannel deviceId for Motor Controller used on intake
+     * @param solenoidChannelLeftIntake Channel for left side pnuematic
+     * @param solenoidChannelRightIntake Channel for right side pnuematic
+     * @param limitSwitchChannel Channle for limit switch (DIO channel)
+     */
+    public Intake(int intakeId, int solenoidChannelLeftIntake, int solenoidChannelRightIntake, int limitSwitchChannel) {
+        m_Intake = new CANSparkMax(intakeId, MotorType.kBrushless);
+        s_LeftIntake = new Solenoid(PneumaticsModuleType.REVPH, solenoidChannelLeftIntake);
+        s_RightIntake = new Solenoid(PneumaticsModuleType.REVPH, solenoidChannelRightIntake);
+        indexLimitSwitch = new DigitalInput(limitSwitchChannel);
+    }
 
     //functions
     public void extendIntake(){

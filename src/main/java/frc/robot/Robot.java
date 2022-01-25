@@ -21,7 +21,7 @@ public class Robot extends TimedRobot {
   private final Joystick l_joystick = new Joystick(0);
   private final Joystick r_joystick = new Joystick(1);
   private final Drivetrain m_swerve = new Drivetrain(autoAlignRange);
-  private final Intake m_intake = new Intake();
+  private final Intake m_intake = new Intake(9, 1, 2, 0);
 
   private final Notifier autoAlignNotif = new Notifier(m_swerve);
   private final Notifier intakeNotif = new Notifier(m_intake);

@@ -19,7 +19,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.*;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -164,16 +163,9 @@ public class Drivetrain implements Runnable {
   }
 
   public int initListener() {
-    Pose2d position  = m_odometry.getPoseMeters();
-    double positionX = position.getX();
-    double positionY = position.getY();
     double rotation = (navX.getYaw() % 360) * 180/Math.PI;
-    NetworkTableEntry posXEntry = ballAlignmentValues.getEntry("PosX");
-    NetworkTableEntry posYEntry = ballAlignmentValues.getEntry("PosY");
     NetworkTableEntry rotEntry = ballAlignmentValues.getEntry("rot");
     NetworkTableEntry allianceEntry = ballAlignmentValues.getEntry("alliance");
-    posXEntry.setDouble(positionX);
-    posYEntry.setDouble(positionY);
     rotEntry.setDouble(rotation);
     allianceEntry.setString(alliance.toString());
     int listenerHandle = ballAlignmentValues.addEntryListener("tVelocity", (table, key, entry, value, flags) -> {
@@ -182,11 +174,6 @@ public class Drivetrain implements Runnable {
         double xVel = velocity[0];
         double yVel = velocity[1];
         drive(xVel, yVel, 0, true);
-        Pose2d updatedPosition  = m_odometry.getPoseMeters();
-        double updatedX = updatedPosition.getX();
-        double updatedY = updatedPosition.getY();
-        posXEntry.setDouble(updatedX);
-        posYEntry.setDouble(updatedY);
       }
    }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
    return listenerHandle;

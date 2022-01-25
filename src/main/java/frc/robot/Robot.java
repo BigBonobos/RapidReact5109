@@ -36,9 +36,16 @@ public class Robot extends TimedRobot {
     driveWithJoystick(true);
   }
 
+  /*
+  Commented out because not relevant to testing
+  @Override
+  public void robotInit() {
+    m_swerve.initListener();
+  }
+  */
+
   @Override
   public void autonomousInit() {
-    m_swerve.initListener();
     m_intake.ballIndexer = 1;
     m_intake.intakeOn = false;
   }
@@ -69,7 +76,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    m_swerve.initListener();
+    m_swerve.runListener = false;
   }
   @Override
   public void teleopPeriodic() {

@@ -2,8 +2,6 @@ package frc.robot;
 
 //sparkmax/neos imports
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -20,20 +18,14 @@ public class Intake implements Runnable {
     // Ball indexer variable
     public int ballIndexer = 0;
 
-    //neo encoders
-    private RelativeEncoder e_Intake = m_Intake.getEncoder(); //negative when intaking
-
     // Limit switch
-    private DigitalInput indexLimitSwitch = new DigitalInput(0); // Plug into PWM I think (JavaDocs not present)
+    private DigitalInput indexLimitSwitch = new DigitalInput(0); // Plug into DIO channel 0
 
-    //neo pidcontrollers
-    private SparkMaxPIDController pc_Intake = m_Intake.getPIDController();
-
-    //solenoid variables
+    // solenoid variables
     private Solenoid s_LeftIntake = new Solenoid(null, -1);
     private Solenoid s_RightIntake = new Solenoid(null, -1);
 
-    //logic variables
+    // logic variables
     public boolean intakeOn = false;
     private boolean intakeExtended = false;
 

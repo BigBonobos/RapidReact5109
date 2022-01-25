@@ -48,7 +48,6 @@ public class Robot extends TimedRobot {
       case 1:
         m_swerve.runListener = true;
         intakeNotif.startSingle(0);
-        intakeNotif.notify();
         while(m_intake.ballIndexer == 1) {
           Timer.delay(0.001);
         }
@@ -79,7 +78,6 @@ public class Robot extends TimedRobot {
     if (l_joystick.getTrigger() && !autoAlignRunningShooter) {
       autoAlignRunningShooter = true;
       autoAlignNotif.startSingle(0);
-      autoAlignNotif.notify();
     } else if (l_joystick.getTrigger() && autoAlignRunningShooter) {
       autoAlignNotif.stop();
       autoAlignRunningShooter = false;

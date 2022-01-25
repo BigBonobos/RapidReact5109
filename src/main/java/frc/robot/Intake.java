@@ -9,6 +9,9 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
 
+/**
+ * Intake class that has event for running
+ */
 public class Intake implements Runnable {
     
     //neos

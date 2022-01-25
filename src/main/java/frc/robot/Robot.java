@@ -40,6 +40,7 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     m_swerve.initListener();
     m_intake.ballIndexer = 1;
+    m_intake.intakeOn = false;
   }
   @Override
   public void autonomousPeriodic() {

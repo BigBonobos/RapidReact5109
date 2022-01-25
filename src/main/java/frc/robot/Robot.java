@@ -59,6 +59,7 @@ public class Robot extends TimedRobot {
         while(m_intake.ballIndexer == 1) {
           Timer.delay(0.001);
         }
+        m_swerve.runListener = false;
         intakeNotif.stop();
         autoCounter++;
         break;

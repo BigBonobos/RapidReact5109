@@ -113,49 +113,20 @@ public class Drivetrain implements Runnable {
       OptionalDouble straightDistanceOption = limelight.calculate3dDistance();
       double straightDistance = straightDistanceOption.getAsDouble();
 
-      // Handles driving
-      if (Math.abs(shooterRangeCm - straightDistance) <= 5.0) {
-        driveUntilAdjusted();
-      } else {
-        // Error handling for breaking out of the auto-align event
-        int errorCount = 0;
-        double offset = straightDistance - shooterRangeCm;
-        while (Math.abs(offset) > 5.0) {
-          try{
-            drive(0.5 * limelight.getXOffset().getAsDouble(), 0.5 * offset, 0.0, true);
-            straightDistanceOption = limelight.calculate3dDistance();
-            straightDistance = straightDistanceOption.getAsDouble();
-            errorCount = 0;
-          } catch (Exception e) {
-            if (errorCount >= 2) {
-              throw e.getCause();
-            }
-            System.out.println("Limelight did not recieve values this iteration. Courses of action are:\1. Make sure vision target is in frame\n 2. Stop this thread from runnning by toggling AutoAlign off (Left Joystick Trigger)");
-            errorCount++;
-          }
-          offset = straightDistance - shooterRangeCm;
-        }
+      // Offset variable initialization
+      double yOffset = straightDistance - shooterRangeCm;
+      double xOffset = limelight.getXOffset().getAsDouble();
+
+      // Control logic to drive bot into position
+      while (Math.abs(yOffset) > 2.5 && Math.abs(xOffset) > 2.5) {
+          drive(xOffset / Math.PI, yOffset / Math.PI, 0.0, true);
+          straightDistance = limelight.calculate3dDistance().getAsDouble();
+          xOffset = limelight.getXOffset().getAsDouble();
+          yOffset = straightDistance - shooterRangeCm;
       }
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
-
-  private void driveUntilAdjusted() {
-    OptionalDouble angleOption = limelight.calculateAngleOffset();
-
-    try {
-      double angle = angleOption.getAsDouble();
-      double currentAngle = navX.getYaw();
-      double startAngle = navX.getYaw();
-      drive(Integer.signum((int) angle) * Math.PI/4, 0, 0.0, true);
-      while(Math.abs(angle - (currentAngle - startAngle)) > 2){
-        angle = limelight.calculateAngleOffset().getAsDouble();
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    drive(0, 0, 0, true);
   }
 
   public int initListener() {

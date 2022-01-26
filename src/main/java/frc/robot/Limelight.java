@@ -56,11 +56,17 @@ public class Limelight {
     public OptionalDouble calculateAngleOffset(){
         NetworkTable limelight = ntwrkInst.getTable("limelight");
         boolean tv = limelight.getEntry("tv").getBoolean(false);
+        double zValue;
         if(tv) {
-            double zValue = calculate3dDistance().getAsDouble();
-            double tx = limelight.getEntry("tx").getDouble(0);
-            double theta = Math.atan(tx/zValue);
-            return OptionalDouble.of(theta);
+            try{
+                zValue = calculate3dDistance().getAsDouble();
+                double tx = limelight.getEntry("tx").getDouble(0);
+                double theta = Math.atan(tx/zValue);
+                return OptionalDouble.of(theta);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return OptionalDouble.empty();
+            }
         } else  {
             return OptionalDouble.empty();
         }

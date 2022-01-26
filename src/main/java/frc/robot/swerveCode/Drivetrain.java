@@ -103,60 +103,70 @@ public class Drivetrain implements Runnable {
   /** Limelight autoalign method */
   public void autoAlign() throws Throwable {
 
-    // Calls limelight method to get the z-distance from goal
-    OptionalDouble straightDistanceOption = limelight.calculate3dDistance();
-    double straightDistance = straightDistanceOption.getAsDouble();
+    try {
+      // Calls limelight method to get the z-distance from goal
+      OptionalDouble straightDistanceOption = limelight.calculate3dDistance();
+      double straightDistance = straightDistanceOption.getAsDouble();
 
-    // handles driving
-    if (Math.abs(shooterRangeCm - straightDistance) <= 5.0) {
-      driveUntilAdjusted();
-    } else {
-      int errorCount = 0;
-      double offset = straightDistance - shooterRangeCm;
-      if (offset < 0) {
-        while (Math.abs(offset) > 5.0) {
-          drive(0, -Math.PI/4, 0.0, true);
-          straightDistanceOption = limelight.calculate3dDistance();
-          try {
-            straightDistance = straightDistanceOption.getAsDouble();
-            errorCount = 0;
-          } catch (Exception e) {
-            if (errorCount >= 2) {
-              throw e.getCause();
-            }
-            System.out.println("Limelight did not recieve values this iteration. Courses of action are:\1. Make sure vision target is in frame\n 2. Stop this thread from runnning by toggling AutoAlign off (Left Joystick Trigger)");
-            errorCount++;
-          }
-          offset = straightDistance - shooterRangeCm;
-        }
+      // handles driving
+      if (Math.abs(shooterRangeCm - straightDistance) <= 5.0) {
         driveUntilAdjusted();
       } else {
-        while (Math.abs(offset) > 5.0) {
-          drive(0.5 * limelight.getXOffset().getAsDouble(), 0.5 * offset, 0.0, true);
-          straightDistanceOption = limelight.calculate3dDistance();
-          try{
-            straightDistance = straightDistanceOption.getAsDouble();
-            errorCount = 0;
-          } catch (Exception e) {
-            if (errorCount >= 2) {
-              throw e.getCause();
+        int errorCount = 0;
+        double offset = straightDistance - shooterRangeCm;
+        if (offset < 0) {
+          while (Math.abs(offset) > 5.0) {
+            drive(0, -Math.PI/4, 0.0, true);
+            straightDistanceOption = limelight.calculate3dDistance();
+            try {
+              straightDistance = straightDistanceOption.getAsDouble();
+              errorCount = 0;
+            } catch (Exception e) {
+              if (errorCount >= 2) {
+                throw e.getCause();
+              }
+              System.out.println("Limelight did not recieve values this iteration. Courses of action are:\1. Make sure vision target is in frame\n 2. Stop this thread from runnning by toggling AutoAlign off (Left Joystick Trigger)");
+              errorCount++;
             }
-            System.out.println("Limelight did not recieve values this iteration. Courses of action are:\1. Make sure vision target is in frame\n 2. Stop this thread from runnning by toggling AutoAlign off (Left Joystick Trigger)");
-            errorCount++;
+            offset = straightDistance - shooterRangeCm;
           }
-          offset = straightDistance - shooterRangeCm;
+          driveUntilAdjusted();
+        } else {
+          while (Math.abs(offset) > 5.0) {
+            try{
+              drive(0.5 * limelight.getXOffset().getAsDouble(), 0.5 * offset, 0.0, true);
+              straightDistanceOption = limelight.calculate3dDistance();
+              straightDistance = straightDistanceOption.getAsDouble();
+              errorCount = 0;
+            } catch (Exception e) {
+              if (errorCount >= 2) {
+                throw e.getCause();
+              }
+              System.out.println("Limelight did not recieve values this iteration. Courses of action are:\1. Make sure vision target is in frame\n 2. Stop this thread from runnning by toggling AutoAlign off (Left Joystick Trigger)");
+              errorCount++;
+            }
+            offset = straightDistance - shooterRangeCm;
+          }
         }
       }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
   private void driveUntilAdjusted() {
-    double angle = limelight.calculateAngleOffset().getAsDouble();
-    double currentAngle = navX.getYaw();
-    double startAngle = navX.getYaw();
-    drive(Integer.signum((int) angle) * Math.PI/4, 0, 0.0, true);
-    while(Math.abs(angle - (currentAngle - startAngle)) > 2){
-      angle = limelight.calculateAngleOffset().getAsDouble();
+    OptionalDouble angleOption = limelight.calculateAngleOffset();
+
+    try {
+      double angle = angleOption.getAsDouble();
+      double currentAngle = navX.getYaw();
+      double startAngle = navX.getYaw();
+      drive(Integer.signum((int) angle) * Math.PI/4, 0, 0.0, true);
+      while(Math.abs(angle - (currentAngle - startAngle)) > 2){
+        angle = limelight.calculateAngleOffset().getAsDouble();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
     drive(0, 0, 0, true);
   }

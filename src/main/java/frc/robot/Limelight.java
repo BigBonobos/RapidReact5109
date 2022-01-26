@@ -25,7 +25,7 @@ public class Limelight {
      * Uses Limelight values and trig to find the distance the robot is from the goal
      * @return Either 0 if no vision tape is in frame or the distance the robot is from the vision target
      */
-    public OptionalDouble calculate3dDistance(){
+    public OptionalDouble calculateYDistance(){
 
         // Gets the NetworkTable called limelight, containing the nessescary values
         NetworkTable limelight = ntwrkInst.getTable("limelight");
@@ -53,25 +53,6 @@ public class Limelight {
      * <li>+theta means the target is to the right of the bot</li>
      * </ul>
      */
-    public OptionalDouble calculateAngleOffset(){
-        NetworkTable limelight = ntwrkInst.getTable("limelight");
-        boolean tv = limelight.getEntry("tv").getBoolean(false);
-        double zValue;
-        if(tv) {
-            try{
-                zValue = calculate3dDistance().getAsDouble();
-                double tx = limelight.getEntry("tx").getDouble(0);
-                double theta = Math.atan(tx/zValue);
-                return OptionalDouble.of(theta);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return OptionalDouble.empty();
-            }
-        } else  {
-            return OptionalDouble.empty();
-        }
-    }
-
     public OptionalDouble getXOffset() {
         NetworkTable limelight = ntwrkInst.getTable("limelight");
         boolean tv = limelight.getEntry("tv").getBoolean(false);

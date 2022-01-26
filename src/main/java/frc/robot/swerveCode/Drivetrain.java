@@ -110,7 +110,7 @@ public class Drivetrain implements Runnable {
 
     try {
       // Calls limelight method to get the z-distance from goal
-      OptionalDouble straightDistanceOption = limelight.calculate3dDistance();
+      OptionalDouble straightDistanceOption = limelight.calculateYDistance();
       double straightDistance = straightDistanceOption.getAsDouble();
 
       // Offset variable initialization
@@ -120,7 +120,7 @@ public class Drivetrain implements Runnable {
       // Control logic to drive bot into position
       while (Math.abs(yOffset) > 2.5 && Math.abs(xOffset) > 2.5) {
           drive(xOffset / Math.PI, yOffset / Math.PI, 0.0, true);
-          straightDistance = limelight.calculate3dDistance().getAsDouble();
+          straightDistance = limelight.calculateYDistance().getAsDouble();
           xOffset = limelight.getXOffset().getAsDouble();
           yOffset = straightDistance - shooterRangeCm;
       }
@@ -129,6 +129,11 @@ public class Drivetrain implements Runnable {
     }
   }
 
+  /**
+   * Initializes the listener for aligining to balls using the jetson nano program
+   * Drives everytime the network tables is updated
+   * @return Returns the id of the listener
+   */
   public int initListener() {
     double rotation = (navX.getYaw() % 360) * 180/Math.PI;
     NetworkTableEntry rotEntry = ballAlignmentValues.getEntry("rot");

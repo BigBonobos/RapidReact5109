@@ -84,11 +84,14 @@ public class Intake implements Runnable {
         intake(intakeOn);
         if (intakeOn && indexLimitSwitch.get()) {
             ballIndexer++;
+            intakeOn = false;
+            intake(intakeOn);
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+        
     }
 }

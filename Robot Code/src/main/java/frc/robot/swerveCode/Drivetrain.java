@@ -42,12 +42,12 @@ public class Drivetrain implements Runnable {
   private static final DriverStation.Alliance alliance = DriverStation.getAlliance();
 
   // Swerve Module instantiation
-  private final SwerveModule m_frontLeft = new SwerveModule(1, 2);
-  private final SwerveModule m_frontRight = new SwerveModule(3, 4);
-  private final SwerveModule m_backLeft = new SwerveModule(5, 6);
-  private final SwerveModule m_backRight = new SwerveModule(7, 8);
-  private final AHRS navX = new AHRS(SPI.Port.kMXP);
-  private final Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * Math.PI/180);
+  private SwerveModule m_frontLeft;
+  private SwerveModule m_frontRight;
+  private SwerveModule m_backLeft;
+  private SwerveModule m_backRight;
+  private AHRS navX = new AHRS(SPI.Port.kMXP);
+  private Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * Math.PI/180);
 
   // Shooter Range
   private double shooterRangeCm; // Enter shooter distance here(cm)
@@ -65,11 +65,19 @@ public class Drivetrain implements Runnable {
   /**
    * Constructor for the swerve drivetrain
    * @param shooterRange The optimal shooting distance in cm for the robot (used for auto aligment with limelight)
+   * @param swerveFrontLeftMotors  The CAN ids for the swerve modules. The first element in the array should be the drive motor id, the second should be the turning motor id
+   * @param swerveFrontRightMotors  The CAN ids for the swerve modules. The first element in the array should be the drive motor id, the second should be the turning motor id
+   * @param swerveBackLeftMotors  The CAN ids for the swerve modules. The first element in the array should be the drive motor id, the second should be the turning motor id
+   * @param swerveBackRightMotors The CAN ids for the swerve modules. The first element in the array should be the drive motor id, the second should be the turning motor id
    */
-  public Drivetrain(double shooterRange) {
+  public Drivetrain(double shooterRange, int[] swerveFrontLeftMotors, int[] swerveFrontRightMotors, int[] swerveBackLeftMotors, int[] swerveBackRightMotors) {
     navX.reset();
     shooterRangeCm = shooterRange;
     ntwrkInst.startClientTeam(5109);
+    m_frontLeft = new SwerveModule(swerveFrontLeftMotors[0], swerveFrontLeftMotors[1]);
+    m_frontRight = new SwerveModule(swerveFrontRightMotors[0], swerveFrontRightMotors[1]);
+    m_backLeft = new SwerveModule(swerveBackLeftMotors[0], swerveBackLeftMotors[1]);
+    m_backRight = new SwerveModule(swerveBackRightMotors[0], swerveBackRightMotors[1]);
   }
 
   /**

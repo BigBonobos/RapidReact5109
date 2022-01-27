@@ -18,9 +18,15 @@ public class Robot extends TimedRobot {
   private double autoAlignRange = 300.0;
   private int autoCounter = 0;
 
+  // CAN IDs for swerve drivetrain
+  private static final int[] frontLeftIds = {1, 2};
+  private static final int[] frontRightIds = {3, 4};
+  private static final int[] backLeftIds = {5, 6};
+  private static final int[] backRightIds = {7, 8};
+
   private final Joystick l_joystick = new Joystick(0);
   private final Joystick r_joystick = new Joystick(1);
-  private final Drivetrain m_swerve = new Drivetrain(autoAlignRange);
+  private final Drivetrain m_swerve = new Drivetrain(autoAlignRange, frontLeftIds, frontRightIds, backLeftIds, backRightIds);
   private final Intake m_intake = new Intake(9, 1, 2, 0);
 
   private final Notifier autoAlignNotif = new Notifier(m_swerve);

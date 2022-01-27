@@ -105,6 +105,7 @@ Temporary Items
 
 ### VisualStudioCode ###
 .vscode/*
+/*/.vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
@@ -137,6 +138,7 @@ $RECYCLE.BIN/
 
 ### Gradle ###
 .gradle
+/*/.gradle
 /build/
 
 # Ignore Gradle GUI config

@@ -123,13 +123,13 @@ public class Drivetrain implements Runnable {
 
       // Offset variable initialization
       double yOffset = straightDistance - shooterRangeCm;
-      double xOffset = limelight.getXOffset().getAsDouble();
+      double xOffset = straightDistance * Math.tan(limelight.getXOffset().getAsDouble() * Math.PI/180);
 
       // Control logic to drive bot into position
       while (Math.abs(yOffset) > 2.5 && Math.abs(xOffset) > 2.5) {
           drive(xOffset / Math.PI, yOffset / Math.PI, 0.0, true);
           straightDistance = limelight.calculateYDistance().getAsDouble();
-          xOffset = limelight.getXOffset().getAsDouble();
+          xOffset = straightDistance * Math.tan(limelight.getXOffset().getAsDouble() * Math.PI/180);
           yOffset = straightDistance - shooterRangeCm;
       }
     } catch (Exception e) {

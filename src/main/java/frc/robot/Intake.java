@@ -80,6 +80,7 @@ public class Intake implements Runnable {
         return intakeOn;
     }
 
+    @Override
     public void run() {
         intake(intakeOn);
         if (intakeOn && indexLimitSwitch.get()) {

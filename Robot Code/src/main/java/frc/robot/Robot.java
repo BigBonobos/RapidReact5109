@@ -3,14 +3,20 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+
+
 import frc.robot.swerveCode.Drivetrain;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends TimedRobot {
+
+  // Ball Align Var
+  private int listenerHandleBall;
+  private int listenerHandleShooter;
+  private boolean runIntake;
 
   // Variables for limelight alignment
   private boolean autoAlignRunningShooter = false;
@@ -26,11 +32,10 @@ public class Robot extends TimedRobot {
 
   private final Joystick l_joystick = new Joystick(0);
   private final Joystick r_joystick = new Joystick(1);
+  private final Joystick j_operator = new Joystick(2);
+
   private final Drivetrain m_swerve = new Drivetrain(autoAlignRange, frontLeftIds, frontRightIds, backLeftIds, backRightIds);
   private final Intake m_intake = new Intake(9, 1, 2, 0);
-
-  private final Notifier autoAlignNotif = new Notifier(m_swerve);
-  private final Notifier intakeNotif = new Notifier(m_intake);
 
   // Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
   private final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(3);
@@ -42,13 +47,10 @@ public class Robot extends TimedRobot {
     driveWithJoystick(true);
   }
 
-  /*
-  Commented out because not relevant to testing
   @Override
   public void robotInit() {
-    m_swerve.initListener();
+    listenerHandleBall = m_swerve.initBallListener();
   }
-  */
 
   @Override
   public void autonomousInit() {
@@ -60,19 +62,18 @@ public class Robot extends TimedRobot {
     driveWithJoystick(false);
     switch(autoCounter) {
       case 1:
-        m_swerve.runListener = true;
-        intakeNotif.startSingle(0);
+        m_intake.intake(true);
         while(m_intake.ballIndexer == 1) {
+          m_intake.checkIntakeState();
           Timer.delay(0.001);
         }
-        m_swerve.runListener = false;
-        intakeNotif.stop();
+        m_swerve.ballAlignmentValues.removeEntryListener(listenerHandleBall);
+        m_intake.intake(false);
         autoCounter++;
         break;
       case 2:
-        m_swerve.runListener = false;
         try {
-          m_swerve.autoAlign();
+          listenerHandleShooter = m_swerve.initShooterListener();
         } catch (Throwable e) {
           e.printStackTrace();
         }
@@ -83,28 +84,34 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    m_swerve.runListener = false;
-    m_swerve.runAutoAlign = true;
+    m_swerve.limelight.limelight.removeEntryListener(listenerHandleShooter);
+    runIntake = true;
   }
+  
   @Override
   public void teleopPeriodic() {
     driveWithJoystick(true);
 
     // Comment the below code out for swerve testing
-    if (l_joystick.getTrigger() && !autoAlignRunningShooter) {
-      m_swerve.runAutoAlign = true;
+    if (l_joystick.getTrigger() && !autoAlignRunningShooter && !autoAlignRunningBall) {
       autoAlignRunningShooter = true;
-      autoAlignNotif.startSingle(0);
-    } else if (l_joystick.getTrigger() && autoAlignRunningShooter) {
-      m_swerve.runAutoAlign = false;
+      listenerHandleShooter = m_swerve.initShooterListener();
+    } else if (l_joystick.getTrigger() && autoAlignRunningShooter && !autoAlignRunningBall || (Math.abs(m_swerve.limelight.limelight.getEntry("tx").getDouble(0.0)) < .5 && (Math.abs(m_swerve.limelight.limelight.getEntry("ty").getDouble(m_swerve.shooterRangeCm) - m_swerve.shooterRangeCm) < .5))) {
+      m_swerve.limelight.limelight.removeEntryListener(listenerHandleShooter);
       autoAlignRunningShooter = false;
     }
-    if (l_joystick.getRawButton(1) && !autoAlignRunningBall) {
-      m_swerve.runListener = true;
+    if (l_joystick.getRawButton(1) && !autoAlignRunningBall && m_intake.ballIndexer < 2 && !autoAlignRunningShooter) {
+      listenerHandleBall = m_swerve.initBallListener();
       autoAlignRunningBall = true;
-    } else if(l_joystick.getRawButton(0) && autoAlignRunningBall) {
-      m_swerve.runListener = false;
+    } else if((l_joystick.getRawButton(1) && autoAlignRunningBall || m_intake.ballIndexer >= 2) && !autoAlignRunningShooter) {
+      m_swerve.ballAlignmentValues.removeEntryListener(listenerHandleBall);
       autoAlignRunningBall = false;
+    }
+
+    if(j_operator.getRawButton(1) && !runIntake) {
+      m_intake.intake(!runIntake);
+    } else if(j_operator.getRawButton(1) && runIntake){
+      m_intake.intake(!runIntake);
     }
   }
 

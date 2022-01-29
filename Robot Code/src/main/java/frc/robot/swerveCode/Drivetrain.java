@@ -23,16 +23,14 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 
 /** Represents a swerve drive style drivetrain. */
-public class Drivetrain implements Runnable {
+public class Drivetrain {
 
   public static final double kMaxSpeed = 3.0; // 3 meters per second
   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
 
   // Network Table instantiation
   private final NetworkTableInstance ntwrkInst = NetworkTableInstance.getDefault();
-  private NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
-  public volatile boolean runListener = false;
-  public volatile boolean runAutoAlign = true;
+  public NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
 
   // Bot measurements
   private final Translation2d m_frontLeftLocation = new Translation2d(0.381, 0.381);
@@ -50,8 +48,8 @@ public class Drivetrain implements Runnable {
   private Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * Math.PI/180);
 
   // Shooter Range
-  private double shooterRangeCm; // Enter shooter distance here(cm)
-  private final Limelight limelight = new Limelight(61.49125);
+  public double shooterRangeCm; // Enter shooter distance here (cm)
+  public final Limelight limelight = new Limelight(61.49125);
 
   // Swerve drive library instantiation
   private final SwerveDriveKinematics m_kinematics =
@@ -126,11 +124,8 @@ public class Drivetrain implements Runnable {
       double xOffset = straightDistance * Math.tan(limelight.getXOffset().getAsDouble() * Math.PI/180);
 
       // Control logic to drive bot into position
-      while (Math.abs(yOffset) > 2.5 && Math.abs(xOffset) > 2.5) {
-          drive(xOffset / Math.PI, yOffset / Math.PI, 0.0, true);
-          straightDistance = limelight.calculateYDistance().getAsDouble();
-          xOffset = straightDistance * Math.tan(limelight.getXOffset().getAsDouble() * Math.PI/180);
-          yOffset = straightDistance - shooterRangeCm;
+      if (Math.abs(yOffset) > .5 || Math.abs(xOffset) > .5) {
+        drive(xOffset / Math.PI, yOffset / Math.PI, 0.0, true);
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -142,38 +137,30 @@ public class Drivetrain implements Runnable {
    * Drives everytime the network tables is updated
    * @return Returns the id of the listener
    */
-  public int initListener() {
-    double rotation = (navX.getYaw() % 360) * 180/Math.PI;
-    NetworkTableEntry rotEntry = ballAlignmentValues.getEntry("rot");
+  public int initBallListener() {
     NetworkTableEntry allianceEntry = ballAlignmentValues.getEntry("alliance");
-    rotEntry.setDouble(rotation);
     allianceEntry.setString(alliance.toString());
     int listenerHandle = ballAlignmentValues.addEntryListener("tVelocity", (table, key, entry, value, flags) -> {
-      if (runListener) {
-        double[] velocity = value.getDoubleArray();
-        double xVel = velocity[0];
-        double yVel = velocity[1];
-        drive(xVel, yVel, 0, true);
-      }
+      double[] velocity = value.getDoubleArray();
+      double xVel = velocity[0];
+      double yVel = velocity[1];
+      drive(xVel, yVel, 0, true);
    }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
    return listenerHandle;
   }
 
-  @Override
-  public void run() {
-    try {
-      while (runAutoAlign) {
+  public int initShooterListener() {
+    int listenerHandle = limelight.limelight.addEntryListener("tx",  (table, key, entry, value, flags) -> {
+      try {
         autoAlign();
-        
-        if (runAutoAlign) {
-          runAutoAlign = false;
-        }
+      } catch (NoSuchElementException e) {
+        System.out.println("Target not found");
       }
-    } catch (NoSuchElementException e) {
-      System.out.println("Vision target not detected (try pointing the robot towards the goal");
-    } catch (Throwable e) {
-      System.out.println("There is a likely an error with the limelight\nIt is reccomended you do not use auto-align for the rest of the match.\nPlease report this issue to programming.");
-      e.printStackTrace();
-    }
-  };
+      catch (Throwable e) {
+        e.printStackTrace();
+      }
+    }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+    return listenerHandle;
+  }
 }

@@ -10,6 +10,7 @@ public class Limelight {
     private NetworkTableInstance ntwrkInst;
     private double targetSize;
     private final static double limelightFOV = 59.6;
+    public NetworkTable limelight;
 
 
     /**
@@ -19,6 +20,7 @@ public class Limelight {
     public Limelight(double targetSizeParam) {
         ntwrkInst = NetworkTableInstance.getDefault();
         targetSize = targetSizeParam;
+        limelight = ntwrkInst.getTable("limelight");
     }
 
     /**
@@ -28,7 +30,6 @@ public class Limelight {
     public OptionalDouble calculateYDistance(){
 
         // Gets the NetworkTable called limelight, containing the nessescary values
-        NetworkTable limelight = ntwrkInst.getTable("limelight");
         boolean tv = limelight.getEntry("tv").getBoolean(false);
 
         // Checks if limelight is returning values
@@ -54,7 +55,6 @@ public class Limelight {
      * </ul>
      */
     public OptionalDouble getXOffset() {
-        NetworkTable limelight = ntwrkInst.getTable("limelight");
         boolean tv = limelight.getEntry("tv").getBoolean(false);
 
         if (tv) {

@@ -7,6 +7,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Intake class that has event for running
@@ -63,15 +64,21 @@ public class Intake implements Runnable {
         }
     }
 
+    public void checkIntakeState() {
+        if (indexLimitSwitch.get()) {
+            ballIndexer++;
+            Timer.delay(1.5);
+        }
+    }
+
     public boolean intake(boolean intakeOn){ //toggle intake motors
         
         if(intakeExtended == true){
-
             if (intakeOn == false){
                 m_Intake.set(.3);
                 intakeOn = true;
             }
-            else{
+            else {
                 m_Intake.set(0);
                 intakeOn = false;
             }

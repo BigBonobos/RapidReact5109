@@ -16,7 +16,7 @@ public class Robot extends TimedRobot {
   // Ball Align Var
   private int listenerHandleBall;
   private int listenerHandleShooter;
-  private boolean runIntake;
+  private boolean intakeRunning;
 
   // Variables for limelight alignment
   private boolean autoAlignRunningShooter = false;
@@ -59,19 +59,29 @@ public class Robot extends TimedRobot {
   }
   @Override
   public void autonomousPeriodic() {
+    // Sets TeleOp Mode to false
     driveWithJoystick(false);
+
+    // Moves in the periodic loop from one instruction to another, useful for redundancy and testing
     switch(autoCounter) {
       case 1:
+        // Sets intake power
         m_intake.intake(true);
+
+        // While no limit switch input, wait until ball is aligned
         while(m_intake.ballIndexer == 1) {
           m_intake.checkIntakeState();
           Timer.delay(0.001);
         }
+
+        // Remove ball aligner, and stop intaking
         m_swerve.ballAlignmentValues.removeEntryListener(listenerHandleBall);
         m_intake.intake(false);
         autoCounter++;
         break;
+      
       case 2:
+        // Shooter alignmnet
         try {
           listenerHandleShooter = m_swerve.initShooterListener();
         } catch (Throwable e) {
@@ -84,8 +94,12 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+
+    // Removes the shooter listener that was set in auto period
     m_swerve.limelight.limelight.removeEntryListener(listenerHandleShooter);
-    runIntake = true;
+
+    // When intake is pressed the first time it will run
+    intakeRunning = false;
   }
   
   @Override
@@ -93,25 +107,37 @@ public class Robot extends TimedRobot {
     driveWithJoystick(true);
 
     // Comment the below code out for swerve testing
+
+    // If the trigger is pressed, and autoAlign through limelight is not listening, then it will initialize the listener
     if (l_joystick.getTrigger() && !autoAlignRunningShooter && !autoAlignRunningBall) {
       autoAlignRunningShooter = true;
       listenerHandleShooter = m_swerve.initShooterListener();
-    } else if (l_joystick.getTrigger() && autoAlignRunningShooter && !autoAlignRunningBall || (Math.abs(m_swerve.limelight.limelight.getEntry("tx").getDouble(0.0)) < .5 && (Math.abs(m_swerve.limelight.limelight.getEntry("ty").getDouble(m_swerve.shooterRangeCm) - m_swerve.shooterRangeCm) < .5))) {
+    } 
+    
+    // Toggles above code off
+    else if (l_joystick.getTrigger() && autoAlignRunningShooter && !autoAlignRunningBall || (Math.abs(m_swerve.limelight.limelight.getEntry("tx").getDouble(0.0)) < .5 && (Math.abs(m_swerve.limelight.limelight.getEntry("ty").getDouble(m_swerve.shooterRangeCm) - m_swerve.shooterRangeCm) < .5))) {
       m_swerve.limelight.limelight.removeEntryListener(listenerHandleShooter);
       autoAlignRunningShooter = false;
     }
+
+
+    // If button 1 is pressed, trigger alignemnet code
     if (l_joystick.getRawButton(1) && !autoAlignRunningBall && m_intake.ballIndexer < 2 && !autoAlignRunningShooter) {
       listenerHandleBall = m_swerve.initBallListener();
       autoAlignRunningBall = true;
-    } else if((l_joystick.getRawButton(1) && autoAlignRunningBall || m_intake.ballIndexer >= 2) && !autoAlignRunningShooter) {
+    } 
+    
+    // Toggle off for above code
+    else if((l_joystick.getRawButton(1) && autoAlignRunningBall || m_intake.ballIndexer >= 2) && !autoAlignRunningShooter) {
       m_swerve.ballAlignmentValues.removeEntryListener(listenerHandleBall);
       autoAlignRunningBall = false;
     }
 
-    if(j_operator.getRawButton(1) && !runIntake) {
-      m_intake.intake(!runIntake);
-    } else if(j_operator.getRawButton(1) && runIntake){
-      m_intake.intake(!runIntake);
+    // Intake toggle
+    if(j_operator.getRawButton(1) && !intakeRunning) {
+      m_intake.intake(!intakeRunning);
+    } else if(j_operator.getRawButton(1) && intakeRunning){
+      m_intake.intake(!intakeRunning);
     }
   }
 

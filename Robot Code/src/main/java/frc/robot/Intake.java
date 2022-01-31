@@ -28,7 +28,7 @@ public class Intake {
     /**
      * Constructor for Intake Object
      * @param intakeChannel deviceId for Motor Controller used on intake
-     * @param beamBreaker Channle for beam breaker (DIO channel)
+     * @param beamBreaker Channel for beam breaker (DIO channel)
      */
     public Intake(int intakeId, int beamBreaker) {
         m_Intake = new CANSparkMax(intakeId, MotorType.kBrushless);

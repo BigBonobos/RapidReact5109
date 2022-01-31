@@ -30,7 +30,7 @@ public class Limelight {
     public OptionalDouble calculateYDistance(){
 
         // Gets the NetworkTable called limelight, containing the nessescary values
-        boolean tv = limelight.getEntry("tv").getBoolean(false);
+        boolean tv = limelight.getEntry("tv").getBoolean(true);
 
         // Checks if limelight is returning values
         if (tv) {
@@ -55,7 +55,7 @@ public class Limelight {
      * </ul>
      */
     public OptionalDouble getXOffset() {
-        boolean tv = limelight.getEntry("tv").getBoolean(false);
+        boolean tv = limelight.getEntry("tv").getBoolean(true);
 
         if (tv) {
             return OptionalDouble.of(limelight.getEntry("tx").getDouble(0));

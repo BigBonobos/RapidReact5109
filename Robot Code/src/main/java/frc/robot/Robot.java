@@ -35,7 +35,7 @@ public class Robot extends TimedRobot {
   private final Joystick j_operator = new Joystick(2);
 
   private final Drivetrain m_swerve = new Drivetrain(autoAlignRange, frontLeftIds, frontRightIds, backLeftIds, backRightIds);
-  private final Intake m_intake = new Intake(9, 1, 2, 0);
+  private final Intake m_intake = new Intake(9, 0);
 
   // Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
   private final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(3);

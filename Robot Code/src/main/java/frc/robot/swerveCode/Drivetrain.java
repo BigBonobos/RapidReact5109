@@ -144,7 +144,10 @@ public class Drivetrain {
       double[] velocity = value.getDoubleArray();
       double xVel = velocity[0];
       double yVel = velocity[1];
-      drive(xVel, yVel, 0, true);
+
+      if(xVel != 0 && yVel != 0){
+        drive(xVel, yVel, 0, true);
+      }
    }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
    return listenerHandle;
   }

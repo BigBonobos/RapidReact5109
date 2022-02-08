@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends TimedRobot {
   public DigitalInput line1 = new DigitalInput(0);
   public DigitalInput line2 = new DigitalInput(1);
-  public CANSparkMax motor = new CANSparkMax(1, MotorType.kBrushless); 
+  public CANSparkMax m_intake = new CANSparkMax(1, MotorType.kBrushless); 
   boolean hasBall = false;
 
   @Override
@@ -46,25 +46,25 @@ public class Robot extends TimedRobot {
     // HasBall covers edge case of ball getting stuck between the two sensors thus making the sensors read FF (false false)
     // Cases TT, FT
     if ((line1.get() == true && line2.get() == true) || (line1.get() == false && line2.get() == true)) {
-        motor.stopMotor();
-        hasBall = false;
+      m_intake.stopMotor();
+      hasBall = false;
     }
 
     // Cases TF
     if (line1.get() == true && line2.get() == false) {
 
       // arbitrary motor value
-      motor.set(0.5);
+      m_intake.set(0.5);
       hasBall = true;
     }
 
     // Case FF + HB (ball stuck)
     if (line1.get() == false && line2.get() == false && hasBall == true) {
-      motor.set(0.5);
+      m_intake.set(0.5);
 
     // Case FF (ball not stuck)
     } else {
-      motor.stopMotor();
+      m_intake.stopMotor();
     }
   }
 

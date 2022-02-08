@@ -1,6 +1,6 @@
-package frc.robot;
+package frc.robot.ballSys;
 
-//sparkmax/neos imports
+// sparkmax/neos imports
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 

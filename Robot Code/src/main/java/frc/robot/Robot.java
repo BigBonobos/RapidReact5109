@@ -5,6 +5,9 @@
 package frc.robot;
 
 
+import frc.robot.ballSys.Intake;
+import frc.robot.ballSys.Shooter;
+import frc.robot.ballSys.Shooter.ShooterState;
 import frc.robot.swerveCode.Drivetrain;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
@@ -23,6 +26,10 @@ public class Robot extends TimedRobot {
   private boolean autoAlignRunningBall = false;
   private double autoAlignRange = 300.0;
   private int autoCounter = 0;
+  
+  // Shooter variables
+  private Shooter m_shooter = new Shooter(1, 2, 1200);
+
 
   // CAN IDs for swerve drivetrain
   private static final int[] frontLeftIds = {1, 2};
@@ -56,11 +63,13 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     m_intake.ballIndexer = 1;
     m_intake.intakeOn = false;
+    m_shooter.state = ShooterState.kCoasting;
   }
   @Override
   public void autonomousPeriodic() {
     // Sets TeleOp Mode to false
     driveWithJoystick(false);
+    m_shooter.setShooter();
 
     // Moves in the periodic loop from one instruction to another, useful for redundancy and testing
     switch(autoCounter) {
@@ -84,28 +93,47 @@ public class Robot extends TimedRobot {
         // Shooter alignmnet
         try {
           listenerHandleShooter = m_swerve.initShooterListener();
+          autoCounter++;
         } catch (Throwable e) {
           e.printStackTrace();
         }
         break;
+
+        case 3:
+          m_shooter.state = ShooterState.kRunning;
+          autoCounter++;
+          break;
+
+        case 4:
+          Timer.delay(5);
+          // Put Ball deploy method here
+          autoCounter++;
+          break;
+        
+        case 5:
+          m_shooter.state = ShooterState.kCoasting;
+          break;
     }
     m_swerve.updateOdometry();
   }
 
   @Override
   public void teleopInit() {
-
     // Removes the shooter listener that was set in auto period
     m_swerve.limelight.limelight.removeEntryListener(listenerHandleShooter);
 
     // When intake is pressed the first time it will run
     intakeRunning = false;
+    
+
+    // Initializes shooter in off state
+    m_shooter.state = ShooterState.kCoasting;
   }
   
   @Override
   public void teleopPeriodic() {
     driveWithJoystick(true);
-
+    m_shooter.setShooter();
     // Comment the below code out for swerve testing
 
     // If the trigger is pressed, and autoAlign through limelight is not listening, then it will initialize the listener
@@ -138,6 +166,17 @@ public class Robot extends TimedRobot {
       m_intake.intake(!intakeRunning);
     } else if(j_operator.getRawButton(1) && intakeRunning){
       m_intake.intake(!intakeRunning);
+    }
+
+    if (j_operator.getTrigger()) {
+      switch (m_shooter.state) {
+        case kCoasting:
+          m_shooter.state = ShooterState.kRunning;
+          break;
+        case kRunning:
+          m_shooter.state = ShooterState.kCoasting;
+          break;
+      }
     }
   }
 

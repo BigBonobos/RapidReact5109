@@ -152,6 +152,10 @@ public class Drivetrain {
    return listenerHandle;
   }
 
+  /**
+   * Initializes shooter aligner
+   * @return Handler of listener
+   */
   public int initShooterListener() {
     int listenerHandle = limelight.limelight.addEntryListener("tx",  (table, key, entry, value, flags) -> {
       try {

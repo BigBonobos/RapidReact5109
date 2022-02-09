@@ -7,7 +7,7 @@
     import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
     import edu.wpi.first.wpilibj.*;
 
-    public class BallSystems {
+    public class BallSystems { 
 
         public Joystick j_Operator = new Joystick(1);
 

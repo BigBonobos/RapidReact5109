@@ -125,7 +125,7 @@ public class Drivetrain {
 
       // Control logic to drive bot into position
       if (Math.abs(yOffset) > .5 || Math.abs(xOffset) > .5) {
-        drive(xOffset / Math.PI, yOffset / Math.PI, 0.0, true);
+        drive(xOffset / Math.PI, yOffset / Math.PI, 0.0, false);
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -146,7 +146,7 @@ public class Drivetrain {
       double yVel = velocity[1];
 
       if(xVel != 0 && yVel != 0){
-        drive(xVel, yVel, 0, true);
+        drive(xVel, yVel, 0, false);
       }
    }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
    return listenerHandle;

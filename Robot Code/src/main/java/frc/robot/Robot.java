@@ -57,6 +57,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     listenerHandleBall = m_swerve.initBallListener();
+    m_shooter.state = ShooterState.kCoasting;
   }
 
   @Override

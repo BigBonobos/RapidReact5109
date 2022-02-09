@@ -17,7 +17,7 @@
 
         //Variables
         private int BallCount;
-        private boolean intakeOn = false; 
+        public boolean intakeOn = false; 
         private boolean intakeExtended = false; 
         
         //Motor
@@ -28,7 +28,7 @@
         //Solenoids
         private Solenoid s_LeftIntake = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
         private Solenoid s_RightIntake = new Solenoid(PneumaticsModuleType.CTREPCM, 2);
-        private Solenoid s_ControlPanel = new Solenoid(PneumaticsModuleType.CTREPCM, 4);
+        //private Solenoid s_ControlPanel = new Solenoid(PneumaticsModuleType.CTREPCM, 4);
 
 
         public void Index() {

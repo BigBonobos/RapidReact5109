@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 /** Represents a swerve drive style drivetrain. */
 public class Drivetrain {
 
-  public static final double kMaxSpeed = 3.0; // 3 meters per second
+  public static final double kMaxSpeed = 0.1; // 3 meters per second
   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
 
   // Network Table instantiation
@@ -68,14 +68,14 @@ public class Drivetrain {
    * @param swerveBackLeftMotors  The CAN ids for the swerve modules. The first element in the array should be the drive motor id, the second should be the turning motor id
    * @param swerveBackRightMotors The CAN ids for the swerve modules. The first element in the array should be the drive motor id, the second should be the turning motor id
    */
-  public Drivetrain(double shooterRange, int[] swerveFrontLeftMotors, int[] swerveFrontRightMotors, int[] swerveBackLeftMotors, int[] swerveBackRightMotors) {
+  public Drivetrain(double shooterRange, double[] swerveFrontLeftMotors, double[] swerveFrontRightMotors, double[] swerveBackLeftMotors, double[] swerveBackRightMotors) {
     navX.reset();
     shooterRangeCm = shooterRange;
     ntwrkInst.startClientTeam(5109);
-    m_frontLeft = new SwerveModule(swerveFrontLeftMotors[0], swerveFrontLeftMotors[1]);
-    m_frontRight = new SwerveModule(swerveFrontRightMotors[0], swerveFrontRightMotors[1]);
-    m_backLeft = new SwerveModule(swerveBackLeftMotors[0], swerveBackLeftMotors[1]);
-    m_backRight = new SwerveModule(swerveBackRightMotors[0], swerveBackRightMotors[1]);
+    m_frontLeft = new SwerveModule((int) swerveFrontLeftMotors[0], (int) swerveFrontLeftMotors[1], (int) swerveFrontLeftMotors[2], swerveFrontLeftMotors[3]);
+    m_frontRight = new SwerveModule((int) swerveFrontRightMotors[0], (int) swerveFrontRightMotors[1], (int) swerveFrontRightMotors[2], swerveFrontRightMotors[3]);
+    m_backLeft = new SwerveModule((int) swerveBackLeftMotors[0], (int) swerveBackLeftMotors[1], (int) swerveBackLeftMotors[2], swerveBackLeftMotors[3]);
+    m_backRight = new SwerveModule((int) swerveBackRightMotors[0], (int) swerveBackRightMotors[1], (int) swerveBackRightMotors[2], swerveBackRightMotors[3]);
   }
 
   /**
@@ -95,10 +95,15 @@ public class Drivetrain {
                 ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, navXVal)
                 : new ChassisSpeeds(xSpeed, ySpeed, rot));
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, kMaxSpeed);
+
+    // for (SwerveModuleState state: swerveModuleStates) {
+    //   System.out.println(state);
+    // }
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_backLeft.setDesiredState(swerveModuleStates[2]);
     m_backRight.setDesiredState(swerveModuleStates[3]);
+    // System.out.println(swerveModuleStates[0].speedMetersPerSecond);
   }
 
   /** Updates the field relative position of the robot. */

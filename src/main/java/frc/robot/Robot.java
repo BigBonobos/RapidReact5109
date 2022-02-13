@@ -20,6 +20,7 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
+  Climb climb = new Climb();
   private boolean frontHooksEngaged = false;
   private int climbCounter = 0; // reaching 1 is high, 2 is traversal
 
@@ -91,5 +92,19 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {
+
+    if (frontHooksEngaged && climbCounter > 3) {
+      frontHooksEngaged = climb.latchArm();
+
+    } else {
+      frontHooksEngaged = climb.pullArm();
+
+      if(frontHooksEngaged) {
+        climbCounter++;
+      }
+      
+    }
+
+
   }
 }

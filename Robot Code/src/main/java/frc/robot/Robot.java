@@ -14,16 +14,23 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
+import edu.wpi.first.math.MathUtil;
+
 public class Robot extends TimedRobot {
+
+  public CANSparkMax motor1 = new CANSparkMax(23,MotorType.kBrushless);
 
   // Ball Align Var
   private int listenerHandleBall;
   private int listenerHandleShooter;
   private boolean intakeRunning;
+  private boolean autoAlignRunningBall;
+  private boolean autoAlignRunningShooter;
 
   // Variables for limelight alignment
-  private boolean autoAlignRunningShooter = false;
-  private boolean autoAlignRunningBall = false;
   private double autoAlignRange = 300.0;
   private int autoCounter = 0;
   
@@ -32,10 +39,10 @@ public class Robot extends TimedRobot {
 
 
   // CAN IDs for swerve drivetrain
-  private static final int[] frontLeftIds = {1, 2};
-  private static final int[] frontRightIds = {3, 4};
-  private static final int[] backLeftIds = {5, 6};
-  private static final int[] backRightIds = {7, 8};
+  private static final double[] frontLeftIds = {15, 14, 1, 18.809}; // back right? 
+  private static final double[] frontRightIds = {12, 13, 2, -22.76}; // back left?
+  private static final double[] backLeftIds = {18, 19, 3, -62.402}; //front right?
+  private static final double[] backRightIds = {16, 17, 4, -21.445}; //front left?y
 
   private final Joystick l_joystick = new Joystick(0);
   private final Joystick r_joystick = new Joystick(1);
@@ -51,7 +58,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
-    driveWithJoystick(true);
+    // driveWithJoystick(false);
+    // m_swerve.drive(0.1, 0, 0, false);
+    motor1.set(1);
+ 
   }
 
   @Override
@@ -184,24 +194,26 @@ public class Robot extends TimedRobot {
     // Get the x speed. We are inverting this because Xbox controllers return
     // negative values when we push forward.
     final double xSpeed =
-        -m_xspeedLimiter.calculate(l_joystick.getY())
+        -m_xspeedLimiter.calculate(MathUtil.applyDeadband(l_joystick.getY(), 0.08))
             * frc.robot.swerveCode.Drivetrain.kMaxSpeed;
+    // System.out.println(xSpeed);
 
     // Get the y speed or sideways/strafe speed. We are inverting this because
     // we want a positive value when we pull to the left. Xbox controllers
     // return positive values when you pull to the right by default.
     final double ySpeed =
-        -m_yspeedLimiter.calculate(l_joystick.getX())
+        -m_yspeedLimiter.calculate(MathUtil.applyDeadband(l_joystick.getX(), 0.08))
             * frc.robot.swerveCode.Drivetrain.kMaxSpeed;
+    // System.out.println(ySpeed);
 
     // Get the rate of angular rotation. We are inverting this because we want a
     // positive value when we pull to the left (remember, CCW is positive in
     // mathematics). Xbox controllers return positive values when you pull to
     // the right by default.
     final double rot =
-        -m_rotLimiter.calculate(r_joystick.getX())
+        -m_rotLimiter.calculate(MathUtil.applyDeadband(r_joystick.getY(), 0.08))
             * frc.robot.swerveCode.Drivetrain.kMaxAngularSpeed;
-
+      // System.out.println(rot);
     m_swerve.drive(xSpeed, ySpeed, rot, fieldRelative);
   }
 }

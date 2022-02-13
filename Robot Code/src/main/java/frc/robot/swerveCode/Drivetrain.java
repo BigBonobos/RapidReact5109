@@ -99,9 +99,13 @@ public class Drivetrain {
     // for (SwerveModuleState state: swerveModuleStates) {
     //   System.out.println(state);
     // }
+    System.out.println("1");
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
+    System.out.println("2");
     m_frontRight.setDesiredState(swerveModuleStates[1]);
+    System.out.println("3");
     m_backLeft.setDesiredState(swerveModuleStates[2]);
+    System.out.println("4");
     m_backRight.setDesiredState(swerveModuleStates[3]);
     // System.out.println(swerveModuleStates[0].speedMetersPerSecond);
   }

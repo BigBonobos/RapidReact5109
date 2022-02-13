@@ -18,7 +18,7 @@ import edu.wpi.first.math.MathUtil;
 
 public class Robot extends TimedRobot {
 
-  public CANSparkMax motor1 = new CANSparkMax(23,MotorType.kBrushless);
+  // public CANSparkMax motor1 = new CANSparkMax(14,MotorType.kBrushless);
 
   // Ball Align Var
   // private int listenerHandleBall;
@@ -28,14 +28,14 @@ public class Robot extends TimedRobot {
   // Variables for limelight alignment
   // private boolean autoAlignRunningShooter = false;
   // private boolean autoAlignRunningBall = false;
-  private double autoAlignRange = 300.0;
+  private double autoAlignRange = 360.0;
   // private int autoCounter = 0;
 
   // CAN IDs for swerve drivetrain
-  private static final double[] frontLeftIds = {15, 14, 1, 18.809}; // back right? 
-  private static final double[] frontRightIds = {12, 13, 2, -22.76}; // back left?
-  private static final double[] backLeftIds = {18, 19, 3, -62.402}; //front right?
-  private static final double[] backRightIds = {16, 17, 4, -21.445}; //front left?y
+  private static final double[] frontLeftIds = {15, 14, 1, 162.6};//100}; // back right? 
+  private static final double[] frontRightIds = {12, 13, 2, -163.213};//(180 - 55) - 360}; // back left?
+  private static final double[] backLeftIds = {18, 19, 3, 60.6};//-5}; //front right?
+  private static final double[] backRightIds = {16, 17, 4, -80.86};//(180 + 40) - 360}; //front left?y
 
   private final Joystick l_joystick = new Joystick(0);
   private final Joystick r_joystick = new Joystick(1);
@@ -45,15 +45,14 @@ public class Robot extends TimedRobot {
   // private final Intake m_intake = new Intake(9, 0);
 
   // Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
-  private final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(3);
-  private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(3);
-  private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3);
+  private final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(10);
+  private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(10);
+  private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(10);
 
   @Override
   public void testPeriodic() {
-    // driveWithJoystick(false);
+    driveWithJoystick(false);
     // m_swerve.drive(0.1, 0, 0, false);
-    motor1.set(1);
  
   }
 
@@ -61,7 +60,6 @@ public class Robot extends TimedRobot {
   // public void robotInit() {
   //   listenerHandleBall = m_swerve.initBallListener();
   // }
-  // motor1.set(1);
 
   // @Override
   // public void autonomousInit() {

@@ -40,10 +40,10 @@ public class Drivetrain {
   private static final DriverStation.Alliance alliance = DriverStation.getAlliance();
 
   // Swerve Module instantiation
-  private SwerveModule m_frontLeft;
-  private SwerveModule m_frontRight;
-  private SwerveModule m_backLeft;
-  private SwerveModule m_backRight;
+  public SwerveModule m_frontLeft;
+  public SwerveModule m_frontRight;
+  public SwerveModule m_backLeft;
+  public SwerveModule m_backRight;
   private AHRS navX = new AHRS(SPI.Port.kMXP);
   private Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * Math.PI/180);
 

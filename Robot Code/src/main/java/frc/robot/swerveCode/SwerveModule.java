@@ -28,11 +28,11 @@ public class SwerveModule {
       2 * Math.PI; // radians per second squared
 
   private final CANSparkMax m_driveMotor;
-  private final CANSparkMax m_turningMotor;
+  public final CANSparkMax m_turningMotor;
 
   private final RelativeEncoder m_driveEncoder;
   private final RelativeEncoder m_turningEncoderRelative;
-  private final CANCoder m_turningEncoderAbsolute;
+  public final CANCoder m_turningEncoderAbsolute;
 
   private final SparkMaxPIDController m_drivePIDController;
 

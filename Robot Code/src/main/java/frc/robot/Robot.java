@@ -66,6 +66,21 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
+    
+    double e_frontLeftPos;
+    double e_frontRightPos;
+    double e_backRightPos;
+    double e_backLeftPos;
+    while (Math.abs(m_swerve.m_backLeft.m_turningEncoderAbsolute.getAbsolutePosition()) != 0 || Math.abs(m_swerve.m_backRight.m_turningEncoderAbsolute.getAbsolutePosition()) != 0 || Math.abs(m_swerve.m_frontRight.m_turningEncoderAbsolute.getAbsolutePosition()) != 0 || Math.abs(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition()) != 0 ) {
+      e_frontLeftPos = m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_frontRightPos = m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_backLeftPos = m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_backRightPos = m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+      m_swerve.m_frontLeft.m_turningMotor.set(-1 * e_frontLeftPos/180);
+      m_swerve.m_frontRight.m_turningMotor.set(-1 * e_frontRightPos/180);
+      m_swerve.m_backLeft.m_turningMotor.set(-1 * e_backLeftPos/180);
+      m_swerve.m_backRight.m_turningMotor.set(-1 * e_backRightPos/180);
+    }
     listenerHandleBall = m_swerve.initBallListener();
   }
 

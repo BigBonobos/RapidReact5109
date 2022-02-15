@@ -32,11 +32,11 @@ public class SwerveModule {
   private static final double kModuleMaxAngularAcceleration = 2 * Math.PI; // radians per second squared
 
   private final CANSparkMax m_driveMotor;
-  private final CANSparkMax m_turningMotor;
+  public final CANSparkMax m_turningMotor;
 
   private final RelativeEncoder m_driveEncoder;
   private final RelativeEncoder m_turningEncoderRelative;
-  private final CANCoder m_turningEncoderAbsolute;
+  public final CANCoder m_turningEncoderAbsolute;
 
   private final SparkMaxPIDController m_drivePIDController;
   private final SparkMaxPIDController m_turningPIDController;
@@ -71,15 +71,15 @@ public class SwerveModule {
     m_drivePIDController.setD(0);
 
     m_turningPIDController.setP(1.5);
-    m_turningPIDController.setI(0.01);
+    m_turningPIDController.setI(0);
     m_turningPIDController.setD(0);
-    m_turningPIDController.setIMaxAccum(0.1,0);
+    // m_turningPIDController.setIMaxAccum(0.1,0);
 
     // Setting turn constraints
     m_turningPIDController.setSmartMotionAccelStrategy(com.revrobotics.SparkMaxPIDController.AccelStrategy.kTrapezoidal,
         0);
-    m_turningPIDController.setSmartMotionMaxAccel(kModuleMaxAngularAcceleration / 16, 0);
-    m_turningPIDController.setSmartMotionMaxVelocity(kModuleMaxAngularVelocity / 16, 0);
+    m_turningPIDController.setSmartMotionMaxAccel(kModuleMaxAngularAcceleration, 0);
+    m_turningPIDController.setSmartMotionMaxVelocity(kModuleMaxAngularVelocity, 0);
 
     // Set the distance per pulse for the drive encoder. We can simply use the
     // distance traveled for one rotation of the wheel divided by the encoder
@@ -89,6 +89,8 @@ public class SwerveModule {
 
     m_driveEncoder.setVelocityConversionFactor(1 / (kTicksPerWheelRadian) * kWheelRadius);
     m_turningEncoderRelative.setPositionConversionFactor(1 / kTicksPerTurnerWheelRadian);
+
+    // m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
 
     // Set the distance (in this case, angle) per pulse for the turning encoder.
     // This is the the angle through an entire rotation (2 * wpi::math::pi)
@@ -133,7 +135,7 @@ public class SwerveModule {
     // m_drivePIDController.setFF(driveFeedforward);
     // m_turningPIDController.setFF(turnFeedforward);
     Rotation2d currentAngle = Rotation2d.fromDegrees(m_turningEncoderAbsolute.getAbsolutePosition());
-    state = SwerveModuleState.optimize(state, currentAngle);
+    // state = SwerveModuleState.optimize(state, currentAngle);
 
     final double deltaAngle = state.angle.getRadians() - currentAngle.getRadians();
 

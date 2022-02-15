@@ -26,7 +26,7 @@ public class Climb {
     public SparkMaxPIDController pc_Winch = m_Winch.getPIDController();
     
     // solenoids
-    public Solenoid s_LeftIntake = new Solenoid(null, -1);
+    public Solenoid s_PopArm = new Solenoid(null, -1);
 
     // sensors
     // return true if the circuit is open
@@ -35,10 +35,11 @@ public class Climb {
 
     // functions
 
-    // latch onto pole
-    public boolean latchArm() {
+    // latch onto pole (will not work)
+    public boolean latchClimb() {
         if (!armNotExtended.get()) {
-            s_LeftIntake.set(true);
+            pc_Winch.setReference(-1, ControlType.kPosition);
+            // s_PopArm.set(true);
 
         } else {
             pc_Hook.setReference(-1, ControlType.kPosition);
@@ -48,8 +49,8 @@ public class Climb {
         return true;
     }
 
-    // pull up to pole
-    public boolean pullArm() {
+    // pull up to pole (will not work)
+    public boolean pullClimb() {
         if (!armNotClosed.get()) {
             pc_Winch.setReference(-1, ControlType.kPosition);
 
@@ -60,5 +61,29 @@ public class Climb {
         }
         return false;
     }
-    
+
+    public void retractArm() {
+        pc_Winch.setReference(-1, ControlType.kPosition);
+    }
+
+    public void extendArm() {
+        pc_Winch.setReference(-1, ControlType.kPosition);
+    }
+
+    public void retractFrontHooks() {
+        pc_Hook.setReference(-1, ControlType.kPosition);
+    }
+
+    public void engageFrontHooks() {
+        pc_Hook.setReference(-1, ControlType.kPosition);
+    }
+
+    public void popArmUp() {
+        s_PopArm.set(true);
+    }
+
+    public void popArmDown() {
+        s_PopArm.set(false);
+    }
+
 }

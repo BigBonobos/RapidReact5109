@@ -7,6 +7,11 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.Joystick;
+
+import com.revrobotics.*;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -17,12 +22,21 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends TimedRobot {
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
+
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
-  Climb climb = new Climb();
+  public Joystick j_ClimbOperator = new Joystick(2);
+  private boolean killToggleOn = false;
+
+  // climb variables
+  private Climb climb = new Climb();
   private boolean frontHooksEngaged = false;
+  private boolean armExtended = false;
+  private boolean armPoppedUp = false;
+
   private int climbCounter = 0; // reaching 1 is high, 2 is traversal
+
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -60,8 +74,6 @@ public class Robot extends TimedRobot {
     m_autoSelected = m_chooser.getSelected();
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
-
-
   }
 
   /** This function is called periodically during autonomous. */
@@ -87,23 +99,79 @@ public class Robot extends TimedRobot {
 
   /** This function is called once when test mode is enabled. */
   @Override
-  public void testInit() {}
+  public void testInit() {
+    climb.m_Hook.setIdleMode(CANSparkMax.IdleMode.kBrake);
+    climb.m_Winch.setIdleMode(CANSparkMax.IdleMode.kBrake);
+  }
 
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {
 
-    if (frontHooksEngaged && climbCounter > 3) {
-      frontHooksEngaged = climb.latchArm();
-
-    } else {
-      frontHooksEngaged = climb.pullArm();
-
-      if(frontHooksEngaged) {
-        climbCounter++;
+    // kill switch only stops future methods from being run
+    if (j_ClimbOperator.getRawButton(1)){
+      if (killToggleOn) {
+        killToggleOn = false;
+      } else {
+        killToggleOn = true;
       }
-      
     }
+
+    // winch toggle
+    if (j_ClimbOperator.getRawButton(4) && !killToggleOn){
+      if (armExtended) {
+        climb.retractArm();
+        armExtended = false;
+      } else {
+        climb.extendArm();
+        armExtended = true;
+      }
+    }
+
+    // front hooks toggle
+    if (j_ClimbOperator.getRawButton(5) && !killToggleOn){
+      if (frontHooksEngaged) {
+        climb.retractFrontHooks();
+        frontHooksEngaged = false;
+      } else {
+        climb.engageFrontHooks();
+        frontHooksEngaged = false;
+      }
+    }
+
+    // pneumatic popup toggle
+    if (j_ClimbOperator.getRawButton(6) && !killToggleOn){
+      if (armPoppedUp) {
+        climb.popArmDown();
+        armPoppedUp = false;
+      } else {
+        climb.popArmUp();
+        armPoppedUp = true;
+      }
+
+    }
+
+    // won't work
+    // if (j_ClimbOperator.getRawButton(2) && !killToggleOn){
+    //   climb.latchClimb();
+    // }
+  
+    // if (j_ClimbOperator.getRawButton(3) && !killToggleOn){
+    //   climb.pullClimb();
+    // }
+
+
+    // if (frontHooksEngaged && climbCounter > 3) {
+    //   frontHooksEngaged = climb.latchClimb();
+
+    // } else {
+    //   frontHooksEngaged = climb.pullClimb();
+
+    //   if(frontHooksEngaged) {
+    //     climbCounter++;
+    //   }
+      
+    // }
 
 
   }

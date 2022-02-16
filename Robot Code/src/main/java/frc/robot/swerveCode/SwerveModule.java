@@ -145,15 +145,23 @@ public class SwerveModule {
 
     //System.out.println("Relative:" + m_turningEncoderRelative.getPosition());
 
-    double finalAngle = (deltaAngle + m_turningEncoderRelative.getPosition()) / (2 * Math.PI);
+    
+    double diffAngle = deltaAngle + m_turningEncoderRelative.getPosition();
+  //  diffAngle = diffAngle % 2 * Math.PI;
+  //   diffAngle = (diffAngle + 2 * Math.PI) % 2 * Math.PI;
+  //   if (diffAngle > Math.PI) diffAngle -= 2 * Math.PI;
+    double finalAngle = (diffAngle) / (2 * Math.PI);
+ 
+    
 
-    // state = SwerveModuleState.optimize(state, Rotation2d.from finalAngle);
-    // double result = finalAngle % 360;
+    System.out.println("final angle: "+ diffAngle);
+    // state = SwerveModuleState.optimize(state, Rotation2d.from diffAngle);
+    // double result = diffAngle % 360;
 
     // if (result < 0) {
     // result += 360;
     // }
-    //System.out.println("Target:" + finalAngle);
+    //System.out.println("Target:" + diffAngle);
     m_drivePIDController.setReference(state.speedMetersPerSecond / kWheelRadius, ControlType.kVelocity);
     m_turningPIDController.setReference(finalAngle, ControlType.kPosition);
   }

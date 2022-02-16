@@ -151,14 +151,19 @@ public class Robot extends TimedRobot {
 
     }
 
-    // won't work
-    // if (j_ClimbOperator.getRawButton(2) && !killToggleOn){
-    //   climb.latchClimb();
-    // }
+    // latch
+    if (j_ClimbOperator.getRawButton(2) && !killToggleOn){
+      climb.latchClimb();
+    }
   
-    // if (j_ClimbOperator.getRawButton(3) && !killToggleOn){
-    //   climb.pullClimb();
-    // }
+    // winch
+    if (j_ClimbOperator.getRawButton(3) && !killToggleOn){
+      climb.pullClimb();
+    }
+
+    
+
+
 
 
     // if (frontHooksEngaged && climbCounter > 3) {

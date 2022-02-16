@@ -26,7 +26,8 @@ public class Climb {
     public SparkMaxPIDController pc_Winch = m_Winch.getPIDController();
     
     // solenoids
-    public Solenoid s_PopArm = new Solenoid(null, -1);
+    public Solenoid s_LeftPopArm = new Solenoid(null, -1);
+    public Solenoid s_RightPopArm = new Solenoid(null, -1);
 
     // sensors
     // return true if the circuit is open
@@ -35,31 +36,36 @@ public class Climb {
 
     // functions
 
-    // latch onto pole (will not work)
-    public boolean latchClimb() {
-        if (!armNotExtended.get()) {
-            pc_Winch.setReference(-1, ControlType.kPosition);
-            // s_PopArm.set(true);
-
-        } else {
-            pc_Hook.setReference(-1, ControlType.kPosition);
-            return false;
+    // latch onto pole
+    public void latchClimb() {
+        if (!armNotExtended.get()) { // if arm is not fully extended
+            pc_Winch.setReference(1, ControlType.kPosition);
+            s_LeftPopArm.set(true);
+            s_RightPopArm.set(true);
 
         }
-        return true;
+        // } else {
+        //     pc_Hook.setReference(-1, ControlType.kPosition);
+        //     return false;
+
+        // }
+        //return true;
     }
 
-    // pull up to pole (will not work)
-    public boolean pullClimb() {
-        if (!armNotClosed.get()) {
+    // pull up to pole
+    public void pullClimb() {
+        if (!armNotClosed.get()) { // if arm is not closed
             pc_Winch.setReference(-1, ControlType.kPosition);
-
-        } else {
-            pc_Hook.setReference(-1, ControlType.kPosition);
-            return true;
-
+            s_LeftPopArm.set(false);
+            s_RightPopArm.set(false);
         }
-        return false;
+
+        // } else {
+        //     pc_Hook.setReference(1, ControlType.kPosition);
+        //     return true;
+
+        // }
+        // return false;
     }
 
     public void retractArm() {
@@ -79,11 +85,13 @@ public class Climb {
     }
 
     public void popArmUp() {
-        s_PopArm.set(true);
+        s_LeftPopArm.set(true);
+        s_RightPopArm.set(true);
     }
 
     public void popArmDown() {
-        s_PopArm.set(false);
+        s_LeftPopArm.set(false);
+        s_RightPopArm.set(false);
     }
 
 }

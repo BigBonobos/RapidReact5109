@@ -106,7 +106,7 @@ public class SwerveModule {
     // Limit the PID Controller's input range between -pi and pi and set the input
     // to be continuous.
     // m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
-
+      m_turningPIDController.setOutputRange(-Math.PI, Math.PI);
   }
 
   /**
@@ -135,7 +135,7 @@ public class SwerveModule {
     // m_drivePIDController.setFF(driveFeedforward);
     // m_turningPIDController.setFF(turnFeedforward);
     Rotation2d currentAngle = Rotation2d.fromDegrees(m_turningEncoderAbsolute.getAbsolutePosition());
-    // state = SwerveModuleState.optimize(state, currentAngle);
+    state = SwerveModuleState.optimize(state, currentAngle);
 
     final double deltaAngle = state.angle.getRadians() - currentAngle.getRadians();
 
@@ -162,6 +162,8 @@ public class SwerveModule {
     // result += 360;
     // }
     //System.out.println("Target:" + diffAngle);
+    // * 180 / Math.PI
+    m_turningEncoderAbsolute.setPositionToAbsolute();
     m_drivePIDController.setReference(state.speedMetersPerSecond / kWheelRadius, ControlType.kVelocity);
     m_turningPIDController.setReference(finalAngle, ControlType.kPosition);
   }

@@ -54,10 +54,44 @@ public class Robot extends TimedRobot {
   private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(10);
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(10);
 
+  double testCounter = 0;
+  double degreeOffset = 0;
+
+  public void testInit() {
+    double e_frontLeftPos = m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+    double e_frontRightPos = m_swerve.m_frontRight.m_turningEncoderAbsolute.getAbsolutePosition();
+    double e_backRightPos = m_swerve.m_backRight.m_turningEncoderAbsolute.getAbsolutePosition();
+    double e_backLeftPos = m_swerve.m_backLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+
+    while(testCounter == 0) {
+      if (Math.abs(e_backLeftPos) > degreeOffset || Math.abs(e_frontLeftPos) > degreeOffset || Math.abs(e_frontRightPos) > degreeOffset || Math.abs(e_backRightPos) > degreeOffset) {
+        testCounter = 1;
+      }
+      e_frontLeftPos = m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_frontRightPos = m_swerve.m_frontRight.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_backRightPos = m_swerve.m_backRight.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_backLeftPos = m_swerve.m_backLeft.m_turningEncoderAbsolute.getAbsolutePosition(); 
+
+      m_swerve.m_frontLeft.m_turningMotor.set(-1 * e_frontLeftPos/180);
+      m_swerve.m_backLeft.m_turningMotor.set(-1 * e_backLeftPos/180);
+      m_swerve.m_frontRight.m_turningMotor.set(-1 * e_frontRightPos/180);
+      m_swerve.m_backRight.m_turningMotor.set(-1 * e_backRightPos/180);
+    }
+  }
+  
+
   @Override
   public void testPeriodic() {
+    // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
+    // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
     driveWithJoystick(false);
-    // m_swerve.drive(0.1, 0, 0, false);
+    // try {
+    //   Thread.sleep(100);
+    // } catch (InterruptedException e) {
+    //   // TODO Auto-generated catch block
+    //   e.printStackTrace();
+    // }
+    // m_swerve.drive(0.1, 0.1, 0, false);
  
   }
 

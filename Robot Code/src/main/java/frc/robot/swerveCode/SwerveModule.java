@@ -65,9 +65,9 @@ public class SwerveModule {
     m_drivePIDController.setD(0);
 
     m_turningPIDController.setP(1.5);
-    m_turningPIDController.setI(0.01);
+    m_turningPIDController.setI(0);
     m_turningPIDController.setD(0);
-    m_turningPIDController.setIMaxAccum(0.1,0);
+    // m_turningPIDController.setIMaxAccum(0.1,0);
 
     // Setting turn constraints
     m_turningPIDController.setSmartMotionAccelStrategy(com.revrobotics.SparkMaxPIDController.AccelStrategy.kTrapezoidal,
@@ -84,6 +84,8 @@ public class SwerveModule {
     m_driveEncoder.setVelocityConversionFactor(1 / (kTicksPerWheelRadian) * kWheelRadius);
     m_turningEncoderRelative.setPositionConversionFactor(1 / kTicksPerTurnerWheelRadian);
 
+    // m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+
     // Set the distance (in this case, angle) per pulse for the turning encoder.
     // This is the the angle through an entire rotation (2 * wpi::math::pi)
     // divided by the encoder resolution.
@@ -98,7 +100,7 @@ public class SwerveModule {
     // Limit the PID Controller's input range between -pi and pi and set the input
     // to be continuous.
     // m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
-
+      m_turningPIDController.setOutputRange(-Math.PI, Math.PI);
   }
 
   /**
@@ -137,15 +139,25 @@ public class SwerveModule {
 
     //System.out.println("Relative:" + m_turningEncoderRelative.getPosition());
 
-    double finalAngle = (deltaAngle + m_turningEncoderRelative.getPosition()) / (2 * Math.PI);
+    
+    double diffAngle = deltaAngle + m_turningEncoderRelative.getPosition();
+  //  diffAngle = diffAngle % 2 * Math.PI;
+  //   diffAngle = (diffAngle + 2 * Math.PI) % 2 * Math.PI;
+  //   if (diffAngle > Math.PI) diffAngle -= 2 * Math.PI;
+    double finalAngle = (diffAngle) / (2 * Math.PI);
+ 
+    
 
-    // state = SwerveModuleState.optimize(state, Rotation2d.from finalAngle);
-    // double result = finalAngle % 360;
+    System.out.println("final angle: "+ diffAngle);
+    // state = SwerveModuleState.optimize(state, Rotation2d.from diffAngle);
+    // double result = diffAngle % 360;
 
     // if (result < 0) {
     // result += 360;
     // }
-    //System.out.println("Target:" + finalAngle);
+    //System.out.println("Target:" + diffAngle);
+    // * 180 / Math.PI
+    m_turningEncoderAbsolute.setPositionToAbsolute();
     m_drivePIDController.setReference(state.speedMetersPerSecond / kWheelRadius, ControlType.kVelocity);
     m_turningPIDController.setReference(finalAngle, ControlType.kPosition);
   }

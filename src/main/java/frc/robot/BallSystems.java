@@ -15,12 +15,12 @@ public class BS {
     //Sensors
     private DigitalInput Beam1 = new DigitalInput(0); //Outside the kicker wheel
     private DigitalInput Beam2 = new DigitalInput(1); //Inside the kicker wheel
-    private DigitalInput Beam3 = new DigitalInput(2); //Inside Shooter
 
     //Variables
-    private int BallCount; //manual counts instead of ++ to account for repeated true values of digital switches
+    private int BallCount; 
     public boolean intakeOn = false; 
     public boolean intakeExtend; 
+    public boolean newBall2; 
     
     //Motor
     private CANSparkMax m_indexWheel = new CANSparkMax(23, MotorType.kBrushless);
@@ -50,44 +50,43 @@ public class BS {
                 BallCount = 1; 
             }
         }
-    
         if (BallCount == 1){
-            if (!Beam1.get()){
+            if (!Beam1.get() && !Beam2.get()){
+                m_indexWheel.stopMotor();
                 BallCount = 2; 
             }
-            if (!Beam3.get()){
-                BallCount = 0; 
+            if (!Beam1.get() && Beam2.get()){
+                m_indexWheel.set(0.4);
             }
         }
 
-        if (BallCount == 2){
-            if (!Beam3.get()){
-                BallCount = 1; 
-            }
+        if (Beam2.get()){
+            newBall2 = true;
+        }
+        else{
+            newBall2 = false;
         }
         
     }
 
-    //Bang Bang with a third switch
-    public void Shooting1 (boolean shoot) { 
-        if (shoot == true && BallCount > 0 ){
+    public void Shooting () { 
+        if (BallCount > 0 ){
             m_shooterWheel.set(overSpeedController.calculate(e_shooterWheel.getVelocity(), shooterRPMs));
-                if (e_shooterWheel.getVelocity() == shooterRPMs){
-                    m_indexWheel.set(0.4);
+            if (e_shooterWheel.getVelocity() == shooterRPMs){
+                m_indexWheel.set(0.4);
+                if (newBall2 == true){
+                    BallCount --; 
                 }
-                else {
-                    m_indexWheel.stopMotor();
-                }
+            }
+            else {
+                m_indexWheel.stopMotor();
+            }
         }
         else{
             m_shooterWheel.stopMotor();
         }
     }
 
-    //Bang Bang without a third switch
-    public void Shooting2() {
-
-    }
 
     public boolean intakeSolenoid(boolean intakeExtend){
         if (intakeExtend == false){

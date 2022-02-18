@@ -14,7 +14,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import com.ctre.phoenix.sensors.*;
 
-public class SwerveModule {
+public class SwerveModule implements RevOptimization {
   private static final double kWheelRadius = 0.0508;
 
   private static final double kTicksPerMotorRadian = 42 / (2 * Math.PI);
@@ -129,7 +129,7 @@ public class SwerveModule {
     // m_drivePIDController.setFF(driveFeedforward);
     // m_turningPIDController.setFF(turnFeedforward);
     Rotation2d currentAngle = Rotation2d.fromDegrees(m_turningEncoderAbsolute.getAbsolutePosition());
-    state = SwerveModuleState.optimize(state, currentAngle);
+    state = RevOptimization.optimize(state, currentAngle);
 
     final double deltaAngle = state.angle.getRadians() - currentAngle.getRadians();
 

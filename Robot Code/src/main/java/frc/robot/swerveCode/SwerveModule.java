@@ -129,7 +129,7 @@ public class SwerveModule implements RevOptimization {
     // m_drivePIDController.setFF(driveFeedforward);
     // m_turningPIDController.setFF(turnFeedforward);
     Rotation2d currentAngle = Rotation2d.fromDegrees(m_turningEncoderAbsolute.getAbsolutePosition());
-    state = RevOptimization.optimize(state, currentAngle);
+    state = optimize(state, currentAngle);
 
     final double deltaAngle = state.angle.getRadians() - currentAngle.getRadians();
 

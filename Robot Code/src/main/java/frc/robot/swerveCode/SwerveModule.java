@@ -135,7 +135,7 @@ public class SwerveModule implements RevOptimization {
 
     // System.out.println("deltaAngle " + deltaAngle);
     // System.out.println("encoderPos " + m_turningEncoderRelative.getPosition());
-    System.out.println("Encoder "+ m_turningEncoderAbsolute.getPosition());
+    // System.out.println("Encoder "+ m_turningEncoderAbsolute.getPosition());
 
     //System.out.println("Relative:" + m_turningEncoderRelative.getPosition());
 
@@ -148,7 +148,7 @@ public class SwerveModule implements RevOptimization {
  
     
 
-    System.out.println("final angle: "+ diffAngle);
+    // System.out.pr  intln("final angle: "+ diffAngle);
     // state = SwerveModuleState.optimize(state, Rotation2d.from diffAngle);
     // double result = diffAngle % 360;
 

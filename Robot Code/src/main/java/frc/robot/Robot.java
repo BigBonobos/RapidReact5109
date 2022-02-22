@@ -5,12 +5,13 @@
 package frc.robot;
 
 
-import frc.robot.ballSys.Intake;
-import frc.robot.ballSys.Shooter;
-import frc.robot.ballSys.Shooter.ShooterState;
+// import frc.robot.ballSys.Intake;
+// import frc.robot.ballSys.Shooter;
+// import frc.robot.ballSys.Shooter.ShooterState;
 import frc.robot.swerveCode.Drivetrain;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -37,40 +38,49 @@ public class Robot extends TimedRobot {
   // private int autoCounter = 0;
 
   // CAN IDs for swerve drivetrain
-  private static final double[] frontLeftIds = {15, 14, 1, 162.6};//100}; // back right? 
-  private static final double[] frontRightIds = {12, 13, 2, -163.213};//(180 - 55) - 360}; // back left?
+  private static final double[] frontLeftIds = {15, 14, 4, 162.6};//100}; // back right? 
+  private static final double[] frontRightIds = {12, 13, 1, -163.213};//(180 - 55) - 360}; // back left?
   private static final double[] backLeftIds = {18, 19, 3, 60.6};//-5}; //front right?
-  private static final double[] backRightIds = {16, 17, 4, -80.86};//(180 + 40) - 360}; //front left?y
+  private static final double[] backRightIds = {16, 17, 2, -80.86};//(180 + 40) - 360}; //front left?y
 
-  private final Joystick l_joystick = new Joystick(0);
+  private final XboxController xController = new XboxController(0);
   private final Joystick r_joystick = new Joystick(1);
   private final Joystick j_operator = new Joystick(2);
 
   private final Drivetrain m_swerve = new Drivetrain(autoAlignRange, frontLeftIds, frontRightIds, backLeftIds, backRightIds);
-  private final Intake m_intake = new Intake(9, 0);
+  // private final Intake m_intake = new Intake(9, 0);
 
   // Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
   private final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(10);
   private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(10);
-  private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(10);
+  private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(1);
 
   double testCounter = 0;
-  double degreeOffset = 0;
+  double degreeOffset = 10;
 
   public void testInit() {
     double e_frontLeftPos = m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
     double e_frontRightPos = m_swerve.m_frontRight.m_turningEncoderAbsolute.getAbsolutePosition();
     double e_backRightPos = m_swerve.m_backRight.m_turningEncoderAbsolute.getAbsolutePosition();
     double e_backLeftPos = m_swerve.m_backLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+    // boolean outuput =Math.abs(e_backLeftPos) <= degreeOffset && Math.abs(e_frontLeftPos) <= degreeOffset && Math.abs(e_frontRightPos) <= degreeOffset && Math.abs(e_backRightPos) <= degreeOffset;
 
     while(testCounter == 0) {
-      if (Math.abs(e_backLeftPos) > degreeOffset || Math.abs(e_frontLeftPos) > degreeOffset || Math.abs(e_frontRightPos) > degreeOffset || Math.abs(e_backRightPos) > degreeOffset) {
+      if (Math.abs(e_backLeftPos) <= degreeOffset && Math.abs(e_frontLeftPos) <= degreeOffset && Math.abs(e_frontRightPos) <= degreeOffset && Math.abs(e_backRightPos) <= degreeOffset) {
         testCounter = 1;
       }
       e_frontLeftPos = m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
       e_frontRightPos = m_swerve.m_frontRight.m_turningEncoderAbsolute.getAbsolutePosition();
       e_backRightPos = m_swerve.m_backRight.m_turningEncoderAbsolute.getAbsolutePosition();
       e_backLeftPos = m_swerve.m_backLeft.m_turningEncoderAbsolute.getAbsolutePosition(); 
+
+      boolean output = Math.abs(e_backLeftPos) <= degreeOffset && Math.abs(e_frontLeftPos) <= degreeOffset && Math.abs(e_frontRightPos) <= degreeOffset && Math.abs(e_backRightPos) <= degreeOffset;
+
+      // System.out.println(-1 * e_frontLeftPos/180);
+      // System.out.println(-1 * e_frontRightPos/180);
+      // System.out.println(-1 * e_backRightPos/180);
+      // System.out.println(-1 * e_frontLeftPos/180);
+
 
       m_swerve.m_frontLeft.m_turningMotor.set(-1 * e_frontLeftPos/180);
       m_swerve.m_backLeft.m_turningMotor.set(-1 * e_backLeftPos/180);
@@ -83,8 +93,8 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
-    // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
-    driveWithJoystick(false);
+    System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
+    driveWithJoystick(true);
     // try {
     //   Thread.sleep(100);
     // } catch (InterruptedException e) {
@@ -223,7 +233,7 @@ public class Robot extends TimedRobot {
     // Get the x speed. We are inverting this because Xbox controllers return
     // negative values when we push forward.
     final double xSpeed =
-        -m_xspeedLimiter.calculate(MathUtil.applyDeadband(l_joystick.getY(), 0.08))
+        -m_xspeedLimiter.calculate(MathUtil.applyDeadband(xController.getLeftY(), 0.08))
             * frc.robot.swerveCode.Drivetrain.kMaxSpeed;
     // System.out.println(xSpeed);
 
@@ -231,7 +241,7 @@ public class Robot extends TimedRobot {
     // we want a positive value when we pull to the left. Xbox controllers
     // return positive values when you pull to the right by default.
     final double ySpeed =
-        -m_yspeedLimiter.calculate(MathUtil.applyDeadband(l_joystick.getX(), 0.08))
+        -m_yspeedLimiter.calculate(MathUtil.applyDeadband(xController.getLeftX(), 0.08))
             * frc.robot.swerveCode.Drivetrain.kMaxSpeed;
     // System.out.println(ySpeed);
 
@@ -240,7 +250,7 @@ public class Robot extends TimedRobot {
     // mathematics). Xbox controllers return positive values when you pull to
     // the right by default.
     final double rot =
-        -m_rotLimiter.calculate(MathUtil.applyDeadband(r_joystick.getY(), 0.08))
+        -m_rotLimiter.calculate(MathUtil.applyDeadband(xController.getRightX(), 0.12))
             * frc.robot.swerveCode.Drivetrain.kMaxAngularSpeed;
       // System.out.println(rot);
     m_swerve.drive(xSpeed, ySpeed, rot, fieldRelative);

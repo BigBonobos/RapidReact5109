@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.revrobotics.*;
+import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -73,10 +74,8 @@ public class BS {
         if (BallCount > 0 ){
             m_shooterWheel.set(overSpeedController.calculate(e_shooterWheel.getVelocity(), shooterRPMs));
             if (e_shooterWheel.getVelocity() == shooterRPMs){
-                m_indexWheel.set(0.4);
-                if (newBall2 == true){
-                    BallCount --; 
-                }
+                e_indexWheel.setPosition(20);
+                BallCount --;
             }
             else {
                 m_indexWheel.stopMotor();
@@ -84,6 +83,7 @@ public class BS {
         }
         else{
             m_shooterWheel.stopMotor();
+            
         }
     }
 

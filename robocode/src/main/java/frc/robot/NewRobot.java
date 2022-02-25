@@ -66,20 +66,20 @@ public class NewRobot extends TimedRobot {
      * Can omni-directionally drive.
      * Control via @see {@link frc.robot.NewRobot#driveWithJoystick(boolean)};
      */
-    private final Drivetrain drivetrainModule = new Drivetrain(
+    public final Drivetrain drivetrainModule = new Drivetrain(
             autoAlignRange, frontLeftMotorIDs, frontRightMotorIDs, backLeftMotorIDs, backRightMotorIDs);
 
     /**
      * Custom intake module. Takes one motor and one solenoid.
      * The settings are: @see {@link frc.robot.shooter.Intake#Intake(int, int)}
      */
-    private final Intake intakeModule = new Intake(9, 0);
+    public final Intake intakeModule = new Intake(9, 0);
 
     /**
      * custom climb module. Two double solenoids control the arms to pull the bot upward.
      * Referenced earlier, but here: @see {@link frc.robot.climber.ClimbModule#ClimbModule(int[][])}
      */
-    private final ClimbModule climbModule = new ClimbModule(solenoidSettings);
+    public final ClimbModule climbModule = new ClimbModule(solenoidSettings);
 
     /**
      * SlewRateLimiters limit the ROC of an inputs strength.

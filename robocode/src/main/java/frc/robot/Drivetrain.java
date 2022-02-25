@@ -25,35 +25,38 @@ public class Drivetrain {
 
   public static final double kMaxSpeed = 0.1; // 3 meters per second
   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
+  public static final double toDegrees = 180 / Math.PI;
+  public static final double toRadians = Math.PI / 180;
 
   // Network Table instantiation
-  private final NetworkTableInstance ntwrkInst = NetworkTableInstance.getDefault();
-  public NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
+  private final NetworkTableInstance networkTable = NetworkTableInstance.getDefault();
+  public NetworkTable ballAlignmentValues = networkTable.getTable("ballAlignment");
 
   // Bot measurements
-  private final Translation2d m_frontLeftLocation = new Translation2d(0.381, 0.381);
-  private final Translation2d m_frontRightLocation = new Translation2d(0.381, -0.381);
-  private final Translation2d m_backLeftLocation = new Translation2d(-0.381, 0.381);
-  private final Translation2d m_backRightLocation = new Translation2d(-0.381, -0.381);
+  private final Translation2d frontLeftMotorLoc = new Translation2d(0.381, 0.381);
+  private final Translation2d frontRightMotorLoc = new Translation2d(0.381, -0.381);
+  private final Translation2d backLeftMotorLoc = new Translation2d(-0.381, 0.381);
+  private final Translation2d backRightMotorLoc = new Translation2d(-0.381, -0.381);
   private static final DriverStation.Alliance alliance = DriverStation.getAlliance();
 
   // Swerve Module instantiation
-  public SwerveModule m_frontLeft;
-  public SwerveModule m_frontRight;
-  public SwerveModule m_backLeft;
-  public SwerveModule m_backRight;
-  private AHRS navX = new AHRS(SPI.Port.kMXP);
-  private Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * Math.PI / 180);
+  public final SwerveModule frontLeftMotor;
+  public final SwerveModule frontRightMotor;
+  public final SwerveModule backLeftMotor;
+  public final SwerveModule backRightMotor;
+  public final AHRS navX = new AHRS(SPI.Port.kMXP);
+  private final Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * Math.PI / 180);
 
   // Shooter Range
   public double shooterRangeCm; // Enter shooter distance here (cm)
   public final Limelight limelight = new Limelight(61.49125);
 
   // Swerve drive library instantiation
-  private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
-      m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
+  public final SwerveDriveKinematics drivetrainKinematics = new SwerveDriveKinematics(
+      frontLeftMotorLoc, frontRightMotorLoc, backLeftMotorLoc, backRightMotorLoc);
 
-  private final SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(m_kinematics, initialMeasurement);
+  public final SwerveDriveOdometry drivetrainOdometry = new SwerveDriveOdometry(drivetrainKinematics,
+      initialMeasurement);
 
   /**
    * Constructor for the swerve drivetrain
@@ -77,15 +80,35 @@ public class Drivetrain {
       double[] swerveBackLeftMotors, double[] swerveBackRightMotors) {
     navX.reset();
     shooterRangeCm = shooterRange;
-    ntwrkInst.startClientTeam(5109);
-    m_frontLeft = new SwerveModule((int) swerveFrontLeftMotors[0], (int) swerveFrontLeftMotors[1],
+    networkTable.startClientTeam(5109);
+    frontLeftMotor = new SwerveModule((int) swerveFrontLeftMotors[0], (int) swerveFrontLeftMotors[1],
         (int) swerveFrontLeftMotors[2], swerveFrontLeftMotors[3]);
-    m_frontRight = new SwerveModule((int) swerveFrontRightMotors[0], (int) swerveFrontRightMotors[1],
+    frontRightMotor = new SwerveModule((int) swerveFrontRightMotors[0], (int) swerveFrontRightMotors[1],
         (int) swerveFrontRightMotors[2], swerveFrontRightMotors[3]);
-    m_backLeft = new SwerveModule((int) swerveBackLeftMotors[0], (int) swerveBackLeftMotors[1],
+    backLeftMotor = new SwerveModule((int) swerveBackLeftMotors[0], (int) swerveBackLeftMotors[1],
         (int) swerveBackLeftMotors[2], swerveBackLeftMotors[3]);
-    m_backRight = new SwerveModule((int) swerveBackRightMotors[0], (int) swerveBackRightMotors[1],
+    backRightMotor = new SwerveModule((int) swerveBackRightMotors[0], (int) swerveBackRightMotors[1],
         (int) swerveBackRightMotors[2], swerveBackRightMotors[3]);
+  }
+
+
+  public void driveChassisSpeed(ChassisSpeeds wanted) {
+    this.driveChassisSpeed(wanted, true);
+  }
+
+  public void driveChassisSpeed(ChassisSpeeds wanted, boolean fieldRelative) {
+    Rotation2d navXVal = new Rotation2d((navX.getYaw() % 360) * Math.PI / 180);
+    SwerveModuleState[] swerveModuleStates = drivetrainKinematics.toSwerveModuleStates(
+      fieldRelative
+          ? ChassisSpeeds.fromFieldRelativeSpeeds(wanted.vxMetersPerSecond, wanted.vyMetersPerSecond, wanted.omegaRadiansPerSecond, navXVal)
+          : wanted
+    );
+
+    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, kMaxSpeed);
+    frontLeftMotor.setDesiredState(swerveModuleStates[0]);
+    frontRightMotor.setDesiredState(swerveModuleStates[1]);
+    backLeftMotor.setDesiredState(swerveModuleStates[2]);
+    backRightMotor.setDesiredState(swerveModuleStates[3]);
   }
 
   /**
@@ -100,37 +123,27 @@ public class Drivetrain {
    * @param fieldRelative
    *          Whether the provided x and y speeds are relative to the field.
    */
-  @SuppressWarnings("ParameterName")
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
     Rotation2d navXVal = new Rotation2d((navX.getYaw() % 360) * Math.PI / 180);
-    SwerveModuleState[] swerveModuleStates = m_kinematics.toSwerveModuleStates(
+    SwerveModuleState[] swerveModuleStates = drivetrainKinematics.toSwerveModuleStates(
         fieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, navXVal)
             : new ChassisSpeeds(xSpeed, ySpeed, rot));
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, kMaxSpeed);
-
-    // for (SwerveModuleState state: swerveModuleStates) {
-    // System.out.println(state);
-    // }
-    System.out.println("1");
-    m_frontLeft.setDesiredState(swerveModuleStates[0]);
-    System.out.println("2");
-    m_frontRight.setDesiredState(swerveModuleStates[1]);
-    System.out.println("3");
-    m_backLeft.setDesiredState(swerveModuleStates[2]);
-    System.out.println("4");
-    m_backRight.setDesiredState(swerveModuleStates[3]);
-    // System.out.println(swerveModuleStates[0].speedMetersPerSecond);
+    frontLeftMotor.setDesiredState(swerveModuleStates[0]);
+    frontRightMotor.setDesiredState(swerveModuleStates[1]);
+    backLeftMotor.setDesiredState(swerveModuleStates[2]);
+    backRightMotor.setDesiredState(swerveModuleStates[3]);
   }
 
   /** Updates the field relative position of the robot. */
   public void updateOdometry() {
-    m_odometry.update(
-        new Rotation2d(navX.getYaw() * 180 / Math.PI),
-        m_frontLeft.getState(),
-        m_frontRight.getState(),
-        m_backLeft.getState(),
-        m_backRight.getState());
+    drivetrainOdometry.update(
+        new Rotation2d(navX.getYaw() * toDegrees),
+        frontLeftMotor.getState(),
+        frontRightMotor.getState(),
+        backLeftMotor.getState(),
+        backRightMotor.getState());
   }
 
   /** Limelight autoalign method */
@@ -143,7 +156,7 @@ public class Drivetrain {
 
       // Offset variable initialization
       double yOffset = straightDistance - shooterRangeCm;
-      double xOffset = straightDistance * Math.tan(limelight.getXOffset().getAsDouble() * Math.PI / 180);
+      double xOffset = straightDistance * Math.tan(limelight.getXOffset().getAsDouble() * toRadians);
 
       // Control logic to drive bot into position
       if (Math.abs(yOffset) > .5 || Math.abs(xOffset) > .5) {
@@ -189,29 +202,29 @@ public class Drivetrain {
     return listenerHandle;
   }
 
-
   public void customAutoAlign() {
     double testCounter = 0;
     double degreeOffset = 0;
 
-    double e_frontLeftPos = m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
-    double e_frontRightPos = m_frontRight.m_turningEncoderAbsolute.getAbsolutePosition();
-    double e_backRightPos = m_backRight.m_turningEncoderAbsolute.getAbsolutePosition();
-    double e_backLeftPos = m_backLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+    double e_frontLeftPos = frontLeftMotor.m_turningEncoderAbsolute.getAbsolutePosition();
+    double e_frontRightPos = frontRightMotor.m_turningEncoderAbsolute.getAbsolutePosition();
+    double e_backRightPos = backRightMotor.m_turningEncoderAbsolute.getAbsolutePosition();
+    double e_backLeftPos = backLeftMotor.m_turningEncoderAbsolute.getAbsolutePosition();
 
-    while(testCounter == 0) {
-      if (Math.abs(e_backLeftPos) > degreeOffset || Math.abs(e_frontLeftPos) > degreeOffset || Math.abs(e_frontRightPos) > degreeOffset || Math.abs(e_backRightPos) > degreeOffset) {
+    while (testCounter == 0) {
+      if (Math.abs(e_backLeftPos) > degreeOffset || Math.abs(e_frontLeftPos) > degreeOffset
+          || Math.abs(e_frontRightPos) > degreeOffset || Math.abs(e_backRightPos) > degreeOffset) {
         testCounter = 1;
       }
-      e_frontLeftPos = m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
-      e_frontRightPos = m_frontRight.m_turningEncoderAbsolute.getAbsolutePosition();
-      e_backRightPos = m_backRight.m_turningEncoderAbsolute.getAbsolutePosition();
-      e_backLeftPos = m_backLeft.m_turningEncoderAbsolute.getAbsolutePosition(); 
+      e_frontLeftPos = frontLeftMotor.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_frontRightPos = frontRightMotor.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_backRightPos = backRightMotor.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_backLeftPos = backLeftMotor.m_turningEncoderAbsolute.getAbsolutePosition();
 
-      m_frontLeft.m_turningMotor.set(-1 * e_frontLeftPos/180);
-      m_backLeft.m_turningMotor.set(-1 * e_backLeftPos/180);
-      m_frontRight.m_turningMotor.set(-1 * e_frontRightPos/180);
-      m_backRight.m_turningMotor.set(-1 * e_backRightPos/180);
+      frontLeftMotor.m_turningMotor.set(-1 * e_frontLeftPos / 180);
+      backLeftMotor.m_turningMotor.set(-1 * e_backLeftPos / 180);
+      frontRightMotor.m_turningMotor.set(-1 * e_frontRightPos / 180);
+      backRightMotor.m_turningMotor.set(-1 * e_backRightPos / 180);
     }
   }
 }

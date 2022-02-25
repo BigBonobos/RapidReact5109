@@ -4,11 +4,8 @@
 
 package frc.robot;
 
-
-import frc.robot.ballSys.Intake;
-import frc.robot.ballSys.Shooter;
-import frc.robot.ballSys.Shooter.ShooterState;
 import frc.robot.climber.ClimbModule;
+import frc.robot.shooter.Intake;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;

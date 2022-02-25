@@ -8,11 +8,12 @@ package frc.robot;
 import frc.robot.ballSys.Intake;
 import frc.robot.ballSys.Shooter;
 import frc.robot.ballSys.Shooter.ShooterState;
-import frc.robot.swerveCode.Drivetrain;
+import frc.robot.climber.ClimbModule;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -48,6 +49,11 @@ public class Robot extends TimedRobot {
 
   private final Drivetrain m_swerve = new Drivetrain(autoAlignRange, frontLeftIds, frontRightIds, backLeftIds, backRightIds);
   private final Intake m_intake = new Intake(9, 0);
+
+
+  int[][] solenoidSettings = {{1, 2}, {3, 4}};
+  private final ClimbModule m_climb = new ClimbModule(solenoidSettings);
+
 
   // Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
   private final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(10);
@@ -224,7 +230,7 @@ public class Robot extends TimedRobot {
     // negative values when we push forward.
     final double xSpeed =
         -m_xspeedLimiter.calculate(MathUtil.applyDeadband(l_joystick.getY(), 0.08))
-            * frc.robot.swerveCode.Drivetrain.kMaxSpeed;
+            * frc.robot.Drivetrain.kMaxSpeed;
     // System.out.println(xSpeed);
 
     // Get the y speed or sideways/strafe speed. We are inverting this because
@@ -232,7 +238,7 @@ public class Robot extends TimedRobot {
     // return positive values when you pull to the right by default.
     final double ySpeed =
         -m_yspeedLimiter.calculate(MathUtil.applyDeadband(l_joystick.getX(), 0.08))
-            * frc.robot.swerveCode.Drivetrain.kMaxSpeed;
+            * frc.robot.Drivetrain.kMaxSpeed;
     // System.out.println(ySpeed);
 
     // Get the rate of angular rotation. We are inverting this because we want a
@@ -241,8 +247,14 @@ public class Robot extends TimedRobot {
     // the right by default.
     final double rot =
         -m_rotLimiter.calculate(MathUtil.applyDeadband(r_joystick.getY(), 0.08))
-            * frc.robot.swerveCode.Drivetrain.kMaxAngularSpeed;
+            * frc.robot.Drivetrain.kMaxAngularSpeed;
       // System.out.println(rot);
     m_swerve.drive(xSpeed, ySpeed, rot, fieldRelative);
+  }
+
+
+  
+  private void handleControllerInputs() {
+
   }
 }

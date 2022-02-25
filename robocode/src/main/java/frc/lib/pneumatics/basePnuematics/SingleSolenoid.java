@@ -1,17 +1,21 @@
-package frc.robot.pneumaticsTesting;
+package frc.lib.pneumatics.basePnuematics;
 
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
 
-public class SingleSolenoid extends ISolenoid {
+public class SingleSolenoid implements ISolenoid {
 
     private final Solenoid singlePCM;
 
-    public SingleSolenoid(int forwardPort, int reversePort) {
-        super(forwardPort, reversePort);
+    public SingleSolenoid(int port) {
+        this.singlePCM = new Solenoid(PneumaticsModuleType.CTREPCM, port);
 
-        this.singlePCM = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
+    }
 
+    @Override
+    public Value getState() {
+        return this.singlePCM.get() ? Value.kForward : Value.kOff;
     }
 
     @Override
@@ -42,5 +46,7 @@ public class SingleSolenoid extends ISolenoid {
 
     @Override
     public void relax() {}
+
+ 
 
 }

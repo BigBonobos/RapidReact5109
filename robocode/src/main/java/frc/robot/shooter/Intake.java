@@ -82,18 +82,43 @@ public class Intake {
         this.intakeMotor.set(0.3);
     }
 
-
     public void relax() {
         this.intakeMotor.set(0);
     }
 
     /**
-     * Lol, good name.
+     * lol, good name.
      */
     public void closeUpShop() {
         this.relax();
         this.intakeSolenoid.retractFully();
-
     }
 
+    // Custom methods, requested by Xander.
+
+    /**
+     * Opens and closes the intake gate, depending on boolean input.
+     * 
+     * @param open
+     *            true = forward, open. false = reverse, closed.
+     */
+    public void moveIntakeGate(boolean open) {
+        if (open)
+            this.intakeSolenoid.extendFully();
+        else
+            this.intakeSolenoid.retractFully();
+    }
+
+    /**
+     * Turns the intake motor a certain direction, depending on boolean input.
+     * 
+     * @param inward
+     *            true = inward, backward. false = outward, forward.
+     */
+    public void setIntakeMotorMode(boolean inward) {
+        if (inward)
+            this.intakeMotor.set(1);
+        else
+            this.intakeMotor.set(-1);
+    }
 }

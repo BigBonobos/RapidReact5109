@@ -32,7 +32,7 @@ public class NewRobot extends TimedRobot {
 
     /**
      * Settings for drivetrainModule.
-     * The settings are: @see {@link frc.lib.swerveCode.SwerveModule#SwerveModule(int, int, int, double)}
+     * @see {@link frc.lib.swerveCode.SwerveModule#SwerveModule(int, int, int, double)}
      */
     private static final double[] 
             frontLeftMotorIDs = { 15, 14, 1, 162.6 },
@@ -64,14 +64,14 @@ public class NewRobot extends TimedRobot {
     /**
      * A custom implementation of four SwerveModules (also custom).
      * Can omni-directionally drive.
-     * Control via @see {@link frc.robot.NewRobot#driveWithJoystick(boolean)};
+     * @see {@link frc.robot.NewRobot#driveWithJoystick(boolean)};
      */
     public final Drivetrain drivetrainModule = new Drivetrain(
             autoAlignRange, frontLeftMotorIDs, frontRightMotorIDs, backLeftMotorIDs, backRightMotorIDs);
 
     /**
      * Custom intake module. Takes one motor and one solenoid.
-     * The settings are: @see {@link frc.robot.shooter.Intake#Intake(int, int)}
+     * @see {@link frc.robot.shooter.Intake#Intake(int, int)}
      */
     public final Intake intakeModule = new Intake(9, 0);
 
@@ -102,7 +102,7 @@ public class NewRobot extends TimedRobot {
     }
 
     /**
-     * Test stub. This is a continual loop. AFAIK, there is no pause between iterations.
+     * Test stub. This is a continual loop. 20ms pause between iterations.
      */
     @Override
     public void testPeriodic() {

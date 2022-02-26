@@ -16,6 +16,12 @@ public class Intake {
     private final CANSparkMax intakeMotor;
     private final SingleSolenoid intakeSolenoid;
 
+
+    /**
+     * 
+     * @param motorPort
+     * @param solenoidPort
+     */
     public Intake(int motorPort, int solenoidPort) {
         intakeMotor = new CANSparkMax(motorPort, MotorType.kBrushless);
         intakeSolenoid = new SingleSolenoid(solenoidPort);

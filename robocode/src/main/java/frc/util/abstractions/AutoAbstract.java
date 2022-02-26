@@ -1,10 +1,6 @@
 package frc.util.abstractions;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -20,58 +16,66 @@ import frc.robot.NewRobot;
  */
 public abstract class AutoAbstract extends MovementUtil {
 
-
     public AutoAbstract(NewRobot robo) {
         super(robo);
     }
 
-    public void translateTo(Translation2d fieldPoint, Optional<Double> speed) {
+    public boolean translateTo(Translation2d fieldPoint, Optional<Double> speed) {
 
-        // double current = robot.drivetrainModule.navX.getAngle();
-        // double wanted = RevOptimization.placeInAppropriate0To360Scope(current, yaw);
-
-        Translation2d delta = fieldPoint.minus(robot.drivetrainModule.drivetrainOdometry.getPoseMeters().getTranslation());
-        double yaw =  Math.atan2(delta.getX(), delta.getY());
+        Translation2d delta = fieldPoint
+                .minus(robot.drivetrainModule.drivetrainOdometry.getPoseMeters().getTranslation());
+        double yaw = Math.atan2(delta.getX(), delta.getY());
         double wantedSpeed = speed.isPresent() ? speed.get() : Drivetrain.kMaxAngularSpeed;
 
-        double xSpeed = wantedSpeed * Math.cos(yaw);
-        double ySpeed = wantedSpeed * Math.sin(yaw);
+        double xSpeed = wantedSpeed * Math.sin(yaw);
+        double ySpeed = wantedSpeed * Math.cos(yaw);
 
         while (!reachedTranslationTarget(fieldPoint)) {
             robot.drivetrainModule.drive(xSpeed, ySpeed, 0, false);
-            try { Thread.sleep(10); } catch (InterruptedException e) { break; }
-            
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                return false;
+            }
+
         }
-        // this.translateToFieldPoint(new Pose2d(fieldPoint, new Rotation2d()), speed, 0);
+        return true;
     }
 
-    public void rotateTo(Rotation2d absRotation, Optional<Double> rotSpeed) {
+    public boolean rotateTo(Rotation2d absRotation, Optional<Double> rotSpeed) {
         double current = robot.drivetrainModule.navX.getAngle();
         double wanted = RevOptimization.placeInAppropriate0To360Scope(current, absRotation.getDegrees());
         double wantedSpeed = rotSpeed.isPresent() ? rotSpeed.get() : Drivetrain.kMaxAngularSpeed;
 
-
         while (!reachedRotationTarget(absRotation)) {
 
             // I may be using this incorrectly. :thumbsup:
-            ChassisSpeeds test = ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, wantedSpeed, Rotation2d.fromDegrees(wanted));
+            ChassisSpeeds test = ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, wantedSpeed,
+                    Rotation2d.fromDegrees(wanted));
             robot.drivetrainModule.driveChassisSpeed(test);
-            try { Thread.sleep(10); } catch (InterruptedException e) { break; }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                return false;
+            }
         }
-        
-      
-        
+
+        return true;
+
     }
 
     /**
-     * Wasteful variable assignments are for code readability. I'm sorry, Rob. I cannot optimize this.
-     * <p>Also, this does translation, then rotation. It does not run it together.</p>
+     * Wasteful variable assignments are for code readability. I'm sorry, Rob. I
+     * cannot optimize this.
+     * <p>
+     * Also, this does translation, then rotation. It does not run it together.
+     * </p>
      * I can fix that later.
      * 
      * @param fieldPose
-     *            Wanted position on the field. Both translation and rotation.
+     *                  Wanted position on the field. Both translation and rotation.
      * @param speed
-     *            Optional speed wanted. Defaults to max.
+     *                  Optional speed wanted. Defaults to max.
      */
     public void translateToFieldPoint(Pose2d fieldPose, Optional<Double> speed, Optional<Double> rotSpeed) {
         while (!reachedFullTarget(fieldPose)) {
@@ -86,8 +90,54 @@ public abstract class AutoAbstract extends MovementUtil {
 
     }
 
+    public enum DriveDirection {
+        FORWARD(0, 0),
+        BACKWARD(1, 180),
+        RIGHT(2, 270),
+        LEFT(3, 90);
 
+        private final int index;
+        private final int rotation;
 
+        private int getRot() {
+            return rotation;
+        };
+
+        private DriveDirection(int index, int rotation) {
+            this.index = index;
+            this.rotation = rotation;
+        }
+    }
+
+    public boolean driveTowards(DriveDirection dir, double distance, Optional<Double> speed) {
+        return this.driveTowards(dir.getRot(), distance, speed);
+    }
+
+    public boolean driveTowards(double angle, double distance, Optional<Double> speed) {
+
+        double wantedSpeed = speed.isPresent() ? speed.get() : Drivetrain.kMaxSpeed;
+        Pose2d current = robot.drivetrainModule.drivetrainOdometry.getPoseMeters();
+        Translation2d findXZ = new Translation2d(distance, current.getRotation());
+        Transform2d convertToCorrectType = new Transform2d(findXZ, Rotation2d.fromDegrees(angle)); // already did
+                                                                                                   // rotation above.
+        Pose2d wanted = current.transformBy(convertToCorrectType);
+
+        // technically, we'll want to break this up into xSpeed and ySpeed components.
+        // However, we already know we want to go straight forward. So who cares?
+
+        double xSpeed = wantedSpeed * Math.sin(angle);
+        double ySpeed = wantedSpeed * Math.cos(angle);
+        while (reachedFullTarget(wanted)) {
+            robot.drivetrainModule.drive(xSpeed, ySpeed, 0, false);
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                return false;
+            }
+        }
+        return true;
+
+    }
 
     public boolean driveForward(double distance, Optional<Double> speed) {
         double maxSpeed = Drivetrain.kMaxSpeed;
@@ -100,10 +150,12 @@ public abstract class AutoAbstract extends MovementUtil {
 
         while (reachedFullTarget(wanted)) {
             robot.drivetrainModule.drive(wantedSpeed, 0, 0, false);
-            // Thread.sleep(10);
-            try { Thread.sleep(10); } catch (InterruptedException e) { return false; }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                return false;
+            }
         }
-        
         return true;
     }
 

@@ -11,7 +11,10 @@ import edu.wpi.first.wpilibj.Solenoid;
 
 public class Intake {
     
+    
     //neos
+    // 22 is kicker 
+    // 8 is shooter
     public CANSparkMax m_Intake = new CANSparkMax(-1, MotorType.kBrushless); //negative power for in, positive power for out //OG 6
 
     //neo encoders

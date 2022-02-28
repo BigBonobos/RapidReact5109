@@ -37,6 +37,13 @@ public class Robot extends TimedRobot {
 
   private int climbCounter = 0; // reaching 1 is high, 2 is traversal
 
+  // PID variables
+  public double kP_Winch = 0.0001;
+  public double kI_Winch = 0;
+  public double kD_Winch = 0.01;
+  public double kIz_Winch = 0;
+  public double kFF_Winch = 0.0001746724891;
+
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -47,6 +54,13 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
+
+    climb.pc_Winch.setP(kP_Winch);
+    climb.pc_Winch.setI(kI_Winch);
+    climb.pc_Winch.setD(kD_Winch);
+    climb.pc_Winch.setIZone(kIz_Winch);
+    climb.pc_Winch.setFF(kFF_Winch);
+    
   }
 
   /**
@@ -107,59 +121,63 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {
+    climb.popArmUp();
 
-    // kill switch only stops future methods from being run
-    if (j_ClimbOperator.getRawButton(1)){
-      if (killToggleOn) {
-        killToggleOn = false;
-      } else {
-        killToggleOn = true;
-      }
-    }
+   
+    // climb.retractArm();
 
-    // winch toggle
-    if (j_ClimbOperator.getRawButton(4) && !killToggleOn){
-      if (armExtended) {
-        climb.retractArm();
-        armExtended = false;
-      } else {
-        climb.extendArm();
-        armExtended = true;
-      }
-    }
+    // // kill switch only stops future methods from being run
+    // if (j_ClimbOperator.getRawButton(1)){
+    //   if (killToggleOn) {
+    //     killToggleOn = false;
+    //   } else {
+    //     killToggleOn = true;
+    //   }
+    // }
 
-    // front hooks toggle
-    if (j_ClimbOperator.getRawButton(5) && !killToggleOn){
-      if (frontHooksEngaged) {
-        climb.retractFrontHooks();
-        frontHooksEngaged = false;
-      } else {
-        climb.engageFrontHooks();
-        frontHooksEngaged = false;
-      }
-    }
+    // // winch toggle
+    // if (j_ClimbOperator.getRawButton(4) && !killToggleOn){
+    //   if (armExtended) {
+    //     climb.retractArm();
+    //     armExtended = false;
+    //   } else {
+    //     climb.extendArm();
+    //     armExtended = true;
+    //   }
+    // }
 
-    // pneumatic popup toggle
-    if (j_ClimbOperator.getRawButton(6) && !killToggleOn){
-      if (armPoppedUp) {
-        climb.popArmDown();
-        armPoppedUp = false;
-      } else {
-        climb.popArmUp();
-        armPoppedUp = true;
-      }
+    // // front hooks toggle
+    // if (j_ClimbOperator.getRawButton(5) && !killToggleOn){
+    //   if (frontHooksEngaged) {
+    //     climb.retractFrontHooks();
+    //     frontHooksEngaged = false;
+    //   } else {
+    //     climb.engageFrontHooks();
+    //     frontHooksEngaged = false;
+    //   }
+    // }
 
-    }
+    // // pneumatic popup toggle
+    // if (j_ClimbOperator.getRawButton(6) && !killToggleOn){
+    //   if (armPoppedUp) {
+    //     climb.popArmDown();
+    //     armPoppedUp = false;
+    //   } else {
+    //     climb.popArmUp();
+    //     armPoppedUp = true;
+    //   }
 
-    // latch
-    if (j_ClimbOperator.getRawButton(2) && !killToggleOn){
-      climb.latchClimb();
-    }
+    // }
+
+    // // latch
+    // if (j_ClimbOperator.getRawButton(2) && !killToggleOn){
+    //   climb.latchClimb();
+    // }
   
-    // winch
-    if (j_ClimbOperator.getRawButton(3) && !killToggleOn){
-      climb.pullClimb();
-    }
+    // // winch
+    // if (j_ClimbOperator.getRawButton(3) && !killToggleOn){
+    //   climb.pullClimb();
+    // }
 
     
 

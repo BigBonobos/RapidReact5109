@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 
-import frc.robot.NewRobot;
+import frc.robot.Robot;
 
 public class AutonomousAbstraction extends AutoAbstract {
 
@@ -23,7 +23,7 @@ public class AutonomousAbstraction extends AutoAbstract {
 
     public Optional<CompletableFuture<Void>> runningMovement;
 
-    public AutonomousAbstraction(NewRobot robo) {
+    public AutonomousAbstraction(Robot robo) {
         super(robo);
     }
 

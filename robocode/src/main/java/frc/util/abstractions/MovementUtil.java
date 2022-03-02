@@ -3,17 +3,17 @@ package frc.util.abstractions;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.robot.NewRobot;
+import frc.robot.Robot;
 
 public class MovementUtil {
 
     public static final double acceptableErrorTranslationMeters = 0.1;
     public static final double acceptableErrorRotationDegrees = 3;
 
-    public final NewRobot robot;
+    public final Robot robot;
 
 
-    public MovementUtil(NewRobot robo) {
+    public MovementUtil(Robot robo) {
         robot = robo;
     }
 

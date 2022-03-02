@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.lib.swerveCode.RevOptimization;
 import frc.robot.Drivetrain;
-import frc.robot.NewRobot;
+import frc.robot.Robot;
 
 /**
  * Storage class for autonomous driving.
@@ -16,7 +16,7 @@ import frc.robot.NewRobot;
  */
 public abstract class AutoAbstract extends MovementUtil {
 
-    public AutoAbstract(NewRobot robo) {
+    public AutoAbstract(Robot robo) {
         super(robo);
     }
 

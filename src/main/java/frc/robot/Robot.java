@@ -145,7 +145,6 @@ public class Robot extends TimedRobot {
   public void Shooting() { 
     if (BallCount > 0){
         shooting = true; 
-        e_indexWheel.setPosition(0);
         m_shooterWheel.set(overSpeedController.calculate(e_shooterWheel.getVelocity(), shooterRPMs));
         if (e_shooterWheel.getVelocity() == shooterRPMs && e_indexWheel.getPosition() <= 1){
             m_indexWheel.set(0.4);
@@ -153,6 +152,7 @@ public class Robot extends TimedRobot {
         }
         else{
           m_indexWheel.stopMotor();
+          e_indexWheel.setPosition(0);
         }
     }
     else{

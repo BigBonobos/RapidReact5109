@@ -24,29 +24,29 @@ public class Robot extends TimedRobot {
   public DigitalInput Beam2 = new DigitalInput(1); //Inside the kicker wheel
   
   //Variables
-  private int BallCount; 
-  private boolean shooting;
+  public int BallCount; 
+  public boolean shooting;
   public boolean intakeOn = false; 
   public boolean intakeExtend;
   public boolean boolBeam2; 
 
   //Motor
-  private CANSparkMax m_indexWheel = new CANSparkMax(23, MotorType.kBrushless);
-  private CANSparkMax m_shooterWheel = new CANSparkMax(24, MotorType.kBrushless);
-  private CANSparkMax m_intakeWheel = new CANSparkMax(25, MotorType.kBrushless); 
+  public CANSparkMax m_indexWheel = new CANSparkMax(23, MotorType.kBrushless);
+  public CANSparkMax m_shooterWheel = new CANSparkMax(24, MotorType.kBrushless);
+  public CANSparkMax m_intakeWheel = new CANSparkMax(25, MotorType.kBrushless); 
 
   //Solenoids
-  private Solenoid s_LeftIntake = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
-  private Solenoid s_RightIntake = new Solenoid(PneumaticsModuleType.CTREPCM, 2);
+  public Solenoid s_LeftIntake = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
+  public Solenoid s_RightIntake = new Solenoid(PneumaticsModuleType.CTREPCM, 2);
 
   //Encoders
-  private RelativeEncoder e_shooterWheel = m_shooterWheel.getEncoder();
-  private RelativeEncoder e_indexWheel = m_indexWheel.getEncoder();
-  private SparkMaxPIDController p_indexWheel = m_indexWheel.getPIDController();
+  public RelativeEncoder e_shooterWheel = m_shooterWheel.getEncoder();
+  public RelativeEncoder e_indexWheel = m_indexWheel.getEncoder();
+  public SparkMaxPIDController p_indexWheel = m_indexWheel.getPIDController();
 
   //Controllers
-  private BangBangController overSpeedController; 
-  private int shooterRPMs = 1000; 
+  public BangBangController overSpeedController; 
+  public int shooterRPMs = 1000; 
   
   @Override
   public void robotInit() {
@@ -146,13 +146,16 @@ public class Robot extends TimedRobot {
   }
 
   public void Shooting() { 
-    shooting = true; 
     if (BallCount > 0){
+        shooting = true; 
         e_indexWheel.setPosition(0);
         m_shooterWheel.set(overSpeedController.calculate(e_shooterWheel.getVelocity(), shooterRPMs));
         if (e_shooterWheel.getVelocity() == shooterRPMs && e_indexWheel.getPosition() <= 1){
             m_indexWheel.set(0.4);
             BallCount --;
+        }
+        else{
+          m_indexWheel.stopMotor();
         }
     }
     else{

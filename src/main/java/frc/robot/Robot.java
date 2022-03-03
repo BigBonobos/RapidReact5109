@@ -137,10 +137,7 @@ public class Robot extends TimedRobot {
             if (!Beam1.get() && !Beam2.get()){
                 m_indexWheel.stopMotor();
                 BallCount = 2; 
-            }
-            if (!Beam1.get() && Beam2.get()){
-                m_indexWheel.set(0.4);
-            }
+          }
         }
     }
   }

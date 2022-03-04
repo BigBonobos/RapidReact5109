@@ -81,9 +81,12 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
     
-    SmartDashboard.putBoolean("BeamBreak", BS.Beam2.get());
+    SmartDashboard.putBoolean("BeamBreak1", BS.Beam1.get());
+    SmartDashboard.putBoolean("BeamBreak2", BS.Beam2.get());
     SmartDashboard.putNumber("IndexEncoders", BS.e_indexWheel.getPosition());
     //Orientation of Beam Breaks
+    BS.Beam2.get();
+    BS.Beam1.get();
 
     //Orientation of Shooter
     m_shooterWheel.set(0.3);
@@ -100,6 +103,7 @@ public class Robot extends TimedRobot {
     //put shooter on coats, and index wheel on brake
 
   }
+}
 
 
   

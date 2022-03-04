@@ -16,37 +16,13 @@ public class Robot extends TimedRobot {
   public XboxController xBox = new XboxController(1);
   public Joystick j_Operator = new Joystick(1);
 
-  //Sensors
-  public DigitalInput Beam1 = new DigitalInput(0); //Outside the kicker wheel
-  public DigitalInput Beam2 = new DigitalInput(1); //Inside the kicker wheel
-  
-  //Variables
-  public int BallCount; 
-  public boolean shooting;
-  public boolean intakeOn = false; 
-  public boolean intakeExtend;
-  public boolean boolBeam2; 
-
-  //Motor
-  public CANSparkMax m_indexWheel = new CANSparkMax(23, MotorType.kBrushless);
-  public CANSparkMax m_shooterWheel = new CANSparkMax(24, MotorType.kBrushless);
-  public CANSparkMax m_intakeWheel = new CANSparkMax(25, MotorType.kBrushless); 
-
-  //Solenoids
-  public Solenoid s_LeftIntake = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
-  public Solenoid s_RightIntake = new Solenoid(PneumaticsModuleType.CTREPCM, 2);
-
-  //Encoders
-  public RelativeEncoder e_shooterWheel = m_shooterWheel.getEncoder();
-  public RelativeEncoder e_indexWheel = m_indexWheel.getEncoder();
-  public SparkMaxPIDController p_indexWheel = m_indexWheel.getPIDController();
-
-  //Controllers
-  public BangBangController overSpeedController; 
-  public int shooterRPMs = 1000; 
-
   //Methods
   BallSys BS = new BallSys();
+
+  //Motors for testing
+  private CANSparkMax m_indexWheel = new CANSparkMax(23, MotorType.kBrushless);
+  private CANSparkMax m_shooterWheel = new CANSparkMax(24, MotorType.kBrushless);
+  private CANSparkMax m_intakeWheel = new CANSparkMax(25, MotorType.kBrushless); 
   
   @Override
   public void robotInit() {
@@ -67,9 +43,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    SmartDashboard.putNumber("BallConut", BallCount);
-    SmartDashboard.putBoolean("IntakeMotor", intakeOn);
-    SmartDashboard.putBoolean("Shooting", shooting); 
+    SmartDashboard.putNumber("BallConut", BS.BallCount);
+    SmartDashboard.putBoolean("IntakeMotor", BS.intakeOn);
+    SmartDashboard.putBoolean("Shooting", BS.shooting); 
 
     BS.Index();
 
@@ -78,7 +54,7 @@ public class Robot extends TimedRobot {
     }*/
 
     if (xBox.getLeftBumper()){
-      BS.intakeMotor(intakeOn = !intakeOn);
+      BS.intakeMotor(BS.intakeOn = !BS.intakeOn);
     }
 
     if (xBox.getRightBumper()){
@@ -99,21 +75,15 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
-    e_indexWheel.setPosition(0);
+    BS.e_indexWheel.setPosition(0);
   }
 
   @Override
   public void testPeriodic() {
     
-    SmartDashboard.putBoolean("BeamBreak", boolBeam2);
-    SmartDashboard.putNumber("IndexEncoders", e_indexWheel.getPosition());
+    SmartDashboard.putBoolean("BeamBreak", BS.Beam2.get());
+    SmartDashboard.putNumber("IndexEncoders", BS.e_indexWheel.getPosition());
     //Orientation of Beam Breaks
-    if (Beam2.get()){
-      boolBeam2 = false;
-    }
-    else{
-      boolBeam2 = true; 
-    }
 
     //Orientation of Shooter
     m_shooterWheel.set(0.3);

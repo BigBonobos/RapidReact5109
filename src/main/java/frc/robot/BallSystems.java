@@ -60,7 +60,7 @@ public class BallSys {
               }
             }
         }
-      }
+    }
     
     public void Shooting1() { 
         if (BallCount > 0){
@@ -119,7 +119,7 @@ public class BallSys {
         return intakeExtend;
       } */
     
-      public boolean intakeMotor(boolean intakeOn){
+    public boolean intakeMotor(boolean intakeOn){
         //if (intakeExtend == true){
             if(intakeOn == false){
                 m_intakeWheel.set(0.3);
@@ -129,5 +129,5 @@ public class BallSys {
             }
         //}
         return intakeOn;
-      }
     }
+}

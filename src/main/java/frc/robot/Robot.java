@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import com.revrobotics.*;
@@ -10,6 +6,7 @@ import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -47,6 +44,9 @@ public class Robot extends TimedRobot {
   //Controllers
   public BangBangController overSpeedController; 
   public int shooterRPMs = 1000; 
+
+  //Methods
+  BallSys BS = new BallSys();
   
   @Override
   public void robotInit() {
@@ -61,25 +61,33 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    BS.intakeOn = false; 
+  }
 
   @Override
   public void teleopPeriodic() {
     SmartDashboard.putNumber("BallConut", BallCount);
     SmartDashboard.putBoolean("IntakeMotor", intakeOn);
     SmartDashboard.putBoolean("Shooting", shooting); 
-    Index();
+
+    BS.Index();
 
     /*if (xBox.getAButton()){
       intakeSolenoid(intakeExtend = !intakeExtend);
     }*/
 
     if (xBox.getLeftBumper()){
-      intakeMotor(intakeOn = !intakeOn);
+      BS.intakeMotor(intakeOn = !intakeOn);
     }
 
     if (xBox.getRightBumper()){
-      Shooting();
+      BS.Shooting1();
+    }
+
+    if (xBox.getRightTriggerAxis() != 0){
+      BS.Shooting2();
+      xBox.setRumble(RumbleType.kRightRumble, 1);
     }
   }
 
@@ -119,75 +127,9 @@ public class Robot extends TimedRobot {
       m_indexWheel.set(0.2);
     }*/
 
+    //put shooter on coats, and index wheel on brake
+
   }
 
 
-  public void Index() {
-    if (shooting == false){
-        if (BallCount == 0){
-            if (!Beam1.get()){
-                m_indexWheel.set(0.4);
-            }
-            if (!Beam2.get()){
-                m_indexWheel.stopMotor();
-                BallCount = 1; 
-            }
-        }
-        if (BallCount == 1){
-            if (!Beam1.get() && !Beam2.get()){
-                m_indexWheel.stopMotor();
-                BallCount = 2; 
-          }
-        }
-    }
-  }
-
-  public void Shooting() { 
-    if (BallCount > 0){
-        shooting = true; 
-        m_shooterWheel.set(overSpeedController.calculate(e_shooterWheel.getVelocity(), shooterRPMs));
-        if (e_shooterWheel.getVelocity() == shooterRPMs && e_indexWheel.getPosition() <= 1){
-            m_indexWheel.set(0.4);
-            BallCount --;
-        }
-        else{
-          m_indexWheel.stopMotor();
-          e_indexWheel.setPosition(0);
-        }
-    }
-    else{
-        m_shooterWheel.stopMotor();
-        shooting = false;
-    }
-   
-  }
-
-  /*public boolean intakeSolenoid(boolean intakeExtend){
-    if (intakeExtend == false){
-        s_LeftIntake.set(true);
-        s_RightIntake.set(true);
-        intakeExtend = true; 
-    }
-    if (intakeExtend == true){
-        s_LeftIntake.set(false);
-        s_RightIntake.set(false);
-        intakeExtend = false; 
-    }
-    return intakeExtend;
-  } */
-
-  public boolean intakeMotor(boolean intakeOn){
-    //if (intakeExtend == true){
-        if(intakeOn == false){
-            m_intakeWheel.set(0.3);
-            intakeOn = true; 
-        }
-        else{
-            m_intakeWheel.stopMotor();
-            intakeOn = false; 
-        }
-    //}
-    return intakeOn;
-  }
-}
-
+  

@@ -20,9 +20,7 @@ public class Robot extends TimedRobot {
   BallSys BS = new BallSys();
 
   //Motors for testing
-  private CANSparkMax m_indexWheel = new CANSparkMax(23, MotorType.kBrushless);
-  private CANSparkMax m_shooterWheel = new CANSparkMax(24, MotorType.kBrushless);
-  private CANSparkMax m_intakeWheel = new CANSparkMax(25, MotorType.kBrushless); 
+  
   
   @Override
   public void robotInit() {
@@ -39,31 +37,40 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     BS.intakeOn = false; 
+    BS.BoolBall = false; 
+    //BS.BallCount = 2; 
+    BS.shooting = false;
   }
 
   @Override
   public void teleopPeriodic() {
-    SmartDashboard.putNumber("BallConut", BS.BallCount);
-    SmartDashboard.putBoolean("IntakeMotor", BS.intakeOn);
+    SmartDashboard.putNumber("BallCount", BS.BallCount);
     SmartDashboard.putBoolean("Shooting", BS.shooting); 
+    SmartDashboard.putBoolean("IntakeRunning", BS.intakeOn);
+    SmartDashboard.putBoolean("Beam1", BS.Beam1.get());
+    SmartDashboard.putBoolean("Beam2", BS.Beam2.get());
+    SmartDashboard.putNumber("RPMs", BS.e_shooterWheel.getVelocity());
 
+    //BS.m_indexWheel.set(0.1);
     BS.Index();
+    BS.intakeMotor();
+    //BS.m_intakeWheel.set(0.3);
 
     /*if (xBox.getAButton()){
       intakeSolenoid(intakeExtend = !intakeExtend);
     }*/
 
-    if (xBox.getLeftBumper()){
-      BS.intakeMotor(BS.intakeOn = !BS.intakeOn);
-    }
+    // if (xBox.getLeftBumper()){
+    //     BS.intakeMotor(BS.intakeOn = !BS.intakeOn);
+    //   }
 
-    if (xBox.getRightBumper()){
+    /*if (xBox.getRightBumper()){
       BS.Shooting1();
-    }
+    }*/
 
-    if (xBox.getRightTriggerAxis() != 0){
-      BS.Shooting2();
-      xBox.setRumble(RumbleType.kRightRumble, 1);
+    if (xBox.getRightTriggerAxis() == 1){
+      BS.Shooting2(true);
+      //xBox.setRumble(RumbleType.kRightRumble, 1);
     }
   }
 
@@ -88,12 +95,12 @@ public class Robot extends TimedRobot {
     BS.Beam2.get();
     BS.Beam1.get();
 
-    //Orientation of Shooter
-    m_shooterWheel.set(0.3);
-    //Orientation of Intake
-    m_intakeWheel.set(0.3);
-    //Orientation of index Motor
-    m_indexWheel.set(0.3);
+    //Orientation of Shooter; ++ is shoot
+    //m_shooterWheel.set(0.3);
+    //Orientation of Intake; ++ is intake
+    //m_intakeWheel.set(0.3);
+    //Orientation of index Motor; ++ is intake
+    //m_indexWheel.set(0.3);
 
     //Determing how many encoders = 1 ball shot
     /*if (xBox.getLeftBumper()){
@@ -104,6 +111,3 @@ public class Robot extends TimedRobot {
 
   }
 }
-
-
-  

@@ -24,9 +24,9 @@ public class BallSys {
     public boolean BoolBall;
 
     //Motor
-    private CANSparkMax m_indexWheel = new CANSparkMax(23, MotorType.kBrushless);
-    private CANSparkMax m_shooterWheel = new CANSparkMax(24, MotorType.kBrushless);
-    private CANSparkMax m_intakeWheel = new CANSparkMax(25, MotorType.kBrushless); 
+    public CANSparkMax m_indexWheel = new CANSparkMax(22, MotorType.kBrushless); //correct
+    public CANSparkMax m_shooterWheel = new CANSparkMax(8, MotorType.kBrushless); //correct
+    public CANSparkMax m_intakeWheel = new CANSparkMax(4, MotorType.kBrushless); 
 
     //Solenoids
     private Solenoid s_LeftIntake = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
@@ -38,8 +38,8 @@ public class BallSys {
     private SparkMaxPIDController p_indexWheel = m_indexWheel.getPIDController();
 
     //Controllers
-    private BangBangController overSpeedController; 
-    private int shooterRPMs = 1000; 
+    public BangBangController overSpeedController; 
+    public int shooterRPMs = 2000; 
 
 
     public void Index() {
@@ -61,48 +61,41 @@ public class BallSys {
             }
         }
     }
-    
-    public void Shooting1() { 
-        if (BallCount > 0){
-            shooting = true; 
-            m_shooterWheel.set(overSpeedController.calculate(e_shooterWheel.getVelocity(), shooterRPMs));
-            if (e_shooterWheel.getVelocity() == shooterRPMs && e_indexWheel.getPosition() <= 1){
-                m_indexWheel.set(0.4);
-                BallCount --;
-            }
-            else{
-              m_indexWheel.stopMotor();
-              e_indexWheel.setPosition(0);
-            }
-        }
-        else{
-            m_shooterWheel.stopMotor();
-            shooting = false;
-        }
-    }
 
-    public void Shooting2() {
+    public boolean Shooting2(boolean shooting) {
+        while (shooting == true){
+            if (e_shooterWheel.getVelocity() > 2600){
+                m_shooterWheel.set(0.3);
+            }
+            if (e_shooterWheel.getVelocity() < 2400){
+                m_shooterWheel.set(0.5);
+            }
 
-        if (BallCount > 0){
-            shooting = true; 
-            m_shooterWheel.set(overSpeedController.calculate(e_shooterWheel.getVelocity(), shooterRPMs));
-            if (e_shooterWheel.getVelocity() == shooterRPMs && !Beam2.get()){
-                m_indexWheel.set(0.4);
+            if (e_shooterWheel.getVelocity() >= 2500){
+                m_indexWheel.set(0.3);
                 BoolBall = true;
             }
             else{
                 m_indexWheel.stopMotor();
-                if (Beam2.get() && BoolBall == true){
-                    BallCount --; 
+                if (BoolBall == true){
+                    BallCount --;
                     BoolBall = false;
                 }
             }
+            
+            if (BallCount == 0){
+                m_indexWheel.stopMotor();
+                m_shooterWheel.stopMotor();
+                shooting = false;
+            }
         }
-        else{
-          m_indexWheel.stopMotor();
-          m_shooterWheel.stopMotor();
-          shooting = false; 
-        }
+        
+        // else{
+        //     m_shooterWheel.set(0);
+        //     m_indexWheel.stopMotor();
+        //     shooting = false; 
+        // }
+        return shooting;
     }
     
       /*public boolean intakeSolenoid(boolean intakeExtend){
@@ -119,9 +112,9 @@ public class BallSys {
         return intakeExtend;
       } */
     
-    public boolean intakeMotor(boolean intakeOn){
-        //if (intakeExtend == true){
-            if(intakeOn == false){
+    /*public boolean intakeMotor(boolean intakeOn){
+        //if (intakeExtend == true)
+            if(intakeOn == true){
                 m_intakeWheel.set(0.3);
             }
             else{
@@ -129,5 +122,13 @@ public class BallSys {
             }
         //}
         return intakeOn;
+    }*/
+    public void intakeMotor(){
+        if (shooting == false && BallCount < 2){
+            m_intakeWheel.set(0.4);
+        }
+        else {
+            m_intakeWheel.stopMotor();
+        }
     }
 }

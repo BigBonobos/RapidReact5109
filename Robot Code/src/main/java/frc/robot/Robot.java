@@ -35,6 +35,7 @@ public class Robot extends TimedRobot {
   // private boolean autoAlignRunningShooter = false;
   // private boolean autoAlignRunningBall = false;
   private double autoAlignRange = 360.0;
+  private BallSystems ballSys = new BallSystems();
   // private int autoCounter = 0;
 
   // CAN IDs for swerve drivetrain

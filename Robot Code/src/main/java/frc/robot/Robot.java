@@ -74,7 +74,7 @@ public class Robot extends TimedRobot {
       e_backRightPos = m_swerve.m_backRight.m_turningEncoderAbsolute.getAbsolutePosition();
       e_backLeftPos = m_swerve.m_backLeft.m_turningEncoderAbsolute.getAbsolutePosition(); 
 
-      boolean output = Math.abs(e_backLeftPos) <= degreeOffset && Math.abs(e_frontLeftPos) <= degreeOffset && Math.abs(e_frontRightPos) <= degreeOffset && Math.abs(e_backRightPos) <= degreeOffset;
+      // boolean output = Math.abs(e_backLeftPos) <= degreeOffset && Math.abs(e_frontLeftPos) <= degreeOffset && Math.abs(e_frontRightPos) <= degreeOffset && Math.abs(e_backRightPos) <= degreeOffset;
 
       // System.out.println(-1 * e_frontLeftPos/180);
       // System.out.println(-1 * e_frontRightPos/180);
@@ -93,8 +93,11 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
-    System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
+    // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
     driveWithJoystick(true);
+    // m_swerve.m_frontLeft.m_turningMotor.set(0.1);
+    // Timer.delay(5);
+    // m_swerve.m_frontLeft.m_turningMotor.set(0);
     // try {
     //   Thread.sleep(100);
     // } catch (InterruptedException e) {
@@ -181,7 +184,7 @@ public class Robot extends TimedRobot {
   
   @Override
   public void teleopPeriodic() {
-    driveWithJoystick(true);
+    driveWithJoystick(false);
     // m_shooter.setShooter();
     // // Comment the below code out for swerve testing
 

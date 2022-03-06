@@ -8,6 +8,7 @@ package frc.robot.swerveCode;
 import frc.robot.Limelight;
 
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.SerialPort.Port;
 
 import java.util.NoSuchElementException;
 import java.util.OptionalDouble;
@@ -44,7 +45,7 @@ public class Drivetrain {
   public SwerveModule m_frontRight;
   public SwerveModule m_backLeft;
   public SwerveModule m_backRight;
-  private AHRS navX = new AHRS(SPI.Port.kMXP);
+  private AHRS navX = new AHRS(Port.kUSB);
   private Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * Math.PI/180);
 
   // Shooter Range
@@ -88,6 +89,7 @@ public class Drivetrain {
    */
   @SuppressWarnings("ParameterName")
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
+    System.out.println(navX.isConnected());
     Rotation2d navXVal = new Rotation2d((-navX.getYaw() % 360 ) * Math.PI/180);
     SwerveModuleState[] swerveModuleStates =
         m_kinematics.toSwerveModuleStates(

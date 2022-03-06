@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 /** Represents a swerve drive style drivetrain. */
 public class Drivetrain {
 
-  public static final double kMaxSpeed = 0.6; // 3 meters per second
+  public static final double kMaxSpeed = 0.3; // 3 meters per second
   public static final double kMaxAngularSpeed = Math.PI/6; // 1/2 rotation per second
 
   // Network Table instantiation

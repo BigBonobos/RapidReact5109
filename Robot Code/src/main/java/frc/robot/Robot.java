@@ -88,6 +88,9 @@ public class Robot extends TimedRobot {
       m_swerve.m_frontRight.m_turningMotor.set(-1 * e_frontRightPos/180);
       m_swerve.m_backRight.m_turningMotor.set(-1 * e_backRightPos/180);
     }
+    ballSys.intakeOn = false; 
+    ballSys.BoolBall = false; 
+    ballSys.shooting = false; 
   }
   
 
@@ -95,7 +98,36 @@ public class Robot extends TimedRobot {
   public void testPeriodic() {
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
+    // ballSys.Index();
+    // ballSys.intakeMotor();
+    
     driveWithJoystick(true);
+
+    if (xController.getRightTriggerAxis() == 1){
+      ballSys.shooting2(true);
+      //xBox.setRumble(RumbleType.kRightRumble, 1);
+    }
+
+    if (xController.getXButton()) {
+      ballSys.m_intakeWheel.set(0.4);
+    } else {
+      ballSys.m_intakeWheel.set(0);
+    }
+
+    if (xController.getYButton()) {
+      if(!ballSys.Beam2.get())
+      ballSys.m_indexWheel.set(0.4);
+    } else {
+      ballSys.m_indexWheel.set(0);
+    }
+
+    if(xController.getBButton()) {
+      ballSys.m_shooterWheel.set(0.9);
+    }  else if (xController.getRightTriggerAxis() == 1) {
+      ballSys.m_shooterWheel.set(0.50);
+    } else {
+      ballSys.m_shooterWheel.set(0);
+    }
     // m_swerve.m_frontLeft.m_turningMotor.set(0.1);
     // Timer.delay(5);
     // m_swerve.m_frontLeft.m_turningMotor.set(0);

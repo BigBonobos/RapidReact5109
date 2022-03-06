@@ -67,7 +67,7 @@ public class BallSystems implements Runnable {
             if (e_shooterWheel.getVelocity() > 2700){
                 m_shooterWheel.set(0.4);
             }
-            if (e_shooterWheel.getVelocity() < 2600){
+            if (e_shooterWheel.getVelocity() < 2200){
                 m_shooterWheel.set(0.6);
             }
 

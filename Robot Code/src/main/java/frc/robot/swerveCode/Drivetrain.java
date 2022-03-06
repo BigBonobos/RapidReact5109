@@ -8,11 +8,9 @@ package frc.robot.swerveCode;
 import frc.robot.Limelight;
 
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.SerialPort.Port;
 
 import java.util.NoSuchElementException;
 import java.util.OptionalDouble;
-
 import com.kauailabs.navx.frc.*;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -26,8 +24,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 /** Represents a swerve drive style drivetrain. */
 public class Drivetrain {
 
-  public static final double kMaxSpeed = 0.1; // 3 meters per second
-  public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
+  public static final double kMaxSpeed = 0.6; // 3 meters per second
+  public static final double kMaxAngularSpeed = Math.PI/6; // 1/2 rotation per second
 
   // Network Table instantiation
   private final NetworkTableInstance ntwrkInst = NetworkTableInstance.getDefault();
@@ -45,7 +43,7 @@ public class Drivetrain {
   public SwerveModule m_frontRight;
   public SwerveModule m_backLeft;
   public SwerveModule m_backRight;
-  private AHRS navX = new AHRS(Port.kUSB);
+  public AHRS navX = new AHRS(SPI.Port.kMXP);
   private Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * Math.PI/180);
 
   // Shooter Range

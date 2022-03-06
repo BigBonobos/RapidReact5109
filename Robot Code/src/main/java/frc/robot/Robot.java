@@ -171,20 +171,39 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-  //   // Removes the shooter listener that was set in auto period
-  //   m_swerve.limelight.limelight.removeEntryListener(listenerHandleShooter);
+    double e_frontLeftPos = m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+    double e_frontRightPos = m_swerve.m_frontRight.m_turningEncoderAbsolute.getAbsolutePosition();
+    double e_backRightPos = m_swerve.m_backRight.m_turningEncoderAbsolute.getAbsolutePosition();
+    double e_backLeftPos = m_swerve.m_backLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+    // boolean outuput =Math.abs(e_backLeftPos) <= degreeOffset && Math.abs(e_frontLeftPos) <= degreeOffset && Math.abs(e_frontRightPos) <= degreeOffset && Math.abs(e_backRightPos) <= degreeOffset;
 
-  //   // When intake is pressed the first time it will run
-  //   intakeRunning = false;
-    
+    while(testCounter == 0) {
+      if (Math.abs(e_backLeftPos) <= degreeOffset && Math.abs(e_frontLeftPos) <= degreeOffset && Math.abs(e_frontRightPos) <= degreeOffset && Math.abs(e_backRightPos) <= degreeOffset) {
+        testCounter = 1;
+      }
+      e_frontLeftPos = m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_frontRightPos = m_swerve.m_frontRight.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_backRightPos = m_swerve.m_backRight.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_backLeftPos = m_swerve.m_backLeft.m_turningEncoderAbsolute.getAbsolutePosition(); 
 
-  //   // Initializes shooter in off state
-  //   m_shooter.state = ShooterState.kCoasting;
+      // boolean output = Math.abs(e_backLeftPos) <= degreeOffset && Math.abs(e_frontLeftPos) <= degreeOffset && Math.abs(e_frontRightPos) <= degreeOffset && Math.abs(e_backRightPos) <= degreeOffset;
+
+      // System.out.println(-1 * e_frontLeftPos/180);
+      // System.out.println(-1 * e_frontRightPos/180);
+      // System.out.println(-1 * e_backRightPos/180);
+      // System.out.println(-1 * e_frontLeftPos/180);
+
+
+      m_swerve.m_frontLeft.m_turningMotor.set(-1 * e_frontLeftPos/180);
+      m_swerve.m_backLeft.m_turningMotor.set(-1 * e_backLeftPos/180);
+      m_swerve.m_frontRight.m_turningMotor.set(-1 * e_frontRightPos/180);
+      m_swerve.m_backRight.m_turningMotor.set(-1 * e_backRightPos/180);
+    }
   }
   
   @Override
   public void teleopPeriodic() {
-    driveWithJoystick(false);
+    driveWithJoystick(true);
     // m_shooter.setShooter();
     // // Comment the below code out for swerve testing
 

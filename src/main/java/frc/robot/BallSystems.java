@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj.*;
 
-public class BallSys { 
+public class BallSys implements Runnable { 
 
     //Sensors
     public DigitalInput Beam1 = new DigitalInput(0); //Outside the kicker wheel
@@ -61,25 +61,31 @@ public class BallSys {
             }
         }
     }
-
-    public boolean Shooting2(boolean shooting) {
+    
+    public boolean shooting2(boolean shooting) {
         while (shooting == true){
-            if (e_shooterWheel.getVelocity() > 2600){
-                m_shooterWheel.set(0.3);
+            if (e_shooterWheel.getVelocity() > 2700){
+                m_shooterWheel.set(0.4);
             }
-            if (e_shooterWheel.getVelocity() < 2400){
-                m_shooterWheel.set(0.5);
+            if (e_shooterWheel.getVelocity() < 2600){
+                m_shooterWheel.set(0.6);
             }
 
-            if (e_shooterWheel.getVelocity() >= 2500){
-                m_indexWheel.set(0.3);
+            if (BallCount > 0){
+                if (Beam2.get() || e_shooterWheel.getVelocity() >= 2500){
+                    m_indexWheel.set(0.3);
+                } else {
+                    m_indexWheel.stopMotor();
+                }
+            }
+
+            if (!Beam2.get()){
                 BoolBall = true;
             }
-            else{
-                m_indexWheel.stopMotor();
-                if (BoolBall == true){
+            if (Beam2.get()){
+                BoolBall = false;
+                if (BoolBall = false){
                     BallCount --;
-                    BoolBall = false;
                 }
             }
             
@@ -125,10 +131,15 @@ public class BallSys {
     }*/
     public void intakeMotor(){
         if (shooting == false && BallCount < 2){
-            m_intakeWheel.set(0.4);
+            m_intakeWheel.set(0.75);
         }
         else {
             m_intakeWheel.stopMotor();
         }
+    }
+
+    @Override
+    public void run() {
+        shooting2(true);
     }
 }

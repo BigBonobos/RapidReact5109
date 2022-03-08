@@ -105,17 +105,6 @@ public class Robot extends TimedRobot {
     driveWithJoystick(true);
     ballSys.handleInputs(xController, j_operator);
     climb.handleInputs(xController, j_operator);
-    // m_swerve.m_frontLeft.m_turningMotor.set(0.1);
-    // Timer.delay(5);
-    // m_swerve.m_frontLeft.m_turningMotor.set(0);
-    // try {
-    // Thread.sleep(100);
-    // } catch (InterruptedException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // m_swerve.drive(0.1, 0.1, 0, false);
-
   }
 
   // @Override

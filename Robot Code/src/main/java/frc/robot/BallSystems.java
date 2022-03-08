@@ -1,12 +1,7 @@
 package frc.robot;
 
-import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Dynamic;
 import com.revrobotics.*;
-import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj.*;
 
@@ -37,12 +32,17 @@ public class BallSystems implements Runnable {
     public CANSparkMax m_intakeWheel = new CANSparkMax(4, MotorType.kBrushless);
 
     // Solenoids
+    @SuppressWarnings("unused")
     private Solenoid s_LeftIntake = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
+
+    @SuppressWarnings("unused")
     private Solenoid s_RightIntake = new Solenoid(PneumaticsModuleType.CTREPCM, 2);
 
     // Encoders
     public RelativeEncoder e_shooterWheel = m_shooterWheel.getEncoder();
     public RelativeEncoder e_indexWheel = m_indexWheel.getEncoder();
+
+    @SuppressWarnings("unused")
     private SparkMaxPIDController p_indexWheel = m_indexWheel.getPIDController();
 
     // Controllers

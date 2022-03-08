@@ -44,7 +44,7 @@ public class Robot extends TimedRobot {
   private BallSystems ballSys = new BallSystems();
   public IntakeState intakeState = IntakeState.Stopped;
   public Climb climb = new Climb();
-  // private int autoCounter = 0;
+  private int autoCounter = 1;
 
   // CAN IDs for swerve drivetrain
   private static final double[] frontLeftIds = {15, 14, 4, 162.6};//100}; // back right? 
@@ -66,8 +66,7 @@ public class Robot extends TimedRobot {
 
   double testCounter = 0;
   double degreeOffset = 10;
-
-  public void testInit() {
+  private void initSwerve() {
     double e_frontLeftPos = m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
     double e_frontRightPos = m_swerve.m_frontRight.m_turningEncoderAbsolute.getAbsolutePosition();
     double e_backRightPos = m_swerve.m_backRight.m_turningEncoderAbsolute.getAbsolutePosition();
@@ -96,6 +95,9 @@ public class Robot extends TimedRobot {
       m_swerve.m_frontRight.m_turningMotor.set(-1 * e_frontRightPos/180);
       m_swerve.m_backRight.m_turningMotor.set(-1 * e_backRightPos/180);
     }
+  }
+  public void testInit() {
+    initSwerve();
     ballSys.intakeOn = false; 
     ballSys.BoolBall = false; 
     ballSys.shooting = false; 
@@ -111,46 +113,46 @@ public class Robot extends TimedRobot {
     
     driveWithJoystick(true);
 
-    if (xController.getRightTriggerAxis() == 1){
-      ballSys.shooting2(true);
-      //xBox.setRumble(RumbleType.kRightRumble, 1);
-    }
-    if(j_operator.getTrigger()) {
-      climb.popArmUp();
-    }
-    if (j_operator.getRawButton(3)) {
-      climb.popArmDown();
-    }
-    if (xController.getXButton()) {
-      switch (intakeState) {
-        case Stopped:
-          ballSys.m_intakeWheel.set(0.4);
-          intakeState = IntakeState.Go;
-          break;
-        case Go:
-          ballSys.m_intakeWheel.set(-0.4);
-          intakeState = IntakeState.Reverse;
-        case Reverse:
-          ballSys.m_intakeWheel.set(0);
-          intakeState = IntakeState.Stopped;
-      }
-      ballSys.m_intakeWheel.set(0.4);
-    }
+    // if (xController.getRightTriggerAxis() == 1){
+    //   ballSys.shooting2(true);
+    //   //xBox.setRumble(RumbleType.kRightRumble, 1);
+    // }
+    // if(j_operator.getTrigger()) {
+    //   climb.popArmUp();
+    // }
+    // if (j_operator.getRawButton(3)) {
+    //   climb.popArmDown();
+    // }
+    // if (xController.getXButton()) {
+    //   switch (intakeState) {
+    //     case Stopped:
+    //       ballSys.m_intakeWheel.set(0.4);
+    //       intakeState = IntakeState.Go;
+    //       break;
+    //     case Go:
+    //       ballSys.m_intakeWheel.set(-0.4);
+    //       intakeState = IntakeState.Reverse;
+    //     case Reverse:
+    //       ballSys.m_intakeWheel.set(0);
+    //       intakeState = IntakeState.Stopped;
+    //   }
+    //   ballSys.m_intakeWheel.set(0.4);
+    // }
 
-    if (xController.getYButton()) {
-      if(!ballSys.Beam2.get())
-      ballSys.m_indexWheel.set(0.4);
-    } else {
-      ballSys.m_indexWheel.set(0);
-    }
+    // if (xController.getYButton()) {
+    //   if(!ballSys.Beam2.get())
+    //   ballSys.m_indexWheel.set(0.4);
+    // } else {
+    //   ballSys.m_indexWheel.set(0);
+    // }
 
-    if(xController.getBButton()) {
-      ballSys.m_shooterWheel.set(0.9);
-    }  else if (xController.getRightTriggerAxis() == 1) {
-      ballSys.m_shooterWheel.set(0.50);
-    } else {
-      ballSys.m_shooterWheel.set(0);
-    }
+    // if(xController.getBButton()) {
+    //   ballSys.m_shooterWheel.set(0.9);
+    // }  else if (xController.getRightTriggerAxis() == 1) {
+    //   ballSys.m_shooterWheel.set(0.50);
+    // } else {
+    //   ballSys.m_shooterWheel.set(0);
+    // }
     // m_swerve.m_frontLeft.m_turningMotor.set(0.1);
     // Timer.delay(5);
     // m_swerve.m_frontLeft.m_turningMotor.set(0);
@@ -169,61 +171,23 @@ public class Robot extends TimedRobot {
   //   listenerHandleBall = m_swerve.initBallListener();
   // }
 
-  // @Override
-  // public void autonomousInit() {
-  //   m_intake.ballIndexer = 1;
-  //   m_intake.intakeOn = false;
-  // }
-  // @Override
-  // public void autonomousPeriodic() {
-  //   // Sets TeleOp Mode to false
-  //   driveWithJoystick(false);
+  @Override
+  public void autonomousInit() {
+    initSwerve();
+  }
+  @Override
+  public void autonomousPeriodic() {
 
-  //   // Moves in the periodic loop from one instruction to another, useful for redundancy and testing
-  //   switch(autoCounter) {
-  //     case 1:
-  //       // Sets intake power
-  //       m_intake.intake(true);
-
-  //       // While no limit switch input, wait until ball is aligned
-  //       while(m_intake.ballIndexer == 1) {
-  //         m_intake.checkIntakeState();
-  //         Timer.delay(0.001);
-  //       }
-
-  //       // Remove ball aligner, and stop intaking
-  //       m_swerve.ballAlignmentValues.removeEntryListener(listenerHandleBall);
-  //       m_intake.intake(false);
-  //       autoCounter++;
-  //       break;
-      
-  //     case 2:
-  //       // Shooter alignmnet
-  //       try {
-  //         listenerHandleShooter = m_swerve.initShooterListener();
-  //         autoCounter++;
-  //       } catch (Throwable e) {
-  //         e.printStackTrace();
-  //       }
-  //       break;
-
-  //       case 3:
-  //         m_shooter.state = ShooterState.kRunning;
-  //         autoCounter++;
-  //         break;
-
-  //       case 4:
-  //         Timer.delay(5);
-  //         // Put Ball deploy method here
-  //         autoCounter++;
-  //         break;
-        
-  //       case 5:
-  //         m_shooter.state = ShooterState.kCoasting;
-  //         break;
-  //   }
-  //   m_swerve.updateOdometry();
-  // }
+    // Moves in the periodic loop from one instruction to another, useful for redundancy and testing
+    switch(autoCounter) {
+      case 1:
+        m_swerve.drive(0, -1, 0, true);
+        Timer.delay(0.001);
+        m_swerve.drive(0,0,0,true);
+        break;
+    }
+    // m_swerve.updateOdometry();
+  }
 
   @Override
   public void teleopInit() {

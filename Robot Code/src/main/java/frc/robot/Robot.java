@@ -116,7 +116,7 @@ public class Robot extends TimedRobot {
     driveWithJoystick(true);
 
     if (xController.getRightTriggerAxis() == 1){
-      ballSysNotif.startSingle(.001);
+      ballSysNotif.startSingle(0.001);;
     } else if (xController.getRightBumper()) {
       ballSysNotif.stop();
     }

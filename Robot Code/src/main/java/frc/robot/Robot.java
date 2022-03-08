@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Timer;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import edu.wpi.first.wpilibj.Notifier;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -42,6 +43,7 @@ public class Robot extends TimedRobot {
   // private boolean autoAlignRunningBall = false;
   private double autoAlignRange = 360.0;
   private BallSystems ballSys = new BallSystems();
+  private Notifier ballSysNotif = new Notifier(ballSys);
   public IntakeState intakeState = IntakeState.Stopped;
   public Climb climb = new Climb();
   private int autoCounter = 1;
@@ -108,15 +110,16 @@ public class Robot extends TimedRobot {
   public void testPeriodic() {
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
-    // ballSys.Index();
-    // ballSys.intakeMotor();
+    ballSys.Index();
+    ballSys.intakeMotor();
     
     driveWithJoystick(true);
 
-    // if (xController.getRightTriggerAxis() == 1){
-    //   ballSys.shooting2(true);
-    //   //xBox.setRumble(RumbleType.kRightRumble, 1);
-    // }
+    if (xController.getRightTriggerAxis() == 1){
+      ballSysNotif.startSingle(.001);
+    } else if (xController.getRightBumper()) {
+      ballSysNotif.stop();
+    }
     // if(j_operator.getTrigger()) {
     //   climb.popArmUp();
     // }

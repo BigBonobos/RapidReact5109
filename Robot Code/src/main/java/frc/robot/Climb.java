@@ -8,9 +8,11 @@ import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 //wpilib imports
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.XboxController;
 
 public class Climb {
 
@@ -26,10 +28,9 @@ public class Climb {
     // public SparkMaxPIDController pc_Hook = m_Hook.getPIDController();
     // public SparkMaxPIDController pc_Winch = m_Winch.getPIDController();
 
-    
     // solenoids
     public Solenoid s_LeftPopArm = new Solenoid(PneumaticsModuleType.CTREPCM, 7);
-    //public Solenoid s_LeftPopArm = new Solenoid(PneumaticsModuleType.CTREPCM, 5);
+    // public Solenoid s_LeftPopArm = new Solenoid(PneumaticsModuleType.CTREPCM, 5);
 
     // sensors
     // return true if the circuit is open
@@ -40,66 +41,73 @@ public class Climb {
 
     // latch onto pole
     /*
-    public void latchClimb() {
-        if (!armNotExtended.get()) { // if arm is not fully extended
-            pc_Winch.setReference(1, ControlType.kPosition);
-            s_LeftPopArm.set(true);
-            s_RightPopArm.set(true);
-
-        }
-        // } else {
-        //     pc_Hook.setReference(-1, ControlType.kPosition);
-        //     return false;
-
-        // }
-        //return true;
-    }
-    */
+     * public void latchClimb() {
+     * if (!armNotExtended.get()) { // if arm is not fully extended
+     * pc_Winch.setReference(1, ControlType.kPosition);
+     * s_LeftPopArm.set(true);
+     * s_RightPopArm.set(true);
+     * 
+     * }
+     * // } else {
+     * // pc_Hook.setReference(-1, ControlType.kPosition);
+     * // return false;
+     * 
+     * // }
+     * //return true;
+     * }
+     */
 
     /*
-    // pull up to pole
-    public void pullClimb() {
-        if (!armNotClosed.get()) { // if arm is not closed
-            pc_Winch.setReference(-1, ControlType.kPosition);
-            s_LeftPopArm.set(false);
-            s_RightPopArm.set(false);
-        }
-
-        // } else {
-        //     pc_Hook.setReference(1, ControlType.kPosition);
-        //     return true;
-
-        // }
-        // return false;
-    }
-    */
+     * // pull up to pole
+     * public void pullClimb() {
+     * if (!armNotClosed.get()) { // if arm is not closed
+     * pc_Winch.setReference(-1, ControlType.kPosition);
+     * s_LeftPopArm.set(false);
+     * s_RightPopArm.set(false);
+     * }
+     * 
+     * // } else {
+     * // pc_Hook.setReference(1, ControlType.kPosition);
+     * // return true;
+     * 
+     * // }
+     * // return false;
+     * }
+     */
 
     // public void retractArm() {
-    //     pc_Winch.setReference(300.14, ControlType.kPosition);
+    // pc_Winch.setReference(300.14, ControlType.kPosition);
     // }
 
     // public void extendArm() {
-    //     pc_Winch.setReference(3.14, ControlType.kPosition);
+    // pc_Winch.setReference(3.14, ControlType.kPosition);
     // }
 
     // public void retractFrontHooks() {
-    //     pc_Hook.setReference(3.14, ControlType.kPosition);
+    // pc_Hook.setReference(3.14, ControlType.kPosition);
     // }
 
     // public void engageFrontHooks() {
-    //     pc_Hook.setReference(3.14, ControlType.kPosition);
+    // pc_Hook.setReference(3.14, ControlType.kPosition);
     // }
-
 
     public void popArmUp() {
         s_LeftPopArm.set(true);
-        //s_RightPopArm.set(true);
+        // s_RightPopArm.set(true);
     }
 
     public void popArmDown() {
         s_LeftPopArm.set(false);
-        //s_RightPopArm.set(false);
+        // s_RightPopArm.set(false);
     }
-    
+
+    public void handleInputs(XboxController xController, Joystick j_operator) {
+        if (j_operator.getTrigger()) {
+            popArmUp();
+        }
+        if (j_operator.getRawButton(3)) {
+            popArmDown();
+        }
+    }
 
 }

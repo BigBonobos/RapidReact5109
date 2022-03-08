@@ -21,11 +21,6 @@ import edu.wpi.first.math.MathUtil;
 
 public class Robot extends TimedRobot {
 
-  enum IntakeState {
-    Stopped,
-    Go,
-    Reverse
-  }
 
   // public CANSparkMax motor1 = new CANSparkMax(14,MotorType.kBrushless);
 
@@ -44,7 +39,6 @@ public class Robot extends TimedRobot {
   // private boolean autoAlignRunningBall = false;
   private double autoAlignRange = 360.0;
   private BallSystems ballSys = new BallSystems();
-  public IntakeState intakeState = IntakeState.Stopped;
   public Climb climb = new Climb();
   // private int autoCounter = 0;
 
@@ -109,47 +103,8 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
     driveWithJoystick(true);
-
-    if (xController.getRightTriggerAxis() == 1) {
-      ballSys.shooting2(true);
-      // xBox.setRumble(RumbleType.kRightRumble, 1);
-    }
-    if (j_operator.getTrigger()) {
-      climb.popArmUp();
-    }
-    if (j_operator.getRawButton(3)) {
-      climb.popArmDown();
-    }
-    if (xController.getXButton()) {
-      switch (intakeState) {
-        case Stopped:
-          ballSys.m_intakeWheel.set(0.4);
-          intakeState = IntakeState.Go;
-          break;
-        case Go:
-          ballSys.m_intakeWheel.set(-0.4);
-          intakeState = IntakeState.Reverse;
-        case Reverse:
-          ballSys.m_intakeWheel.set(0);
-          intakeState = IntakeState.Stopped;
-      }
-      ballSys.m_intakeWheel.set(0.4);
-    }
-
-    if (xController.getYButton()) {
-      if (!ballSys.Beam2.get())
-        ballSys.m_indexWheel.set(0.4);
-    } else {
-      ballSys.m_indexWheel.set(0);
-    }
-
-    if (xController.getBButton()) {
-      ballSys.m_shooterWheel.set(0.9);
-    } else if (xController.getRightTriggerAxis() == 1) {
-      ballSys.m_shooterWheel.set(0.50);
-    } else {
-      ballSys.m_shooterWheel.set(0);
-    }
+    ballSys.handleInputs(xController, j_operator);
+    climb.handleInputs(xController, j_operator);
     // m_swerve.m_frontLeft.m_turningMotor.set(0.1);
     // Timer.delay(5);
     // m_swerve.m_frontLeft.m_turningMotor.set(0);

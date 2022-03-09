@@ -67,10 +67,12 @@ public class BallSystems implements Runnable {
         double currentTime = startTime;
         while (shooting == true){
             currentTime = Timer.getFPGATimestamp();
-            if (e_shooterWheel.getVelocity() > 2700){
+            //System.out.println(BallCount);
+            System.out.println(e_shooterWheel.getVelocity());
+            if (e_shooterWheel.getVelocity() > 3000){
                 m_shooterWheel.set(0.4);
             }
-            if (e_shooterWheel.getVelocity() < 2600){
+            if (e_shooterWheel.getVelocity() < 2500){
                 m_shooterWheel.set(0.6);
             }
 
@@ -85,14 +87,14 @@ public class BallSystems implements Runnable {
             if (!Beam2.get()){
                 BoolBall = true;
             }
-            if (Beam2.get()){
+            if (Beam2.get()){ 
                 BoolBall = false;
                 if (BoolBall = false){
                     BallCount --;
                 }
             }
             
-            if (BallCount == 0 || currentTime - startTime >= 3){
+            if (BallCount == 0 || currentTime - startTime >= 5){
                 BallCount = 0;
                 m_indexWheel.stopMotor();
                 m_shooterWheel.stopMotor();

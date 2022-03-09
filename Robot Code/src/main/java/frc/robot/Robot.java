@@ -12,8 +12,11 @@ import frc.robot.swerveCode.Drivetrain;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+
+import javax.swing.text.StyledEditorKit;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -99,10 +102,10 @@ public class Robot extends TimedRobot {
     }
   }
   public void testInit() {
-    initSwerve();
+    //initSwerve();
     ballSys.intakeOn = false; 
     ballSys.BoolBall = false; 
-    ballSys.shooting = false; 
+    ballSys.BallCount = 2; 
   }
   
 
@@ -110,16 +113,11 @@ public class Robot extends TimedRobot {
   public void testPeriodic() {
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
-    ballSys.Index();
-    ballSys.intakeMotor();
-    
-    driveWithJoystick(true);
 
-    if (xController.getRightTriggerAxis() == 1){
-      ballSysNotif.startSingle(0.001);;
-    } else if (xController.getRightBumper()) {
-      ballSysNotif.stop();
-    }
+    SmartDashboard.putNumber("RPMS", ballSys.e_shooterWheel.getVelocity());
+    SmartDashboard.putNumber("BallCount", ballSys.BallCount);
+    ballSys.shooting2(true);
+
     // if(j_operator.getTrigger()) {
     //   climb.popArmUp();
     // }
@@ -177,16 +175,32 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     initSwerve();
+    m_swerve.navX.reset();
+    autoCounter = 1;
+    //ballSys.intakeOn = false; 
+    ballSys.BoolBall = false; 
+    ballSys.shooting = false; 
+    ballSys.BallCount = 1;
   }
   @Override
   public void autonomousPeriodic() {
-
+    System.out.println(ballSys.BallCount);
+    ballSys.Index();
+    // System.out.println(autoCounter);
+    // System.out.println(Math.abs(15-m_swerve.navX.getYaw()));
     // Moves in the periodic loop from one instruction to another, useful for redundancy and testing
     switch(autoCounter) {
       case 1:
-        m_swerve.drive(0, -1, 0, true);
-        Timer.delay(0.001);
-        m_swerve.drive(0,0,0,true);
+        if (Math.abs(15-m_swerve.navX.getYaw()) > .5) {
+          m_swerve.drive(0, 0, -.1, true);
+        } else {
+          m_swerve.drive(0, 0, 0, true);
+          autoCounter++;
+        }
+        break;
+      case 2:
+        ballSys.shooting2(true);
+        autoCounter++;
         break;
     }
     // m_swerve.updateOdometry();

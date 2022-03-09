@@ -87,7 +87,6 @@ public class Drivetrain {
    */
   @SuppressWarnings("ParameterName")
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
-    System.out.println(navX.isConnected());
     Rotation2d navXVal = new Rotation2d((-navX.getYaw() % 360 ) * Math.PI/180);
     SwerveModuleState[] swerveModuleStates =
         m_kinematics.toSwerveModuleStates(

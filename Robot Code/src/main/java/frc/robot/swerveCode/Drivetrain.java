@@ -174,4 +174,45 @@ public class Drivetrain {
 
     return listenerHandle;
   }
+
+
+  public void customAutoAlign() {
+
+    double testCounter = 0;
+    double degreeOffset = 10;
+
+    
+    double e_frontLeftPos = m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+    double e_frontRightPos = m_frontRight.m_turningEncoderAbsolute.getAbsolutePosition();
+    double e_backRightPos = m_backRight.m_turningEncoderAbsolute.getAbsolutePosition();
+    double e_backLeftPos = m_backLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+    // boolean outuput =Math.abs(e_backLeftPos) <= degreeOffset &&
+    // Math.abs(e_frontLeftPos) <= degreeOffset && Math.abs(e_frontRightPos) <=
+    // degreeOffset && Math.abs(e_backRightPos) <= degreeOffset;
+
+    while (testCounter == 0) {
+      if (Math.abs(e_backLeftPos) <= degreeOffset && Math.abs(e_frontLeftPos) <= degreeOffset
+          && Math.abs(e_frontRightPos) <= degreeOffset && Math.abs(e_backRightPos) <= degreeOffset) {
+        testCounter = 1;
+      }
+      e_frontLeftPos = m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_frontRightPos = m_frontRight.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_backRightPos = m_backRight.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_backLeftPos = m_backLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+
+      // boolean output = Math.abs(e_backLeftPos) <= degreeOffset &&
+      // Math.abs(e_frontLeftPos) <= degreeOffset && Math.abs(e_frontRightPos) <=
+      // degreeOffset && Math.abs(e_backRightPos) <= degreeOffset;
+
+      // System.out.println(-1 * e_frontLeftPos/180);
+      // System.out.println(-1 * e_frontRightPos/180);
+      // System.out.println(-1 * e_backRightPos/180);
+      // System.out.println(-1 * e_frontLeftPos/180);
+
+      m_frontLeft.m_turningMotor.set(-1 * e_frontLeftPos / 180);
+      m_backLeft.m_turningMotor.set(-1 * e_backLeftPos / 180);
+      m_frontRight.m_turningMotor.set(-1 * e_frontRightPos / 180);
+      m_backRight.m_turningMotor.set(-1 * e_backRightPos / 180);
+    }
+  }
 }

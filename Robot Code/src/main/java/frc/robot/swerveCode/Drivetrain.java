@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.SPI;
 
 import java.util.NoSuchElementException;
 import java.util.OptionalDouble;
-
 import com.kauailabs.navx.frc.*;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -25,8 +24,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 /** Represents a swerve drive style drivetrain. */
 public class Drivetrain {
 
-  public static final double kMaxSpeed = 0.1; // 3 meters per second
-  public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
+  public static final double kMaxSpeed = 0.3; // 3 meters per second
+  public static final double kMaxAngularSpeed = Math.PI/6; // 1/2 rotation per second
 
   // Network Table instantiation
   private final NetworkTableInstance ntwrkInst = NetworkTableInstance.getDefault();
@@ -44,7 +43,7 @@ public class Drivetrain {
   public SwerveModule m_frontRight;
   public SwerveModule m_backLeft;
   public SwerveModule m_backRight;
-  private AHRS navX = new AHRS(SPI.Port.kMXP);
+  public AHRS navX = new AHRS(SPI.Port.kMXP);
   private Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * Math.PI/180);
 
   // Shooter Range
@@ -88,7 +87,7 @@ public class Drivetrain {
    */
   @SuppressWarnings("ParameterName")
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
-    Rotation2d navXVal = new Rotation2d((navX.getYaw() % 360 ) * Math.PI/180);
+    Rotation2d navXVal = new Rotation2d((-navX.getYaw() % 360 ) * Math.PI/180);
     SwerveModuleState[] swerveModuleStates =
         m_kinematics.toSwerveModuleStates(
             fieldRelative
@@ -99,13 +98,13 @@ public class Drivetrain {
     // for (SwerveModuleState state: swerveModuleStates) {
     //   System.out.println(state);
     // }
-    System.out.println("1");
+    // System.out.println("1");
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
-    System.out.println("2");
+    // System.out.println("2");
     m_frontRight.setDesiredState(swerveModuleStates[1]);
-    System.out.println("3");
+    // System.out.println("3");
     m_backLeft.setDesiredState(swerveModuleStates[2]);
-    System.out.println("4");
+    // System.out.println("4");
     m_backRight.setDesiredState(swerveModuleStates[3]);
     // System.out.println(swerveModuleStates[0].speedMetersPerSecond);
   }
@@ -174,5 +173,46 @@ public class Drivetrain {
     }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
 
     return listenerHandle;
+  }
+
+
+  public void customAutoAlign() {
+
+    double testCounter = 0;
+    double degreeOffset = 10;
+
+    
+    double e_frontLeftPos = m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+    double e_frontRightPos = m_frontRight.m_turningEncoderAbsolute.getAbsolutePosition();
+    double e_backRightPos = m_backRight.m_turningEncoderAbsolute.getAbsolutePosition();
+    double e_backLeftPos = m_backLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+    // boolean outuput =Math.abs(e_backLeftPos) <= degreeOffset &&
+    // Math.abs(e_frontLeftPos) <= degreeOffset && Math.abs(e_frontRightPos) <=
+    // degreeOffset && Math.abs(e_backRightPos) <= degreeOffset;
+
+    while (testCounter == 0) {
+      if (Math.abs(e_backLeftPos) <= degreeOffset && Math.abs(e_frontLeftPos) <= degreeOffset
+          && Math.abs(e_frontRightPos) <= degreeOffset && Math.abs(e_backRightPos) <= degreeOffset) {
+        testCounter = 1;
+      }
+      e_frontLeftPos = m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_frontRightPos = m_frontRight.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_backRightPos = m_backRight.m_turningEncoderAbsolute.getAbsolutePosition();
+      e_backLeftPos = m_backLeft.m_turningEncoderAbsolute.getAbsolutePosition();
+
+      // boolean output = Math.abs(e_backLeftPos) <= degreeOffset &&
+      // Math.abs(e_frontLeftPos) <= degreeOffset && Math.abs(e_frontRightPos) <=
+      // degreeOffset && Math.abs(e_backRightPos) <= degreeOffset;
+
+      // System.out.println(-1 * e_frontLeftPos/180);
+      // System.out.println(-1 * e_frontRightPos/180);
+      // System.out.println(-1 * e_backRightPos/180);
+      // System.out.println(-1 * e_frontLeftPos/180);
+
+      m_frontLeft.m_turningMotor.set(-1 * e_frontLeftPos / 180);
+      m_backLeft.m_turningMotor.set(-1 * e_backLeftPos / 180);
+      m_frontRight.m_turningMotor.set(-1 * e_frontRightPos / 180);
+      m_backRight.m_turningMotor.set(-1 * e_backRightPos / 180);
+    }
   }
 }

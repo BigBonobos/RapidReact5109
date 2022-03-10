@@ -4,16 +4,21 @@
 
 package frc.robot;
 
+import frc.robot.auto.Autonomous;
 // import frc.robot.ballSys.Intake;
 // import frc.robot.ballSys.Shooter;
 // import frc.robot.ballSys.Shooter.ShooterState;
 import frc.robot.swerveCode.Drivetrain;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+
+import java.util.Optional;
 
 import javax.swing.text.StyledEditorKit;
 
@@ -24,7 +29,6 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.math.MathUtil;
 
 public class Robot extends TimedRobot {
-
 
   // public CANSparkMax motor1 = new CANSparkMax(14,MotorType.kBrushless);
 
@@ -70,7 +74,7 @@ public class Robot extends TimedRobot {
    * 
    * @see {@link frc.robot.Robot#driveWithJoystick(boolean)};
    */
-  private final Drivetrain m_swerve = new Drivetrain(autoAlignRange, frontLeftIds, frontRightIds, backLeftIds,
+  public final Drivetrain m_swerve = new Drivetrain(autoAlignRange, frontLeftIds, frontRightIds, backLeftIds,
       backRightIds);
 
   /**
@@ -82,11 +86,17 @@ public class Robot extends TimedRobot {
 
   /**
    * SlewRateLimiters limit the ROC of an inputs strength.
-   * <p>For example, cannot instantly go from rest -> full speed.</p>
-   * <p>Technical term is "interpolating" inbetween points until reaching full speed.</p>
+   * <p>
+   * For example, cannot instantly go from rest -> full speed.
+   * </p>
+   * <p>
+   * Technical term is "interpolating" inbetween points until reaching full speed.
+   * </p>
    * Basically, makes controls more gradual.
    * Lower = jerkier. Higher = smoother but slower.
-   * <p>setting of 10: 1/3 sec from 0 to 1.</p>
+   * <p>
+   * setting of 10: 1/3 sec from 0 to 1.
+   * </p>
    */
   private final SlewRateLimiter m_xspeedLimiter = new SlewRateLimiter(10);
   private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(10);
@@ -110,57 +120,63 @@ public class Robot extends TimedRobot {
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
 
+    ballSys.m_indexWheel.set(1);
+    ballSys.m_intakeWheel.set(1);
+    ballSys.m_shooterWheel.set(0.5);
+
+
+
     SmartDashboard.putNumber("RPMS", ballSys.e_shooterWheel.getVelocity());
     SmartDashboard.putNumber("BallCount", ballSys.BallCount);
     ballSys.handleInputs(xController, j_operator);
     climb.handleInputs(xController, j_operator);
     // if(j_operator.getTrigger()) {
-    //   climb.popArmUp();
+    // climb.popArmUp();
     // }
     // if (j_operator.getRawButton(3)) {
-    //   climb.popArmDown();
+    // climb.popArmDown();
     // }
     // if (xController.getXButton()) {
-    //   switch (intakeState) {
-    //     case Stopped:
-    //       ballSys.m_intakeWheel.set(0.4);
-    //       intakeState = IntakeState.Go;
-    //       break;
-    //     case Go:
-    //       ballSys.m_intakeWheel.set(-0.4);
-    //       intakeState = IntakeState.Reverse;
-    //     case Reverse:
-    //       ballSys.m_intakeWheel.set(0);
-    //       intakeState = IntakeState.Stopped;
-    //   }
-    //   ballSys.m_intakeWheel.set(0.4);
+    // switch (intakeState) {
+    // case Stopped:
+    // ballSys.m_intakeWheel.set(0.4);
+    // intakeState = IntakeState.Go;
+    // break;
+    // case Go:
+    // ballSys.m_intakeWheel.set(-0.4);
+    // intakeState = IntakeState.Reverse;
+    // case Reverse:
+    // ballSys.m_intakeWheel.set(0);
+    // intakeState = IntakeState.Stopped;
+    // }
+    // ballSys.m_intakeWheel.set(0.4);
     // }
 
     // if (xController.getYButton()) {
-    //   if(!ballSys.Beam2.get())
-    //   ballSys.m_indexWheel.set(0.4);
+    // if(!ballSys.Beam2.get())
+    // ballSys.m_indexWheel.set(0.4);
     // } else {
-    //   ballSys.m_indexWheel.set(0);
+    // ballSys.m_indexWheel.set(0);
     // }
 
     // if(xController.getBButton()) {
-    //   ballSys.m_shooterWheel.set(0.9);
-    // }  else if (xController.getRightTriggerAxis() == 1) {
-    //   ballSys.m_shooterWheel.set(0.50);
+    // ballSys.m_shooterWheel.set(0.9);
+    // } else if (xController.getRightTriggerAxis() == 1) {
+    // ballSys.m_shooterWheel.set(0.50);
     // } else {
-    //   ballSys.m_shooterWheel.set(0);
+    // ballSys.m_shooterWheel.set(0);
     // }
     // m_swerve.m_frontLeft.m_turningMotor.set(0.1);
     // Timer.delay(5);
     // m_swerve.m_frontLeft.m_turningMotor.set(0);
     // try {
-    //   Thread.sleep(100);
+    // Thread.sleep(100);
     // } catch (InterruptedException e) {
-    //   // TODO Auto-generated catch block
-    //   e.printStackTrace();
+    // // TODO Auto-generated catch block
+    // e.printStackTrace();
     // }
     // m_swerve.drive(0.1, 0.1, 0, false);
- 
+
   }
 
   // @Override
@@ -173,29 +189,41 @@ public class Robot extends TimedRobot {
     m_swerve.customAutoAlign();
     m_swerve.navX.reset();
     autoCounter = 1;
-    //ballSys.intakeOn = false; 
-    ballSys.BoolBall = false; 
-    ballSys.shooting = false; 
+    // ballSys.intakeOn = false;
+    ballSys.BoolBall = false;
+    ballSys.shooting = false;
     ballSys.BallCount = 1;
+
   }
+
   @Override
   public void autonomousPeriodic() {
-    System.out.println(ballSys.BallCount);
-    ballSys.Index();
-    // System.out.println(autoCounter);
-    // System.out.println(Math.abs(15-m_swerve.navX.getYaw()));
-    // Moves in the periodic loop from one instruction to another, useful for redundancy and testing
-    switch(autoCounter) {
-      case 1:
-        if (Math.abs(15-m_swerve.navX.getYaw()) > .5) {
-          m_swerve.drive(0, 0, -.1, true);
-        } else {
-          m_swerve.drive(0, 0, 0, true);
-          autoCounter++;
-        }
+    // System.out.println(ballSys.BallCount);
+    // ballSys.Index();
+    // // System.out.println(autoCounter);
+    // System.out.println(Math.abs(15 - m_swerve.navX.getYaw()));
+    // // Moves in the periodic loop from one instruction to another, useful for
+    // redundancy and testing
+    switch (autoCounter) {
+      case -1:
+        m_swerve.rotateToLimelightWanted();
+        m_swerve.auto.stop();
+        // if (Math.abs(15-m_swerve.navX.getYaw()) > .5) {
+
+        // m_swerve.drive(0, 0, -.1, true);
+        // } else {
+        // m_swerve.drive(0, 0, 0, true);
+        // autoCounter++;
+        // }
         break;
-      case 2:
+      case -2:
+        Timer.delay(1);
         ballSys.shooting2(true);
+        autoCounter++;
+        break;
+      case 1:
+        m_swerve.auto.translateTo(new Translation2d(-0.1, 0), Optional.of(.05));
+        m_swerve.drive(0, 0, 0, true);
         autoCounter++;
         break;
     }

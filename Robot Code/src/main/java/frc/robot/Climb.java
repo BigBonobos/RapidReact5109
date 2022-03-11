@@ -6,8 +6,12 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 //wpilib imports
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import frc.robot.pneumatics.ISolenoidController;
+import frc.robot.pneumatics.basePneumatics.ISolenoid;
+import frc.robot.pneumatics.basePneumatics.SingleSolenoid;
 
-public class Climb {
+public class Climb implements ISolenoidController {
 
     // // neos
     // public CANSparkMax m_Hook = new CANSparkMax(0, MotorType.kBrushless);
@@ -22,8 +26,11 @@ public class Climb {
     // public SparkMaxPIDController pc_Winch = m_Winch.getPIDController();
 
     // solenoids
-    public Solenoid s_LeftPopArm = new Solenoid(PneumaticsModuleType.CTREPCM, 7);
-    // public Solenoid s_LeftPopArm = new Solenoid(PneumaticsModuleType.CTREPCM, 5);
+    public SingleSolenoid s_LeftPopArm = new SingleSolenoid(7);
+    // public Solenoid s_RightPopArm = new Solenoid(PneumaticsModuleType.CTREPCM,
+    // 5);
+
+    public SingleSolenoid[] solenoids = new SingleSolenoid[] { s_LeftPopArm };
 
     // sensors
     // return true if the circuit is open
@@ -31,6 +38,40 @@ public class Climb {
     // public DigitalInput armNotClosed = new DigitalInput(-1);
 
     // functions
+
+    public void handleInputs(XboxController xController, Joystick j_operator) {
+        if (j_operator.getTrigger()) {
+            extendAll();
+        }
+        if (j_operator.getRawButton(3)) {
+            retractAll();
+        }
+    }
+
+    @Override
+    public void extendAll() {
+        s_LeftPopArm.extendFully();
+        // s_RightPopArm.extendFully();
+
+    }
+
+    @Override
+    public void retractAll() {
+        s_LeftPopArm.retractFully();
+        // s_RightPopArm.retractFully();
+    }
+
+    @Override
+    public void toggleAll() {
+        s_LeftPopArm.toggle();
+        // s_RightPopArm.toggle();
+
+    }
+
+    @Override
+    public ISolenoid[] getAllSolenoids() {
+        return solenoids;
+    }
 
     // latch onto pole
     /*
@@ -83,24 +124,5 @@ public class Climb {
     // public void engageFrontHooks() {
     // pc_Hook.setReference(3.14, ControlType.kPosition);
     // }
-
-    public void popArmUp() {
-        s_LeftPopArm.set(true);
-        // s_RightPopArm.set(true);
-    }
-
-    public void popArmDown() {
-        s_LeftPopArm.set(false);
-        // s_RightPopArm.set(false);
-    }
-
-    public void handleInputs(XboxController xController, Joystick j_operator) {
-        if (j_operator.getTrigger()) {
-            popArmUp();
-        }
-        if (j_operator.getRawButton(3)) {
-            popArmDown();
-        }
-    }
 
 }

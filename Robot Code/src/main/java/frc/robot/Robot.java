@@ -179,7 +179,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     System.out.println(ballSys.BallCount);
-    ballSys.Index();
+    ballSys.updateIndex();
     // System.out.println(autoCounter);
     // System.out.println(Math.abs(15-m_swerve.navX.getYaw()));
     // Moves in the periodic loop from one instruction to another, useful for redundancy and testing
@@ -254,7 +254,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     driveWithJoystick(true);
-    ballSys.Index();
+    ballSys.updateIndex();
     ballSys.intakeMotor();
     if (xController.getRightTriggerAxis() == 1) {
       ballSysNotif.startSingle(0.0001);

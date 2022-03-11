@@ -96,20 +96,18 @@ public abstract class Autonomous extends MovementUtil {
     }
 
     public enum DriveDirection {
-        FORWARD(0, 0),
-        BACKWARD(1, 180),
-        RIGHT(2, 270),
-        LEFT(3, 90);
+        FORWARD(0),
+        BACKWARD(180),
+        RIGHT(270),
+        LEFT(90);
 
-        private final int index;
         private final int rotation;
 
         private int getRot() {
             return rotation;
         };
 
-        private DriveDirection(int index, int rotation) {
-            this.index = index;
+        private DriveDirection( int rotation) {
             this.rotation = rotation;
         }
     }

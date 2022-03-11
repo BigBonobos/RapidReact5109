@@ -42,7 +42,7 @@ public class Robot extends TimedRobot {
   private double autoAlignRange = 360.0;
   private BallSystems ballSys = new BallSystems();
   private Notifier ballSysNotif = new Notifier(ballSys);
-  public Climb climb = new Climb();
+  // public Climb climb = new Climb();
   private int autoCounter = 1;
 
   /**
@@ -105,13 +105,15 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
+    driveWithJoystick(false);
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
 
     SmartDashboard.putNumber("RPMS", ballSys.e_shooterWheel.getVelocity());
     SmartDashboard.putNumber("BallCount", ballSys.BallCount);
+
     ballSys.handleInputs(xController, j_operator);
-    climb.handleInputs(xController, j_operator);
+    // climb.handleInputs(xController, j_operator);
     // if(j_operator.getTrigger()) {
     //   climb.popArmUp();
     // }
@@ -174,6 +176,7 @@ public class Robot extends TimedRobot {
     //ballSys.intakeOn = false; 
     ballSys.BoolBall = false; 
     ballSys.shooting = false; 
+    ballSys.m_intakeWheel.set(0);
     ballSys.BallCount = 1;
   }
   @Override

@@ -1,6 +1,5 @@
 package frc.robot.pneumatics.basePneumatics;
 
-
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 
 import static edu.wpi.first.wpilibj.DoubleSolenoid.Value.*;
@@ -25,7 +24,7 @@ public class CustomDoubleSolenoid implements ISolenoid {
     @Override
     public void extendFully() {
         if (this.doublePCM.get() == kForward) {
-            this.relax();
+            // this.relax();
             return;
         }
         this.doublePCM.set(kForward);
@@ -34,7 +33,7 @@ public class CustomDoubleSolenoid implements ISolenoid {
     @Override
     public void retractFully() {
         if (this.doublePCM.get() == kReverse) {
-            this.relax();
+            // this.relax();
             return;
         }
         this.doublePCM.set(kReverse);
@@ -56,6 +55,5 @@ public class CustomDoubleSolenoid implements ISolenoid {
     public void relax() {
         this.doublePCM.set(kOff);
     }
-
 
 }

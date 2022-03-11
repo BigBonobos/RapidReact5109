@@ -2,11 +2,8 @@ package frc.robot;
 
 // imports
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
 //wpilib imports
-import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import frc.robot.pneumatics.ISolenoidController;
 import frc.robot.pneumatics.basePneumatics.ISolenoid;
 import frc.robot.pneumatics.basePneumatics.SingleSolenoid;
@@ -27,8 +24,8 @@ public class Climb implements ISolenoidController {
 
     // solenoids
     public SingleSolenoid s_LeftPopArm = new SingleSolenoid(7);
-    // public Solenoid s_RightPopArm = new Solenoid(PneumaticsModuleType.CTREPCM,
-    // 5);
+    public SingleSolenoid s_RightPopArm = new SingleSolenoid(5);
+    // public Solenoid s_RightPopArm = new Solenoid(PneumaticsModuleType.CTREPCM, 5);
 
     public SingleSolenoid[] solenoids = new SingleSolenoid[] { s_LeftPopArm };
 
@@ -51,20 +48,20 @@ public class Climb implements ISolenoidController {
     @Override
     public void extendAll() {
         s_LeftPopArm.extendFully();
-        // s_RightPopArm.extendFully();
+        s_RightPopArm.extendFully();
 
     }
 
     @Override
     public void retractAll() {
         s_LeftPopArm.retractFully();
-        // s_RightPopArm.retractFully();
+        s_RightPopArm.retractFully();
     }
 
     @Override
     public void toggleAll() {
         s_LeftPopArm.toggle();
-        // s_RightPopArm.toggle();
+        s_RightPopArm.toggle();
 
     }
 

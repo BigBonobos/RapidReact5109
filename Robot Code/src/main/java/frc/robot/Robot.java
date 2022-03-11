@@ -68,7 +68,7 @@ public class Robot extends TimedRobot {
    * 
    * @see {@link frc.robot.Robot#driveWithJoystick(boolean)};
    */
-  private final Drivetrain m_swerve = new Drivetrain(autoAlignRange, frontLeftIds, frontRightIds, backLeftIds,
+  public final Drivetrain m_swerve = new Drivetrain(autoAlignRange, frontLeftIds, frontRightIds, backLeftIds,
       backRightIds);
 
   /**

@@ -49,7 +49,7 @@ public class BallSystems implements Runnable {
     public BangBangController overSpeedController;
     public int shooterRPMs = 2000;
 
-    public void Index() {
+    public void updateIndex() {
         if (shooting == false) {
             if (BallCount == 0) {
                 if (!Beam1.get()) {

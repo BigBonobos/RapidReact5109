@@ -163,47 +163,51 @@ public class Robot extends TimedRobot {
  
   }
 
-  // @Override
-  // public void robotInit() {
+   @Override
+  public void robotInit() {
   // listenerHandleBall = m_swerve.initBallListener();
-  // }
+  }
 
   @Override
   public void autonomousInit() {
     m_swerve.customAutoAlign();
-    m_swerve.navX.reset();
     autoCounter = 1;
-    //ballSys.intakeOn = false; 
-    ballSys.BoolBall = false; 
-    ballSys.shooting = false; 
-    ballSys.m_intakeWheel.set(0);
     ballSys.BallCount = 1;
+  //   m_swerve.navX.reset();
+  //   autoCounter = 1;
+  //   //ballSys.intakeOn = false; 
+  //   ballSys.BoolBall = false; 
+  //   ballSys.shooting = false; 
+  //   ballSys.m_intakeWheel.set(0);
+  //   ballSys.BallCount = 1;
   }
   @Override
   public void autonomousPeriodic() {
-    System.out.println(ballSys.BallCount);
-    ballSys.updateIndex();
-    // System.out.println(autoCounter);
-    // System.out.println(Math.abs(15-m_swerve.navX.getYaw()));
-    // Moves in the periodic loop from one instruction to another, useful for redundancy and testing
+    // System.out.println(ballSys.BallCount);
+    // ballSys.updateIndex();
+    // // System.out.println(autoCounter);
+    // // System.out.println(Math.abs(15-m_swerve.navX.getYaw()));
+    // // Moves in the periodic loop from one instruction to another, useful for redundancy and testing
     switch(autoCounter) {
+      // case 1:
+      //   if (Math.abs(15-m_swerve.navX.getYaw()) > .5) {
+      //     m_swerve.drive(0, 0, -.1, true);
+      //   } else {
+      //     m_swerve.drive(0, 0, 0, true);
+      //     autoCounter++;
+      //   }
+      //   break;
       case 1:
-        if (Math.abs(15-m_swerve.navX.getYaw()) > .5) {
-          m_swerve.drive(0, 0, -.1, true);
-        } else {
-          m_swerve.drive(0, 0, 0, true);
-          autoCounter++;
-        }
-        break;
-      case 2:
         ballSys.shooting2(true);
         autoCounter++;
         break;
 
-      case 3:
-        m_swerve.drive(0, 1, 0, true);
-        Timer.delay(5);
-        m_swerve.drive(0,0,0,true);
+      case 2:
+        Timer.delay(3);
+        m_swerve.customAutoAlign();
+        m_swerve.drive(-1, 0, 0, false);
+        Timer.delay(1);
+        m_swerve.drive(0,0,0,false);
         autoCounter++;
     }
     // m_swerve.updateOdometry();
@@ -258,9 +262,15 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     driveWithJoystick(true);
     ballSys.updateIndex();
-    ballSys.intakeMotor();
+    //ballSys.intakeMotor();
     if (xController.getRightTriggerAxis() == 1) {
       ballSysNotif.startSingle(0.0001);
+    }
+    if (xController.getLeftTriggerAxis() == 1){
+      ballSys.m_intakeWheel.set(1);
+    }
+    else {
+      ballSys.m_intakeWheel.set(0);
     }
     // // Comment the below code out for swerve testing
 

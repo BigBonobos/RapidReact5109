@@ -13,10 +13,16 @@ import frc.robot.swerveCode.RevOptimization;
  * Storage class for autonomous driving.
  * DO NOT USE THIS. THIS IS NOT THREAD SAFE.
  */
-public abstract class Autonomous extends MovementUtil {
+public class Autonomous extends MovementUtil {
+
+    // private boolean running = false;
 
     public Autonomous(Drivetrain drivetrai) {
         super(drivetrai);
+    }
+
+    public void stop() {
+        m_swerve.drive(0, 0, 0, true);
     }
 
     public boolean translateTo(Translation2d fieldPoint, Optional<Double> speed) {
@@ -24,7 +30,7 @@ public abstract class Autonomous extends MovementUtil {
         Translation2d delta = fieldPoint
                 .minus(m_swerve.m_odometry.getPoseMeters().getTranslation());
         double yaw = Math.atan2(delta.getX(), delta.getY());
-        double wantedSpeed = speed.isPresent() ? speed.get() : Drivetrain.kMaxAngularSpeed;
+        double wantedSpeed = speed.isPresent() ? speed.get() : Drivetrain.kMaxSpeed;
 
         double xSpeed = wantedSpeed * Math.sin(yaw);
         double ySpeed = wantedSpeed * Math.cos(yaw);
@@ -53,7 +59,9 @@ public abstract class Autonomous extends MovementUtil {
         double wantedSpeed = rotSpeed.isPresent() ? rotSpeed.get() : Drivetrain.kMaxAngularSpeed;
 
         while (!reachedRotationTarget(absRotation)) {
-
+            // System.out.println(m_swerve.navX.getAngle());
+            // System.out.println(wanted);
+            // System.out.println(absRotation.getDegrees());
             // I may be using this incorrectly. :thumbsup:
             ChassisSpeeds test = ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, wantedSpeed,
                     Rotation2d.fromDegrees(wanted));
@@ -65,6 +73,7 @@ public abstract class Autonomous extends MovementUtil {
             }
         }
 
+        stop();
         return true;
 
     }

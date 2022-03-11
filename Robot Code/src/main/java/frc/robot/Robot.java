@@ -9,11 +9,14 @@ package frc.robot;
 // import frc.robot.ballSys.Shooter.ShooterState;
 import frc.robot.swerveCode.Drivetrain;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+
+import java.util.Optional;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -105,14 +108,18 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-    driveWithJoystick(false);
+    //driveWithJoystick(false);
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
 
     SmartDashboard.putNumber("RPMS", ballSys.e_shooterWheel.getVelocity());
     SmartDashboard.putNumber("BallCount", ballSys.BallCount);
+    SmartDashboard.putBoolean("Beam1", ballSys.Beam1.get());
+    SmartDashboard.putBoolean("Beam2", ballSys.Beam2.get());
+    
 
-    ballSys.handleInputs(xController, j_operator);
+    // ballSys.handleInputs(xController, j_operator);
+    ballSys.updateIndex();
     // climb.handleInputs(xController, j_operator);
     // if(j_operator.getTrigger()) {
     //   climb.popArmUp();
@@ -253,6 +260,10 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     m_swerve.customAutoAlign();
+    ballSys.intakeOn = false;
+    ballSys.BoolBall = false;
+    ballSys.shooting = false;
+    ballSys.BallCount = 0; 
   }
 
   /**
@@ -260,18 +271,44 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    // if (xController.getLeftBumperPressed()) {
+
+    //   m_swerve.auto.rotateTo(Rotation2d.fromDegrees(90), Optional.ofNullable(null));
+    // } else {
     driveWithJoystick(true);
     ballSys.updateIndex();
+    // }
     //ballSys.intakeMotor();
     if (xController.getRightTriggerAxis() == 1) {
       ballSysNotif.startSingle(0.0001);
     }
+
+
+    if (xController.getYButton()) {
+      // ballSysNotif.startSingle(0.0001);
+      ballSys.windUpShooter();
+    } else {
+      ballSys.stopShooter();
+    }
+
+
     if (xController.getLeftTriggerAxis() == 1){
       ballSys.m_intakeWheel.set(1);
     }
     else {
       ballSys.m_intakeWheel.set(0);
     }
+
+    // if (xController.getXButton()) {
+    //   ballSys.m_indexWheel.set(0.6);
+    //   // ballSys
+    // } else {
+    //   ballSys.m_indexWheel.set(0);
+    // }
+
+    // if (xController.getRightBumperPressed()) {
+    //   // m_swerve.autoAlignToGoalUsingLimelight();
+    // }
     // // Comment the below code out for swerve testing
 
     // // If the trigger is pressed, and autoAlign through limelight is not

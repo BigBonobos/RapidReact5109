@@ -53,7 +53,7 @@ public class BallSystems implements Runnable {
         if (shooting == false) {
             if (BallCount == 0) {
                 if (!Beam1.get()) {
-                    m_indexWheel.set(0.4);
+                    m_indexWheel.set(0.6);
                 }
                 if (!Beam2.get()) {
                     m_indexWheel.stopMotor();
@@ -67,6 +67,19 @@ public class BallSystems implements Runnable {
                 }
             }
         }
+    }
+
+    public void windUpShooter() {
+            if (e_shooterWheel.getVelocity() > 3800){
+                m_shooterWheel.set(0.4);
+            }
+            if (e_shooterWheel.getVelocity() < 3500){
+                m_shooterWheel.set(1);
+            }
+    }
+
+    public void stopShooter() {
+        m_shooterWheel.set(0); 
     }
 
     public boolean shooting2(boolean shooting) {
@@ -84,24 +97,24 @@ public class BallSystems implements Runnable {
             }
 
             if (BallCount > 0) {
-                if (Beam2.get() || e_shooterWheel.getVelocity() >= 2500) {
-                    m_indexWheel.set(0.3);
+                if (e_shooterWheel.getVelocity() >= 3400) {
+                    m_indexWheel.set(0.5);
                 } else {
                     m_indexWheel.stopMotor();
                 }
             }
 
-            if (!Beam2.get()) {
-                BoolBall = true;
-            }
-            if (Beam2.get()){ 
-                BoolBall = false;
-                if (BoolBall = false) {
-                    BallCount--;
-                }
-            }
+            // if (!Beam2.get()) {
+            //     BoolBall = true;
+            // }
+            // if (Beam2.get()){ 
+            //     BoolBall = false;
+            //     if (BoolBall = false) {
+            //         BallCount--;
+            //     }
+            // }
             
-            if (BallCount == 0 || currentTime - startTime >=4){
+            if (currentTime - startTime >=4){
                 BallCount = 0;
                 m_indexWheel.stopMotor();
                 m_shooterWheel.stopMotor();

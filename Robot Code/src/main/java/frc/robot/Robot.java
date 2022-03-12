@@ -99,9 +99,10 @@ public class Robot extends TimedRobot {
   private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(10);
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(1);
 
-  private final ClimbModule climbModule = new ClimbModule(10, 9, 7);
-  
-  private final CANSparkMax climbMotor = new CANSparkMax(10, MotorType.kBrushless);
+  private final int[][] solenoidPorts = new int[][]{{9, 8}, { 7, 6}};
+  private final ClimbModule climbModule = new ClimbModule(10, solenoidPorts);
+
+  // private final CANSparkMax climbMotor = new CANSparkMax(10, MotorType.kBrushless);
   /**
    * Test stub. Called once upon initialization.
    */
@@ -332,14 +333,14 @@ public class Robot extends TimedRobot {
     }
 
     ballSys.handleInputs(xController, j_operator);
-
-    if (xController.getBButton()) {
-      climbMotor.set(-0.5);
-    } else if (xController.getAButton()) {
-      climbMotor.set(0.5);
-    } else {
-      climbMotor.set(0);
-    }
+    climbModule.handleInputs(xController, j_operator);
+    // if (xController.getBButton()) {
+    //   climbMotor.set(-0.5);
+    // } else if (xController.getAButton()) {
+    //   climbMotor.set(0.5);
+    // } else {
+    //   climbMotor.set(0);
+    // }
 
 
 

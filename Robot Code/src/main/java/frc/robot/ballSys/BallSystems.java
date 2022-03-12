@@ -158,6 +158,7 @@ public class BallSystems implements BaseController, Runnable {
      * 
      * <p>
      * UPDATE: Nvm, Xander is a retard. What the fuck is this variable assignment?
+     * 
      */
     public boolean shooting2(boolean shooting) {
         double startTime = Timer.getFPGATimestamp();

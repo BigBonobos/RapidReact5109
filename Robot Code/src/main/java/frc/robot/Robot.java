@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import frc.robot.ballSys.BallSystems;
+import frc.robot.climb.ClimbModule;
 // import frc.robot.ballSys.Intake;
 // import frc.robot.ballSys.Shooter;
 // import frc.robot.ballSys.Shooter.ShooterState;
@@ -44,13 +46,16 @@ public class Robot extends TimedRobot {
   // private boolean autoAlignRunningShooter = false;
   // private boolean autoAlignRunningBall = false;
   private double autoAlignRange = 360.0;
-  private BallSystems ballSys = new BallSystems();
+
+
+  private int[] ballSysIDs = new int[]{4, 22, 8};
+  private BallSystems ballSys = new BallSystems(ballSysIDs);
   private Notifier ballSysNotif = new Notifier(ballSys);
   // public Climb climb = new Climb();
   private int autoCounter = 1;
 
   /**
-   * Settings for drivetrainModule.
+   * Settings for our drive train.
    * 
    * @see {@link frc.robot.swerveCode.SwerveModule#SwerveModule(int, int, int, double)}
    */
@@ -94,16 +99,15 @@ public class Robot extends TimedRobot {
   private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(10);
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(1);
 
-
+  private final ClimbModule climbModule = new ClimbModule(10, 9, 7);
+  
   private final CANSparkMax climbMotor = new CANSparkMax(10, MotorType.kBrushless);
   /**
    * Test stub. Called once upon initialization.
    */
   public void testInit() {
     m_swerve.customAutoAlign();
-    ballSys.intakeOn = false;
-    ballSys.BoolBall = false;
-    ballSys.shooting = false;
+    ballSys.resetSystem();
   }
 
   /**
@@ -115,10 +119,10 @@ public class Robot extends TimedRobot {
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
 
-    SmartDashboard.putNumber("RPMS", ballSys.e_shooterWheel.getVelocity());
-    SmartDashboard.putNumber("BallCount", ballSys.BallCount);
-    SmartDashboard.putBoolean("Beam1", ballSys.Beam1.get());
-    SmartDashboard.putBoolean("Beam2", ballSys.Beam2.get());
+    // SmartDashboard.putNumber("RPMS", ballSys.e_shooterWheel.getVelocity());
+    // SmartDashboard.putNumber("BallCount", ballSys.ballCount);
+    // SmartDashboard.putBoolean("Beam1", ballSys.Beam1.get());
+    // SmartDashboard.putBoolean("Beam2", ballSys.Beam2.get());
     
     switch (autoCounter){
       case 1: 
@@ -215,7 +219,7 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     m_swerve.customAutoAlign();
     autoCounter = 1;
-    ballSys.BallCount = 1;
+    ballSys.ballCount = 1;
   //   m_swerve.navX.reset();
   //   autoCounter = 1;
   //   //ballSys.intakeOn = false; 
@@ -310,10 +314,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     m_swerve.customAutoAlign();
-    ballSys.intakeOn = false;
-    ballSys.BoolBall = false;
-    ballSys.shooting = false;
-    ballSys.BallCount = 0; 
+    ballSys.resetSystem();
   }
 
   /**
@@ -321,17 +322,16 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    if (xController.getLeftBumperPressed()) {
 
-      m_swerve.auto.rotateTo(Rotation2d.fromDegrees(90), Optional.ofNullable(null));
-    } else {
     driveWithJoystick(true);
     ballSys.updateIndex();
-    }
-    //ballSys.intakeMotor();
+
+ 
     if (xController.getRightTriggerAxis() == 1) {
       ballSysNotif.startSingle(0.0001);
     }
+
+    ballSys.handleInputs(xController, j_operator);
 
     if (xController.getBButton()) {
       climbMotor.set(-0.5);
@@ -342,22 +342,6 @@ public class Robot extends TimedRobot {
     }
 
 
-
-
-    if (xController.getYButton()) {
-      // ballSysNotif.startSingle(0.0001);
-      ballSys.windUpShooter();
-    } else {
-      ballSys.stopShooter();
-    }
-
-
-    if (xController.getLeftTriggerAxis() == 1){
-      ballSys.m_intakeWheel.set(1);
-    }
-    else {
-      ballSys.m_intakeWheel.set(0);
-    }
 
     // if (xController.getXButton()) {
     //   ballSys.m_indexWheel.set(0.6);

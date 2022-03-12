@@ -10,6 +10,7 @@ package frc.robot;
 import frc.robot.swerveCode.Drivetrain;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -93,6 +94,8 @@ public class Robot extends TimedRobot {
   private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(10);
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(1);
 
+
+  private final CANSparkMax climbMotor = new CANSparkMax(10, MotorType.kBrushless);
   /**
    * Test stub. Called once upon initialization.
    */
@@ -117,9 +120,42 @@ public class Robot extends TimedRobot {
     SmartDashboard.putBoolean("Beam1", ballSys.Beam1.get());
     SmartDashboard.putBoolean("Beam2", ballSys.Beam2.get());
     
+    switch (autoCounter){
+      case 1: 
+        if (ballSys.e_shooterWheel.getVelocity() > 2600){
+          autoCounter ++;
+        }
+        else {
+          ballSys.m_shooterWheel.set(0.6);
+        }
+        break;
+      case 2:
+        ballSys.m_indexWheel.set(0.75);
+        Timer.delay(1);
+        autoCounter ++;
+        break;
+      case 3:
+        ballSys.m_shooterWheel.stopMotor();
+        autoCounter++;
+        break;
+    }
 
+    //ballSys.shooting2(true);
+
+
+    //   case 4:
+    //     ballSys.m_indexWheel.set(0.3);
+    //     Timer.delay(1);
+    //     autoCounter++;
+    //     break;
+    // }
     // ballSys.handleInputs(xController, j_operator);
-    ballSys.updateIndex();
+    // ballSys.m_shooterWheel.set(0.59);
+    // Timer.delay(2);
+    // ballSys.m_indexWheel.set(0.75);
+    // Timer.delay(2);
+    // ballSys.m_shooterWheel.stopMotor();
+    //autoCounter++;    
     // climb.handleInputs(xController, j_operator);
     // if(j_operator.getTrigger()) {
     //   climb.popArmUp();
@@ -204,12 +240,24 @@ public class Robot extends TimedRobot {
       //     autoCounter++;
       //   }
       //   break;
-      case 1:
-        ballSys.shooting2(true);
+      case 1: 
+        if (ballSys.e_shooterWheel.getVelocity() > 2700){
+          autoCounter ++;
+        }
+        else {
+          ballSys.m_shooterWheel.set(0.6);
+        }
+        break;
+      case 2:
+        ballSys.m_indexWheel.set(0.75);
+        Timer.delay(1);
+        autoCounter ++;
+        break;
+      case 3:
+        ballSys.m_shooterWheel.stopMotor();
         autoCounter++;
         break;
-
-      case 2:
+      case 4:
         Timer.delay(3);
         m_swerve.customAutoAlign();
         m_swerve.drive(-1, 0, 0, false);
@@ -219,6 +267,8 @@ public class Robot extends TimedRobot {
     }
     // m_swerve.updateOdometry();
   }
+
+  
 
   // // Remove ball aligner, and stop intaking
   // m_swerve.ballAlignmentValues.removeEntryListener(listenerHandleBall);
@@ -271,17 +321,27 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    // if (xController.getLeftBumperPressed()) {
+    if (xController.getLeftBumperPressed()) {
 
-    //   m_swerve.auto.rotateTo(Rotation2d.fromDegrees(90), Optional.ofNullable(null));
-    // } else {
+      m_swerve.auto.rotateTo(Rotation2d.fromDegrees(90), Optional.ofNullable(null));
+    } else {
     driveWithJoystick(true);
     ballSys.updateIndex();
-    // }
+    }
     //ballSys.intakeMotor();
     if (xController.getRightTriggerAxis() == 1) {
       ballSysNotif.startSingle(0.0001);
     }
+
+    if (xController.getBButton()) {
+      climbMotor.set(-0.5);
+    } else if (xController.getAButton()) {
+      climbMotor.set(0.5);
+    } else {
+      climbMotor.set(0);
+    }
+
+
 
 
     if (xController.getYButton()) {

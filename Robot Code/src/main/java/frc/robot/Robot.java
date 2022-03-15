@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import frc.robot.ballSys.BallSystems;
+import frc.robot.climb.ClimbModule;
 // import frc.robot.ballSys.Intake;
 // import frc.robot.ballSys.Shooter;
 // import frc.robot.ballSys.Shooter.ShooterState;
@@ -45,13 +47,16 @@ public class Robot extends TimedRobot {
   // private boolean autoAlignRunningShooter = false;
   // private boolean autoAlignRunningBall = false;
   private double autoAlignRange = 360.0;
-  private BallSystems ballSys = new BallSystems();
+
+
+  private int[] ballSysIDs = new int[]{4, 22, 8};
+  private BallSystems ballSys = new BallSystems(ballSysIDs);
   private Notifier ballSysNotif = new Notifier(ballSys);
   // public Climb climb = new Climb();
   private int autoCounter = 1;
 
   /**
-   * Settings for drivetrainModule.
+   * Settings for our drive train.
    * 
    * @see {@link frc.robot.swerveCode.SwerveModule#SwerveModule(int, int, int, double)}
    */
@@ -95,8 +100,10 @@ public class Robot extends TimedRobot {
   private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(10);
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(1);
 
+  private final int[][] solenoidPorts = new int[][]{{9, 8}, { 7, 6}};
+  private final ClimbModule climbModule = new ClimbModule(10, solenoidPorts);
 
-  private final CANSparkMax climbMotor = new CANSparkMax(10, MotorType.kBrushless);
+  // private final CANSparkMax climbMotor = new CANSparkMax(10, MotorType.kBrushless);
   /**
    * Test stub. Called once upon initialization.
    */
@@ -105,9 +112,7 @@ public class Robot extends TimedRobot {
     
 
     m_swerve.customAutoAlign();
-    ballSys.intakeOn = false;
-    ballSys.BoolBall = false;
-    ballSys.shooting = false;
+    ballSys.resetSystem();
   }
 
   /**
@@ -227,7 +232,7 @@ public class Robot extends TimedRobot {
     m_swerve.customAutoAlign();
     Timer.delay(1);
     autoCounter = 1;
-    ballSys.BallCount = 1;
+    ballSys.ballCount = 1;
 
     m_swerve.auto.rotateTo(Rotation2d.fromDegrees(135), Optional.of(0.1));
     m_swerve.auto.translateTo(new Translation2d(-.1, 0), Optional.of(0.1));
@@ -326,10 +331,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     m_swerve.customAutoAlign();
-    ballSys.intakeOn = false;
-    ballSys.BoolBall = false;
-    ballSys.shooting = false;
-    ballSys.BallCount = 0; 
+    ballSys.resetSystem();
   }
 
   /**
@@ -349,10 +351,6 @@ public class Robot extends TimedRobot {
     // if (xController.getBButton()) {
     //   climbMotor.set(-0.5);
     // } else if (xController.getAButton()) {
-    //   climbMotor.set(0.5);
-    // } else {
-    //   climbMotor.set(0);
-    // }
 
 
 
@@ -364,13 +362,6 @@ public class Robot extends TimedRobot {
       ballSys.stopShooter();
     }
 
-
-    if (xController.getLeftTriggerAxis() == 1){
-      ballSys.m_intakeWheel.set(1);
-    }
-    else {
-      ballSys.m_intakeWheel.set(0);
-    }
 
     // if (xController.getXButton()) {
     //   ballSys.m_indexWheel.set(0.6);

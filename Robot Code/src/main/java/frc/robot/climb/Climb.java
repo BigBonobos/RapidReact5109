@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.climb;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;

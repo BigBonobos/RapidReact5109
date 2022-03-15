@@ -10,6 +10,7 @@ package frc.robot;
 import frc.robot.swerveCode.Drivetrain;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -100,6 +101,9 @@ public class Robot extends TimedRobot {
    * Test stub. Called once upon initialization.
    */
   public void testInit() {
+
+    
+
     m_swerve.customAutoAlign();
     ballSys.intakeOn = false;
     ballSys.BoolBall = false;
@@ -111,34 +115,41 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
+    
+    // if(j_operator.
+    // }
+
+    // climb.handleInputs(j_operator);
+
+
     //driveWithJoystick(false);
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
     // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
 
-    SmartDashboard.putNumber("RPMS", ballSys.e_shooterWheel.getVelocity());
-    SmartDashboard.putNumber("BallCount", ballSys.BallCount);
-    SmartDashboard.putBoolean("Beam1", ballSys.Beam1.get());
-    SmartDashboard.putBoolean("Beam2", ballSys.Beam2.get());
+    // SmartDashboard.putNumber("RPMS", ballSys.e_shooterWheel.getVelocity());
+    // SmartDashboard.putNumber("BallCount", ballSys.BallCount);
+    // SmartDashboard.putBoolean("Beam1", ballSys.Beam1.get());
+    // SmartDashboard.putBoolean("Beam2", ballSys.Beam2.get());
     
-    switch (autoCounter){
-      case 1: 
-        if (ballSys.e_shooterWheel.getVelocity() > 2600){
-          autoCounter ++;
-        }
-        else {
-          ballSys.m_shooterWheel.set(0.6);
-        }
-        break;
-      case 2:
-        ballSys.m_indexWheel.set(0.75);
-        Timer.delay(1);
-        autoCounter ++;
-        break;
-      case 3:
-        ballSys.m_shooterWheel.stopMotor();
-        autoCounter++;
-        break;
-    }
+    // switch (autoCounter){
+    //   case 1: 
+    //     if (ballSys.e_shooterWheel.getVelocity() > 2600){
+    //       autoCounter ++;
+    //     }
+    //     else {
+    //       ballSys.m_shooterWheel.set(0.6);
+    //     }
+    //     break;
+    //   case 2:
+    //     ballSys.m_indexWheel.set(0.75);
+    //     Timer.delay(1);
+    //     autoCounter ++;
+    //     break;
+    //   case 3:
+    //     ballSys.m_shooterWheel.stopMotor();
+    //     autoCounter++;
+    //     break;
+    // }
 
     //ballSys.shooting2(true);
 
@@ -214,8 +225,13 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_swerve.customAutoAlign();
+    Timer.delay(1);
     autoCounter = 1;
     ballSys.BallCount = 1;
+
+    m_swerve.auto.rotateTo(Rotation2d.fromDegrees(135), Optional.of(0.1));
+    m_swerve.auto.translateTo(new Translation2d(-.1, 0), Optional.of(0.1));
+    m_swerve.auto.stop();
   //   m_swerve.navX.reset();
   //   autoCounter = 1;
   //   //ballSys.intakeOn = false; 
@@ -231,40 +247,40 @@ public class Robot extends TimedRobot {
     // // System.out.println(autoCounter);
     // // System.out.println(Math.abs(15-m_swerve.navX.getYaw()));
     // // Moves in the periodic loop from one instruction to another, useful for redundancy and testing
-    switch(autoCounter) {
-      // case 1:
-      //   if (Math.abs(15-m_swerve.navX.getYaw()) > .5) {
-      //     m_swerve.drive(0, 0, -.1, true);
-      //   } else {
-      //     m_swerve.drive(0, 0, 0, true);
-      //     autoCounter++;
-      //   }
-      //   break;
-      case 1: 
-        if (ballSys.e_shooterWheel.getVelocity() > 2700){
-          autoCounter ++;
-        }
-        else {
-          ballSys.m_shooterWheel.set(0.6);
-        }
-        break;
-      case 2:
-        ballSys.m_indexWheel.set(0.75);
-        Timer.delay(1);
-        autoCounter ++;
-        break;
-      case 3:
-        ballSys.m_shooterWheel.stopMotor();
-        autoCounter++;
-        break;
-      case 4:
-        Timer.delay(3);
-        m_swerve.customAutoAlign();
-        m_swerve.drive(-1, 0, 0, false);
-        Timer.delay(1);
-        m_swerve.drive(0,0,0,false);
-        autoCounter++;
-    }
+    // switch(autoCounter) {
+    //   // case 1:
+    //   //   if (Math.abs(15-m_swerve.navX.getYaw()) > .5) {
+    //   //     m_swerve.drive(0, 0, -.1, true);
+    //   //   } else {
+    //   //     m_swerve.drive(0, 0, 0, true);
+    //   //     autoCounter++;
+    //   //   }
+    //   //   break;
+    //   case 1: 
+    //     if (ballSys.e_shooterWheel.getVelocity() > 2700){
+    //       autoCounter ++;
+    //     }
+    //     else {
+    //       ballSys.m_shooterWheel.set(0.6);
+    //     }
+    //     break;
+    //   case 2:
+    //     ballSys.m_indexWheel.set(0.75);
+    //     Timer.delay(1);
+    //     autoCounter ++;
+    //     break;
+    //   case 3:
+    //     ballSys.m_shooterWheel.stopMotor();
+    //     autoCounter++;
+    //     break;
+    //   case 4:
+    //     Timer.delay(3);
+    //     m_swerve.customAutoAlign();
+    //     m_swerve.drive(-1, 0, 0, false);
+    //     Timer.delay(1);
+    //     m_swerve.drive(0,0,0,false);
+    //     autoCounter++;
+    // }
     // m_swerve.updateOdometry();
   }
 
@@ -321,25 +337,22 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    if (xController.getLeftBumperPressed()) {
-
-      m_swerve.auto.rotateTo(Rotation2d.fromDegrees(90), Optional.ofNullable(null));
-    } else {
+    m_swerve.updateOdometry();
+    System.out.println(m_swerve.m_odometry.getPoseMeters());
     driveWithJoystick(true);
     ballSys.updateIndex();
-    }
     //ballSys.intakeMotor();
     if (xController.getRightTriggerAxis() == 1) {
       ballSysNotif.startSingle(0.0001);
     }
 
-    if (xController.getBButton()) {
-      climbMotor.set(-0.5);
-    } else if (xController.getAButton()) {
-      climbMotor.set(0.5);
-    } else {
-      climbMotor.set(0);
-    }
+    // if (xController.getBButton()) {
+    //   climbMotor.set(-0.5);
+    // } else if (xController.getAButton()) {
+    //   climbMotor.set(0.5);
+    // } else {
+    //   climbMotor.set(0);
+    // }
 
 
 

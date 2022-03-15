@@ -8,7 +8,7 @@ import frc.robot.swerveCode.Drivetrain;
 
 public class MovementUtil {
 
-    public static final double acceptableErrorTranslationMeters = 0.1;
+    public static final double acceptableErrorTranslationMeters = 0.01;
     public static final double acceptableErrorRotationDegrees = 3;
 
     public final Drivetrain m_swerve;
@@ -63,6 +63,7 @@ public class MovementUtil {
         m_swerve.updateOdometry();
         Pose2d current = m_swerve.m_odometry.getPoseMeters();
         double rotDist = Math.abs(target.getDegrees() - current.getRotation().getDegrees());
+        System.out.println(String.format("distance to: %f", rotDist));
         return rotDist < acceptableErrorRotationDegrees;
     }
 

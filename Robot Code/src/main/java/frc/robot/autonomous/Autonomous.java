@@ -43,7 +43,10 @@ public class Autonomous extends MovementUtil {
 
             xSpeed = wantedSpeed * Math.sin(yaw);
             ySpeed = wantedSpeed * Math.cos(yaw);
-            m_swerve.drive(xSpeed, ySpeed, 0, false);
+            m_swerve.drive(xSpeed, ySpeed, 0, true);
+            System.out.println(xSpeed);
+            System.out.println(ySpeed);
+            System.out.println(m_swerve.m_odometry.getPoseMeters().getTranslation());
             try {
                 Thread.sleep(20);
             } catch (InterruptedException e) {
@@ -67,6 +70,8 @@ public class Autonomous extends MovementUtil {
             ChassisSpeeds test = ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, wantedSpeed,
                     Rotation2d.fromDegrees(wanted));
             m_swerve.drive(test.vxMetersPerSecond, test.vyMetersPerSecond, test.omegaRadiansPerSecond, true);
+            System.out.println(test.omegaRadiansPerSecond);
+            System.out.println(m_swerve.m_odometry.getPoseMeters().getRotation());
             try {
                 Thread.sleep(20);
             } catch (InterruptedException e) {

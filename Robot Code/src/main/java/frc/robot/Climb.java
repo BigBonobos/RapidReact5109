@@ -1,5 +1,9 @@
 package frc.robot;
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 // imports
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -10,11 +14,11 @@ public class Climb {
 
     // // neos
     // public CANSparkMax m_Hook = new CANSparkMax(0, MotorType.kBrushless);
-    // public CANSparkMax m_Winch = new CANSparkMax(22, MotorType.kBrushless);
+    public CANSparkMax m_Winch = new CANSparkMax(10, MotorType.kBrushless);
 
     // // neo encoders
     // public RelativeEncoder e_Hook = m_Hook.getEncoder();
-    // public RelativeEncoder e_Winch = m_Winch.getEncoder();
+    //public RelativeEncoder e_Winch = m_Winch.getEncoder();
 
     // // neo pidcontrollers
     // public SparkMaxPIDController pc_Hook = m_Hook.getPIDController();
@@ -34,13 +38,19 @@ public class Climb {
 
     // functions
 
-    public void handleInputs(XboxController xController, Joystick j_operator) {
+    public void handleInputs(Joystick j_operator) {
         if (j_operator.getTrigger()) {
             extendAll();
         }
         if (j_operator.getRawButton(3)) {
             retractAll();
         }
+        if (j_operator.getRawButton(4)) {
+            extendWinch();
+        } 
+        if (j_operator.getRawButton(5)) {
+            retractWinch();
+        } 
     }
 
     
@@ -61,6 +71,14 @@ public class Climb {
         s_LeftPopArm.toggle();
         // s_RightPopArm.toggle();
 
+    }
+
+    public void extendWinch() {
+        m_Winch.set(-0.5);
+    }
+
+    public void retractWinch() {
+        m_Winch.set(-0.5);
     }
 
     

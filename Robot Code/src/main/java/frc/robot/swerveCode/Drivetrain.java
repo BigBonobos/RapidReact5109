@@ -32,10 +32,10 @@ public class Drivetrain {
   public NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
 
   // Bot measurements
-  private final Translation2d m_frontLeftLocation = new Translation2d(0.381, 0.381);
-  private final Translation2d m_frontRightLocation = new Translation2d(0.381, -0.381);
-  private final Translation2d m_backLeftLocation = new Translation2d(-0.381, 0.381);
-  private final Translation2d m_backRightLocation = new Translation2d(-0.381, -0.381);
+  private final Translation2d m_frontLeftLocation = new Translation2d(0.2921, 0.2921);
+  private final Translation2d m_frontRightLocation = new Translation2d(0.2921, -0.2921);
+  private final Translation2d m_backLeftLocation = new Translation2d(-0.2921, 0.2921);
+  private final Translation2d m_backRightLocation = new Translation2d(-0.2921, -0.2921);
   private static final DriverStation.Alliance alliance = DriverStation.getAlliance();
 
   // Swerve Module instantiation
@@ -44,7 +44,7 @@ public class Drivetrain {
   public SwerveModule m_backLeft;
   public SwerveModule m_backRight;
   public AHRS navX = new AHRS(SPI.Port.kMXP);
-  private Rotation2d initialMeasurement = new Rotation2d((navX.getYaw() % 360) * Math.PI / 180);
+  private Rotation2d initialMeasurement = Rotation2d.fromDegrees(navX.getYaw() % 360);
 
   // Shooter Range
   public double shooterRangeCm; // Enter shooter distance here (cm)

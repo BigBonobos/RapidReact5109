@@ -61,7 +61,7 @@ public class Intake implements BaseController {
      */
     public void intakeFor(double seconds) {
         double start = Timer.getFPGATimestamp();
-        while (Timer.getFPGATimestamp() - start < seconds) {
+        while (ballCount < 2 && Timer.getFPGATimestamp() - start < seconds) {
             intakeBalls();
 
             try {

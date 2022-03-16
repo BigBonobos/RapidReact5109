@@ -6,6 +6,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.BangBangController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
@@ -64,6 +65,9 @@ public class Shooter implements BaseController {
      */
     private final BangBangController overSpeedController;
 
+
+    private final SimpleMotorFeedforward feedForward;
+
     /**
      * Wanted RPM of the wheel.
      * <p>
@@ -91,7 +95,8 @@ public class Shooter implements BaseController {
         m_indexEncoder = m_indexMotor.getEncoder();
         m_shooterEncoder = m_shooterMotor.getEncoder();
 
-        overSpeedController = new BangBangController(50);
+        overSpeedController = new BangBangController(100);
+        feedForward = new SimpleMotorFeedforward(0, 0, 0);
 
         m_shooterMotor.setIdleMode(CANSparkMax.IdleMode.kCoast);
         overSpeedController.setSetpoint(shooterSpeedRpms);
@@ -119,6 +124,11 @@ public class Shooter implements BaseController {
         return overSpeedController.calculate(m_shooterEncoder.getVelocity(), this.getWantedRPM());
     }
 
+    //https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/bang-bang.html
+    public double calculateShootingVoltage() {
+        return overSpeedController.calculate(m_shooterEncoder.getVelocity(), getWantedRPM()) * 12.0 + 0.9 * feedForward.calculate(getWantedRPM());
+    }
+
     /**
      * @return velocity of motor is less than 20 rpm AND wanted speed of motor is NOT zero. 
      */
@@ -137,25 +147,11 @@ public class Shooter implements BaseController {
         double ballDelay = 0.25;
         ballDelay = ballCount * 0.25;
 
-
-        // if (!Beam1.get()) {
-        //     ballDelay = 0.5;
-        // }
-        // if (!Beam2.get() && Beam1.get()) {
-        //     ballDelay = 0.25;
-        // }
-        // if (Beam1.get() && Beam2.get()) {
-        //     ballDelay = 0.25;
-        // }
-
         m_indexMotor.set(0);
         double startTime = Timer.getFPGATimestamp();
         while (!isAtShootingSpeed() && Timer.getFPGATimestamp() - startTime < 4) {
             m_shooterMotor.set(calculateShootingSpeed());
-
-            // System.out.printf("Ready?: %b   Speed: %f\n", isAtShootingSpeed(), m_shooterEncoder.getVelocity());
-            // pause for ten milliseconds to not be wasteful.
-            // if interrupted, break.
+            // m_shooterMotor.setVoltage(calculateShootingVoltage());
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -166,7 +162,6 @@ public class Shooter implements BaseController {
       
         double loadingStart = Timer.getFPGATimestamp();
         while (Timer.getFPGATimestamp() - loadingStart < ballDelay) {
-            System.out.println("We're loading teh balls now.");
             m_indexMotor.set(0.4);
             m_shooterMotor.set(calculateShootingSpeed());
             try {

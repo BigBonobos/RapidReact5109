@@ -7,13 +7,12 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.controllers.SolenoidController;
 import frc.robot.pneumatics.base.CDSolenoid;
-import frc.robot.pneumatics.base.ISolenoid;
 
 public class ClimbModule implements SolenoidController {
 
     private final CDSolenoid rightSolenoid;
     private final CDSolenoid leftSolenoid;
-    private final ISolenoid[] sols;
+    private final CDSolenoid[] sols;
 
     private final CANSparkMax climbMotor;
 
@@ -35,7 +34,7 @@ public class ClimbModule implements SolenoidController {
         leftSolenoid = null;
         // rightSolenoid = new CDSolenoid(solenoidSettings[0][0], solenoidSettings[0][1]);
         // leftSolenoid = new CDSolenoid(solenoidSettings[1][0], solenoidSettings[1][1]);
-        sols = new ISolenoid[]{ rightSolenoid, leftSolenoid };
+        sols = new CDSolenoid[]{ rightSolenoid, leftSolenoid };
 
     }
 
@@ -43,7 +42,7 @@ public class ClimbModule implements SolenoidController {
         climbMotor = climb;
         rightSolenoid = right;
         leftSolenoid = left;
-        sols = new ISolenoid[]{ left, right };
+        sols = new CDSolenoid[]{ left, right };
     }
 
     @Override
@@ -68,11 +67,14 @@ public class ClimbModule implements SolenoidController {
     }
 
     @Override
-    public ISolenoid[] getAllSolenoids() {
+    public CDSolenoid[] getAllSolenoids() {
         return sols;
     }
 
 
+    /**
+     * Listens to B BUTTON and A BUTTON.
+     */
     @Override
     public void handleInputs(XboxController xController, Joystick j_operator) {
         if (xController.getBButton()) {

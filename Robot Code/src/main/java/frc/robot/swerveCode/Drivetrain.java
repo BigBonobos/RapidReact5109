@@ -38,12 +38,12 @@ public class Drivetrain {
   private static final DriverStation.Alliance alliance = DriverStation.getAlliance();
 
   // Swerve Module instantiation
-  public SwerveModule m_frontLeft;
-  public SwerveModule m_frontRight;
-  public SwerveModule m_backLeft;
-  public SwerveModule m_backRight;
-  public AHRS navX = new AHRS(SPI.Port.kMXP);
-  private Rotation2d initialMeasurement = Rotation2d.fromDegrees(navX.getYaw() % 360);
+  public final SwerveModule m_frontLeft;
+  public final SwerveModule m_frontRight;
+  public final SwerveModule m_backLeft;
+  public final  SwerveModule m_backRight;
+  public final AHRS navX = new AHRS(SPI.Port.kMXP);
+  private final Rotation2d initialMeasurement = Rotation2d.fromDegrees(navX.getYaw() % 360);
 
   // Shooter Range
   public double shooterRangeCm; // Enter shooter distance here (cm)

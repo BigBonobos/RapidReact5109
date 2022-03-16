@@ -27,7 +27,6 @@ public class Robot extends TimedRobot {
    */
   private double autoAlignRange = 360.0;
 
-
   /**
    * Settings for our drive train.
    * 
@@ -38,6 +37,9 @@ public class Robot extends TimedRobot {
   private static final double[] backLeftIds = { 18, 19, 3, 60.6 };// -5}; //front right?
   private static final double[] backRightIds = { 16, 17, 2, -80.86 };// (180 + 40) - 360}; //front left?y
 
+  /**
+   * XboxController for general movement of the robot.
+   */
   private final XboxController xController = new XboxController(0);
 
   /**
@@ -49,7 +51,7 @@ public class Robot extends TimedRobot {
    * A custom implementation of four SwerveModules (also custom).
    * Can omni-directionally drive.
    * 
-   * @see {@link frc.robot.Robot#driveWithJoystick(boolean)};
+   * @see {@link frc.robot.Robot#driveWithJoystick(boolean) Drivetrain constructor.}
    */
   public final Drivetrain m_swerve = new Drivetrain(autoAlignRange, frontLeftIds, frontRightIds, backLeftIds,
       backRightIds);
@@ -70,31 +72,35 @@ public class Robot extends TimedRobot {
   private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(10);
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(1);
 
+  /**
+   * CANSparkMax motor ports.
+   * <p>
+   * {@link com.revrobotics.CANSparkMax#CANSparkMax(int, MotorType) motor config.}
+   */
+  private final int[] bfIDs = new int[] { 4, 22, 8 };
 
   /**
-   * CANSparkMax motor ports. 
-   * <p>{@link com.revrobotics.CANSparkMax#CANSparkMax(int, MotorType) motor config.}
+   * Handler for intake and shooter. Uses {@link Robot#bfIDs motor ids}
+   * to set up.
+   * 
+   * @see {@link frc.robot.ballSys.BallFondler#BallFondler(int, int, int, double)
+   *      BallFondler constructor.}
    */
-  private final int[] ballFondlerIDs = new int[] { 4, 22, 8 };
-
-  /**
-   * Handler for intake and shooter. Uses {@link Robot#ballFondlerIDs motor ids} to set up.
-   * @see {@link frc.robot.ballSys.BallFondler#BallFondler(int, int, int, double) BallFondler constructor.}
-   */
-  private final BallFondler ballFondler = new BallFondler(ballFondlerIDs[0], ballFondlerIDs[1], ballFondlerIDs[2],
-      3500);
+  private final BallFondler ballFondler = new BallFondler(bfIDs[0], bfIDs[1], bfIDs[2], 3650);
 
   /**
    * Setup for solenoid ports for the climb module.
    * 
-   * @see {@link frc.robot.climb.ClimbModule#ClimbModule(int, int[][]) ClimbModule constructor.}
+   * @see {@link frc.robot.climb.ClimbModule#ClimbModule(int, int[][]) ClimbModule
+   *      constructor.}
    */
   private final int[][] solenoidPorts = new int[][] { { 9, 8 }, { 7, 6 } };
 
   /**
    * Climb module. Controls two solenoids and a motor.
    * 
-   * @see {@link frc.robot.climb.ClimbModule#ClimbModule(int, int[][]) ClimbModule constructor.}
+   * @see {@link frc.robot.climb.ClimbModule#ClimbModule(int, int[][]) ClimbModule
+   *      constructor.}
    */
   private final ClimbModule climbModule = new ClimbModule(10, solenoidPorts);
 
@@ -117,8 +123,6 @@ public class Robot extends TimedRobot {
   @Override
   public void testInit() {
     m_swerve.customAutoAlign();
-    ballFondler.resetSystem();
-    climbModule.resetSystem();
   }
 
   /**
@@ -127,8 +131,7 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
     driveWithJoystick(true);
-    ballFondler.handleInputs(xController, j_operator);
-    climbModule.handleInputs(xController, j_operator);
+    handleInputs(xController, j_operator);
 
   }
 
@@ -137,16 +140,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-
     autoCounter = 1;
     ballFondler.hardReset();
     m_swerve.customAutoAlign();
-
     Timer.delay(1);
-
-    m_swerve.auto.rotateTo(Rotation2d.fromDegrees(135), 0.1);
-    m_swerve.auto.translateTo(new Translation2d(-.1, 0), 0.1);
-    m_swerve.auto.stop();
   }
 
   /**
@@ -160,7 +157,7 @@ public class Robot extends TimedRobot {
         autoCounter++;
         break;
       case 2:
-        if (ballFondler.getAndUpdateBallCount() != 0) {
+        if (ballFondler.getAndUpdateBallCount() >= 2) {
           ballFondler.intake.resetSystem();
           autoCounter++;
           break;
@@ -192,13 +189,15 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    m_swerve.updateOdometry();
     System.out.println(m_swerve.m_odometry.getPoseMeters());
+    m_swerve.updateOdometry();
+    
     driveWithJoystick(true);
-
-    ballFondler.handleInputs(xController, j_operator);
-    climbModule.handleInputs(xController, j_operator);
+    handleInputs(xController, j_operator);
   }
+
+
+
 
   private void driveWithJoystick(boolean fieldRelative) {
     /**
@@ -224,5 +223,10 @@ public class Robot extends TimedRobot {
         * frc.robot.swerveCode.Drivetrain.kMaxAngularSpeed;
 
     m_swerve.drive(xSpeed, ySpeed, rot, fieldRelative);
+  }
+
+  private void handleInputs(XboxController xController, Joystick j_operator) {
+    ballFondler.resetSystem();
+    climbModule.resetSystem();
   }
 }

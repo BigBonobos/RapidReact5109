@@ -39,7 +39,7 @@ public class Autonomous extends MovementUtil {
 
         while (!reachedTranslationTarget(fieldPoint)) {
             delta = fieldPoint
-                    .minus(m_swerve.m_odometry.getPoseMeters().getTranslation());
+                    .minus(new Translation2d(m_swerve.navX.getDisplacementX(), m_swerve.navX.getDisplacementY()));
             yaw = Math.atan2(delta.getX(), delta.getY());
 
             xSpeed = speed * Math.sin(yaw);

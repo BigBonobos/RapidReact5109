@@ -31,8 +31,10 @@ public class ClimbModule implements SolenoidController {
         }
 
         climbMotor = new CANSparkMax(motorPort, MotorType.kBrushless);
-        rightSolenoid = new CDSolenoid(solenoidSettings[0][0], solenoidSettings[0][1]);
-        leftSolenoid = new CDSolenoid(solenoidSettings[1][0], solenoidSettings[1][1]);
+        rightSolenoid = null;
+        leftSolenoid = null;
+        // rightSolenoid = new CDSolenoid(solenoidSettings[0][0], solenoidSettings[0][1]);
+        // leftSolenoid = new CDSolenoid(solenoidSettings[1][0], solenoidSettings[1][1]);
         sols = new ISolenoid[]{ rightSolenoid, leftSolenoid };
 
     }
@@ -84,7 +86,7 @@ public class ClimbModule implements SolenoidController {
 
     @Override
     public void resetSystem() {
-        retractSolenoids();
+        // retractSolenoids();
         climbMotor.set(0);
     }
 

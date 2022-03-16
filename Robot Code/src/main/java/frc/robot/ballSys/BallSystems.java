@@ -40,11 +40,11 @@ public class BallSystems implements BaseController, Runnable {
     private Solenoid s_RightIntake = new Solenoid(PneumaticsModuleType.CTREPCM, 2);
 
     @SuppressWarnings("unused")
-    private SparkMaxPIDController p_indexWheel = m_indexWheel.getPIDController();
+    private SparkMaxPIDController p_indexWheel;
 
     // Encoders
-    public RelativeEncoder e_shooterWheel = m_shooterWheel.getEncoder();
-    public RelativeEncoder e_indexWheel = m_indexWheel.getEncoder();
+    public RelativeEncoder e_shooterWheel;
+    public RelativeEncoder e_indexWheel;
 
     // Controllers
     public BangBangController overSpeedController;
@@ -73,6 +73,11 @@ public class BallSystems implements BaseController, Runnable {
         m_intakeWheel = new CANSparkMax(ports[0], MotorType.kBrushless);
         m_indexWheel = new CANSparkMax(ports[1], MotorType.kBrushless); // correct
         m_shooterWheel = new CANSparkMax(ports[2], MotorType.kBrushless); // correct
+
+        p_indexWheel = m_indexWheel.getPIDController();
+
+        e_shooterWheel = m_shooterWheel.getEncoder();
+        e_indexWheel = m_indexWheel.getEncoder();
         // minWantedRPMs = speedUpToRPM;
         // maxWantedRPMs = slowDownAtRPM;
     }
@@ -216,19 +221,10 @@ public class BallSystems implements BaseController, Runnable {
             m_intakeWheel.set(0.4);
         }
 
-        if (xController.getYButton()) {
-            if (!Beam2.get())
-                m_indexWheel.set(0.4);
+        if (xController.getXButton()) {
+            m_indexWheel.set(0.4);
         } else {
             m_indexWheel.set(0);
-        }
-
-        if (xController.getBButton()) {
-            m_shooterWheel.set(0.9);
-        } else if (xController.getRightTriggerAxis() == 1) {
-            m_shooterWheel.set(0.50);
-        } else {
-            m_shooterWheel.set(0);
         }
 
         if (xController.getYButton()) {

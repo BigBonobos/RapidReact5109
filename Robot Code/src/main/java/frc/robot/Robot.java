@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.ballSys.BallSystems;
+import frc.robot.ballSys.Shooter;
 import frc.robot.climb.ClimbModule;
 // import frc.robot.ballSys.Intake;
 // import frc.robot.ballSys.Shooter;
@@ -49,9 +50,10 @@ public class Robot extends TimedRobot {
   private double autoAlignRange = 360.0;
 
 
-  private int[] ballSysIDs = new int[]{4, 22, 8};
-  private BallSystems ballSys = new BallSystems(ballSysIDs);
-  private Notifier ballSysNotif = new Notifier(ballSys);
+  private final int[] ballSysIDs = new int[]{4, 22, 8};
+  private final Shooter ballSys = new Shooter(ballSysIDs[1], ballSysIDs[2], 3500);
+  // private final BallSystems ballSys = new BallSystems(ballSysIDs);
+  // private final Notifier ballSysNotif = new Notifier(ballSys);
   // public Climb climb = new Climb();
   private int autoCounter = 1;
 
@@ -108,11 +110,9 @@ public class Robot extends TimedRobot {
    * Test stub. Called once upon initialization.
    */
   public void testInit() {
-
-    
-
     m_swerve.customAutoAlign();
     ballSys.resetSystem();
+    climbModule.resetSystem();
   }
 
   /**
@@ -120,105 +120,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-    
-    // if(j_operator.
-    // }
-
-    // climb.handleInputs(j_operator);
-
-
-    //driveWithJoystick(false);
-    // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
-    // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
-
-    // SmartDashboard.putNumber("RPMS", ballSys.e_shooterWheel.getVelocity());
-    // SmartDashboard.putNumber("BallCount", ballSys.BallCount);
-    // SmartDashboard.putBoolean("Beam1", ballSys.Beam1.get());
-    // SmartDashboard.putBoolean("Beam2", ballSys.Beam2.get());
-    
-    // switch (autoCounter){
-    //   case 1: 
-    //     if (ballSys.e_shooterWheel.getVelocity() > 2600){
-    //       autoCounter ++;
-    //     }
-    //     else {
-    //       ballSys.m_shooterWheel.set(0.6);
-    //     }
-    //     break;
-    //   case 2:
-    //     ballSys.m_indexWheel.set(0.75);
-    //     Timer.delay(1);
-    //     autoCounter ++;
-    //     break;
-    //   case 3:
-    //     ballSys.m_shooterWheel.stopMotor();
-    //     autoCounter++;
-    //     break;
-    // }
-
-    //ballSys.shooting2(true);
-
-
-    //   case 4:
-    //     ballSys.m_indexWheel.set(0.3);
-    //     Timer.delay(1);
-    //     autoCounter++;
-    //     break;
-    // }
-    // ballSys.handleInputs(xController, j_operator);
-    // ballSys.m_shooterWheel.set(0.59);
-    // Timer.delay(2);
-    // ballSys.m_indexWheel.set(0.75);
-    // Timer.delay(2);
-    // ballSys.m_shooterWheel.stopMotor();
-    //autoCounter++;    
-    // climb.handleInputs(xController, j_operator);
-    // if(j_operator.getTrigger()) {
-    //   climb.popArmUp();
-    // }
-    // if (j_operator.getRawButton(3)) {
-    //   climb.popArmDown();
-    // }
-    // if (xController.getXButton()) {
-    //   switch (intakeState) {
-    //     case Stopped:
-    //       ballSys.m_intakeWheel.set(0.4);
-    //       intakeState = IntakeState.Go;
-    //       break;
-    //     case Go:
-    //       ballSys.m_intakeWheel.set(-0.4);
-    //       intakeState = IntakeState.Reverse;
-    //     case Reverse:
-    //       ballSys.m_intakeWheel.set(0);
-    //       intakeState = IntakeState.Stopped;
-    //   }
-    //   ballSys.m_intakeWheel.set(0.4);
-    // }
-
-    // if (xController.getYButton()) {
-    //   if(!ballSys.Beam2.get())
-    //   ballSys.m_indexWheel.set(0.4);
-    // } else {
-    //   ballSys.m_indexWheel.set(0);
-    // }
-
-    // if(xController.getBButton()) {
-    //   ballSys.m_shooterWheel.set(0.9);
-    // }  else if (xController.getRightTriggerAxis() == 1) {
-    //   ballSys.m_shooterWheel.set(0.50);
-    // } else {
-    //   ballSys.m_shooterWheel.set(0);
-    // }
-    // m_swerve.m_frontLeft.m_turningMotor.set(0.1);
-    // Timer.delay(5);
-    // m_swerve.m_frontLeft.m_turningMotor.set(0);
-    // try {
-    //   Thread.sleep(100);
-    // } catch (InterruptedException e) {
-    //   // TODO Auto-generated catch block
-    //   e.printStackTrace();
-    // }
-    // m_swerve.drive(0.1, 0.1, 0, false);
+    driveWithJoystick(true);
+    ballSys.handleInputs(xController, j_operator);
+    climbModule.handleInputs(xController, j_operator);
  
   }
 
@@ -232,7 +136,7 @@ public class Robot extends TimedRobot {
     m_swerve.customAutoAlign();
     Timer.delay(1);
     autoCounter = 1;
-    ballSys.ballCount = 1;
+    // ballSys.ballCount = 1;
 
     m_swerve.auto.rotateTo(Rotation2d.fromDegrees(135), Optional.of(0.1));
     m_swerve.auto.translateTo(new Translation2d(-.1, 0), Optional.of(0.1));
@@ -342,10 +246,10 @@ public class Robot extends TimedRobot {
     m_swerve.updateOdometry();
     System.out.println(m_swerve.m_odometry.getPoseMeters());
     driveWithJoystick(true);
-    ballSys.updateIndex();
+    // ballSys.updateIndex();
     //ballSys.intakeMotor();
     if (xController.getRightTriggerAxis() == 1) {
-      ballSysNotif.startSingle(0.0001);
+      // ballSysNotif.startSingle(0.0001);
     }
 
     // if (xController.getBButton()) {
@@ -357,9 +261,9 @@ public class Robot extends TimedRobot {
 
     if (xController.getYButton()) {
       // ballSysNotif.startSingle(0.0001);
-      ballSys.windUpShooter();
+      // ballSys.windUpShooter();
     } else {
-      ballSys.stopShooter();
+      // ballSys.stopShooter();
     }
 
 

@@ -9,7 +9,6 @@ import frc.robot.autonomous.Autonomous;
 import edu.wpi.first.wpilibj.SPI;
 
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.OptionalDouble;
 import com.kauailabs.navx.frc.*;
 import edu.wpi.first.math.geometry.Translation2d;

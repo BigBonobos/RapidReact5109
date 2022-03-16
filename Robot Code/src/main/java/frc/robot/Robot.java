@@ -5,29 +5,17 @@
 package frc.robot;
 
 import frc.robot.ballSys.BallFondler;
-import frc.robot.ballSys.Shooter;
 import frc.robot.climb.ClimbModule;
-// import frc.robot.ballSys.BallSystems;
-// import frc.robot.climb.ClimbModule;
-// import frc.robot.ballSys.Intake;
-// import frc.robot.ballSys.Shooter;
-// import frc.robot.ballSys.Shooter.ShooterState;
 import frc.robot.swerveCode.Drivetrain;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 
-import java.util.Optional;
-
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import edu.wpi.first.wpilibj.Notifier;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -85,7 +73,7 @@ public class Robot extends TimedRobot {
 
   /**
    * CANSparkMax motor ports. 
-   * <p>{@link com.revrobotics.CANSparkMax#CANSparkMax(int, MotorType)}
+   * <p>{@link com.revrobotics.CANSparkMax#CANSparkMax(int, MotorType) motor config.}
    */
   private final int[] ballFondlerIDs = new int[] { 4, 22, 8 };
 
@@ -99,14 +87,14 @@ public class Robot extends TimedRobot {
   /**
    * Setup for solenoid ports for the climb module.
    * 
-   * @see {@link frc.robot.climb.ClimbModule#ClimbModule(int, int[][])}
+   * @see {@link frc.robot.climb.ClimbModule#ClimbModule(int, int[][]) ClimbModule constructor.}
    */
   private final int[][] solenoidPorts = new int[][] { { 9, 8 }, { 7, 6 } };
 
   /**
-   * Climb module controls two solenoids and a motor.
+   * Climb module. Controls two solenoids and a motor.
    * 
-   * @see {@link frc.robot.climb.ClimbModule#ClimbModule(int, int[][])}
+   * @see {@link frc.robot.climb.ClimbModule#ClimbModule(int, int[][]) ClimbModule constructor.}
    */
   private final ClimbModule climbModule = new ClimbModule(10, solenoidPorts);
 

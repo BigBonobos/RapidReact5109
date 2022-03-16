@@ -4,9 +4,9 @@
 
 package frc.robot;
 
-import frc.robot.ballSys.BallSystems;
+// import frc.robot.ballSys.BallSystems;
 import frc.robot.ballSys.Shooter;
-import frc.robot.climb.ClimbModule;
+// import frc.robot.climb.ClimbModule;
 // import frc.robot.ballSys.Intake;
 // import frc.robot.ballSys.Shooter;
 // import frc.robot.ballSys.Shooter.ShooterState;
@@ -103,28 +103,28 @@ public class Robot extends TimedRobot {
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(1);
 
   private final int[][] solenoidPorts = new int[][]{{9, 8}, { 7, 6}};
-  private final ClimbModule climbModule = new ClimbModule(10, solenoidPorts);
+  // private final ClimbModule climbModule = new ClimbModule(10, solenoidPorts);
 
   // private final CANSparkMax climbMotor = new CANSparkMax(10, MotorType.kBrushless);
   /**
    * Test stub. Called once upon initialization.
    */
-  public void testInit() {
-    m_swerve.customAutoAlign();
-    ballSys.resetSystem();
-    climbModule.resetSystem();
-  }
+  // public void testInit() {
+  //   m_swerve.customAutoAlign();
+  //   ballSys.resetSystem();
+  //   climbModule.resetSystem();
+  // }
 
   /**
    * Test stub. This is a continual loop. 20ms pause between iterations.
    */
-  @Override
-  public void testPeriodic() {
-    driveWithJoystick(true);
-    ballSys.handleInputs(xController, j_operator);
-    climbModule.handleInputs(xController, j_operator);
+  // @Override
+  // public void testPeriodic() {
+  //   driveWithJoystick(true);
+  //   ballSys.handleInputs(xController, j_operator);
+  //   climbModule.handleInputs(xController, j_operator);
  
-  }
+  // }
 
    @Override
   public void robotInit() {

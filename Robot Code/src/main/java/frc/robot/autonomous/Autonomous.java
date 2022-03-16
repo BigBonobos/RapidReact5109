@@ -28,7 +28,7 @@ public class Autonomous extends MovementUtil {
     public boolean translateTo(Translation2d fieldPoint, Optional<Double> speed) {
 
         Translation2d delta = fieldPoint
-                .minus(m_swerve.m_odometry.getPoseMeters().getTranslation());
+                .minus(new Translation2d(m_swerve.navX.getDisplacementX(), m_swerve.navX.getDisplacementY()));
         double yaw = Math.atan2(delta.getX(), delta.getY());
         double wantedSpeed = speed.isPresent() ? speed.get() : Drivetrain.kMaxSpeed;
 

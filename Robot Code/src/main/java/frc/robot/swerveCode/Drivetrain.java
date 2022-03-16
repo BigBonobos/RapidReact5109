@@ -232,7 +232,7 @@ public class Drivetrain {
     OptionalDouble posRes = limelight.getXOffset();
     if (posRes.isPresent()) {
       double res = posRes.getAsDouble();
-      auto.rotateTo(Rotation2d.fromDegrees(navX.getYaw() + res), Optional.ofNullable(null));
+      auto.rotateTo(Rotation2d.fromDegrees(navX.getYaw() + res));
     } else {
       System.out.println("No object detected.");
     }

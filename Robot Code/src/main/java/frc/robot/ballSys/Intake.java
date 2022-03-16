@@ -4,6 +4,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.controllers.BaseController;
 public class Intake implements BaseController {
@@ -50,6 +51,27 @@ public class Intake implements BaseController {
     public void intakeBalls() {
         this.intakeMotor.set(ballCount == 2 ?  0 : 1);
      
+    }
+
+    /**
+     * Slightly dumb. It does not update ball count for the duration of intaking balls.
+     * <p> Solution: move DigitalObjects into here. Issue, I am not sure if that breaks anything.
+     * <p>Resets system after completing.
+     * @param seconds # of seconds intake will be on.
+     */
+    public void intakeFor(double seconds) {
+        double start = Timer.getFPGATimestamp();
+        while (Timer.getFPGATimestamp() - start < seconds) {
+            intakeBalls();
+
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+
+        resetSystem();
     }
 
     /**

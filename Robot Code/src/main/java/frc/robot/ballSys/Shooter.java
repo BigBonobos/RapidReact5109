@@ -1,15 +1,11 @@
 package frc.robot.ballSys;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.BangBangController;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
@@ -17,17 +13,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.controllers.BaseController;
 
 public class Shooter implements BaseController {
-
-    /**
-     * This may be unneeded. This is only needed if we need to wait w/o blocking
-     * main thread.
-     * <p>
-     * I am not sure of the functionality of Thread.sleep()
-     * inside the lambda I supplied for .shoot()
-     * </p>
-     */
-    @SuppressWarnings("unused")
-    private static final ExecutorService threadPool = Executors.newCachedThreadPool();
 
     /**
      * This is the motor that actually shoots the ball (the bottom one).
@@ -200,6 +185,10 @@ public class Shooter implements BaseController {
         shootHandler.startSingle(0.01);
     }
 
+
+    /**
+     * Listens to LEFT BUMPER.
+     */
     @Override
     public void handleInputs(XboxController xController, Joystick j_operator) {
         //Manual windup for testing.

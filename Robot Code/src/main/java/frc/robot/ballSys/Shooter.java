@@ -92,12 +92,11 @@ public class Shooter implements BaseController {
     @SuppressWarnings("unused")
     private int shooterRpms;
 
-
     public DigitalInput Beam1 = new DigitalInput(0); // Outside the kicker wheel
     public DigitalInput Beam2 = new DigitalInput(1); // Inside the kicker wheel
 
     private final Notifier shootHandler;
-    private int BallDelay; 
+    private int BallDelay;
 
     private int shooterRPMs;
 
@@ -116,7 +115,6 @@ public class Shooter implements BaseController {
         shootHandler = new Notifier(this::_newShoot);
 
         shooterRPMs = shooterSpeedRpms;
-      
 
     }
 
@@ -138,85 +136,59 @@ public class Shooter implements BaseController {
 
     private void _newShoot() {
 
-        double ballDelay = 0;
-        if (!Beam1.get()){
-            ballDelay = 0.5;
-        }
-        if (!Beam2.get() && Beam1.get()){
-            ballDelay = 0.25;
-        }
-        if (Beam1.get() && Beam2.get()){
-            ballDelay = 0; 
-        }
-
-
-        shooterKickForwardMotor.set(0);
-        double startTime = Timer.getFPGATimestamp();
-        System.out.printf("Ready?: %b", isAtShootingSpeed());
-        while (!isAtShootingSpeed() && Timer.getFPGATimestamp() - startTime < 4 ) {
-            shooterPropulsionMotor.set(calculateShootingSpeed());
-
-            // pause for ten milliseconds to not be wasteful.
-            // if interrupted, break.
-            try { Thread.sleep(10); } catch (InterruptedException e) { break; }
-        }
-
-        double loadingStart = Timer.getFPGATimestamp();
-        while (Timer.getFPGATimestamp() - loadingStart < ballDelay) {
-            shooterKickForwardMotor.set(0.4);
-            shooterPropulsionMotor.set(calculateShootingSpeed());
-            try { Thread.sleep(10); } catch (InterruptedException e) { return; }
-        }
-        
-        shooterKickForwardMotor.set(0);
-        shooterPropulsionMotor.set(0);
-    }
-
-    public void newShoot() {
-        // shootHandler.startSingle(0.01);
-
         setWantedRPM(shooterRPMs);
 
         double ballDelay = 0.25;
-        if (!Beam1.get()){
+        if (!Beam1.get()) {
             ballDelay = 0.5;
         }
-        if (!Beam2.get() && Beam1.get()){
+        if (!Beam2.get() && Beam1.get()) {
             ballDelay = 0.25;
         }
-        if (Beam1.get() && Beam2.get()){
-            ballDelay = 0.25; 
+        if (Beam1.get() && Beam2.get()) {
+            ballDelay = 0.25;
         }
-
-
 
         shooterKickForwardMotor.set(0);
         double startTime = Timer.getFPGATimestamp();
         System.out.printf("Ready?: %b\n", isAtShootingSpeed());
-        while (!isAtShootingSpeed() && Timer.getFPGATimestamp() - startTime < 4 ) {
+        while (!isAtShootingSpeed() && Timer.getFPGATimestamp() - startTime < 4) {
             shooterPropulsionMotor.set(calculateShootingSpeed());
 
             System.out.printf("Ready?: %b   Speed: %f\n", isAtShootingSpeed(), shooterPropulsionEncoder.getVelocity());
             // pause for ten milliseconds to not be wasteful.
             // if interrupted, break.
-            try { Thread.sleep(10); } catch (InterruptedException e) { break; }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                break;
+            }
         }
 
         System.out.printf("Ready?: %b   Speed: %f\n", isAtShootingSpeed(), shooterPropulsionEncoder.getVelocity());
 
         double loadingStart = Timer.getFPGATimestamp();
-        System.out.printf("Time delay: %f\n",  ballDelay);
+        System.out.printf("Time delay: %f\n", ballDelay);
         while (Timer.getFPGATimestamp() - loadingStart < ballDelay) {
             System.out.println("We're loading teh balls now.");
             shooterKickForwardMotor.set(0.4);
             shooterPropulsionMotor.set(calculateShootingSpeed());
-            try { Thread.sleep(10); } catch (InterruptedException e) { return; }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                return;
+            }
         }
-        
+
         shooterKickForwardMotor.set(0);
         shooterPropulsionMotor.set(0);
+
     }
 
+    public void newShoot() {
+        shootHandler.startSingle(0.01);
+
+    }
 
     @Override
     public void handleInputs(XboxController xController, Joystick j_operator) {

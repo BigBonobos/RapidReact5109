@@ -4,8 +4,10 @@
 
 package frc.robot;
 
-// import frc.robot.ballSys.BallSystems;
+import frc.robot.ballSys.BallFondler;
 import frc.robot.ballSys.Shooter;
+import frc.robot.climb.ClimbModule;
+// import frc.robot.ballSys.BallSystems;
 // import frc.robot.climb.ClimbModule;
 // import frc.robot.ballSys.Intake;
 // import frc.robot.ballSys.Shooter;
@@ -50,12 +52,9 @@ public class Robot extends TimedRobot {
   private double autoAlignRange = 360.0;
 
 
-  private final int[] ballSysIDs = new int[]{4, 22, 8};
-  private final Shooter ballSys = new Shooter(ballSysIDs[1], ballSysIDs[2], 3500);
-  // private final BallSystems ballSys = new BallSystems(ballSysIDs);
-  // private final Notifier ballSysNotif = new Notifier(ballSys);
-  // public Climb climb = new Climb();
-  private int autoCounter = 1;
+  private final int[] ballFondlerIDs = new int[]{4, 22, 8};
+  private final BallFondler ballFondler = new BallFondler(ballFondlerIDs[0], ballFondlerIDs[1], ballFondlerIDs[2]);
+
 
   /**
    * Settings for our drive train.
@@ -103,51 +102,53 @@ public class Robot extends TimedRobot {
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(1);
 
   private final int[][] solenoidPorts = new int[][]{{9, 8}, { 7, 6}};
-  // private final ClimbModule climbModule = new ClimbModule(10, solenoidPorts);
+  private final ClimbModule climbModule = new ClimbModule(10, solenoidPorts);
 
-  // private final CANSparkMax climbMotor = new CANSparkMax(10, MotorType.kBrushless);
-  /**
-   * Test stub. Called once upon initialization.
-   */
-  // public void testInit() {
-  //   m_swerve.customAutoAlign();
-  //   ballSys.resetSystem();
-  //   climbModule.resetSystem();
-  // }
 
-  /**
-   * Test stub. This is a continual loop. 20ms pause between iterations.
-   */
-  // @Override
-  // public void testPeriodic() {
-  //   driveWithJoystick(true);
-  //   ballSys.handleInputs(xController, j_operator);
-  //   climbModule.handleInputs(xController, j_operator);
- 
-  // }
+  private int autoCounter = 1;
 
-   @Override
+
+  @Override
   public void robotInit() {
   // listenerHandleBall = m_swerve.initBallListener();
   }
 
+  /**
+   * Test stub. Called once upon initialization.
+   */
+  @Override
+  public void testInit() {
+    m_swerve.customAutoAlign();
+    ballFondler.resetSystem();
+    climbModule.resetSystem();
+  }
+
+  /**
+   * Test stub. This is a continual loop. 20ms pause between iterations.
+   */
+  @Override
+  public void testPeriodic() {
+    driveWithJoystick(true);
+    ballFondler.handleInputs(xController, j_operator);
+    climbModule.handleInputs(xController, j_operator);
+ 
+  }
+
+
   @Override
   public void autonomousInit() {
+    ballFondler.hardReset();
     m_swerve.customAutoAlign();
     Timer.delay(1);
     autoCounter = 1;
-    // ballSys.ballCount = 1;
 
+  
     m_swerve.auto.rotateTo(Rotation2d.fromDegrees(135), Optional.of(0.1));
     m_swerve.auto.translateTo(new Translation2d(-.1, 0), Optional.of(0.1));
     m_swerve.auto.stop();
   //   m_swerve.navX.reset();
   //   autoCounter = 1;
-  //   //ballSys.intakeOn = false; 
-  //   ballSys.BoolBall = false; 
-  //   ballSys.shooting = false; 
-  //   ballSys.m_intakeWheel.set(0);
-  //   ballSys.BallCount = 1;
+
   }
   @Override
   public void autonomousPeriodic() {
@@ -235,7 +236,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     m_swerve.customAutoAlign();
-    ballSys.resetSystem();
+    // ballSys.resetSystem();
   }
 
   /**

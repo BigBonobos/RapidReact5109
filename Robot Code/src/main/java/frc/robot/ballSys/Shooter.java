@@ -32,7 +32,7 @@ public class Shooter implements BaseController {
     /**
      * This is the motor that actually shoots the ball (the bottom one).
      */
-    private final CANSparkMax shooterPropulsionMotor;
+    private final CANSparkMax m_shooterMotor;
 
     /**
      * This is the motor that pushes the balls towards the propulsion once its up to
@@ -47,20 +47,20 @@ public class Shooter implements BaseController {
      * </pre>
      * </p>
      */
-    private final CANSparkMax shooterKickForwardMotor;
+    private final CANSparkMax m_indexMotor;
 
     /**
      * This is the encoder used to know the current velocity of the propulsion
      * motor.
      */
-    private final RelativeEncoder shooterPropulsionEncoder;
+    private final RelativeEncoder m_shooterEncoder;
 
     /**
      * This is an unused encoder, would know info on feed/kickFoward motor.
      * Irrelevant.
      */
     @SuppressWarnings("unused")
-    private final RelativeEncoder shooterKickForwardEncoder;
+    private final RelativeEncoder m_indexEncoder;
 
     /**
      * This controls the speed of the rev'ing motors.
@@ -90,26 +90,25 @@ public class Shooter implements BaseController {
      * @deprecated
      */
     @SuppressWarnings("unused")
-    private int shooterRpms;
-
-    public DigitalInput Beam1 = new DigitalInput(0); // Outside the kicker wheel
-    public DigitalInput Beam2 = new DigitalInput(1); // Inside the kicker wheel
+    private double shooterRpms;
 
     private final Notifier shootHandler;
-    private int BallDelay;
 
-    private int shooterRPMs;
 
-    public Shooter(int m_indexPort, int m_shooterPort, int shooterSpeedRpms) {
-        shooterKickForwardMotor = new CANSparkMax(m_indexPort, MotorType.kBrushless);
-        shooterPropulsionMotor = new CANSparkMax(m_shooterPort, MotorType.kBrushless);
+    public int ballCount = 0;
+    public double shooterRPMs;
 
-        shooterKickForwardEncoder = shooterKickForwardMotor.getEncoder();
-        shooterPropulsionEncoder = shooterPropulsionMotor.getEncoder();
+
+    public Shooter(int m_indexPort, int m_shooterPort, double shooterSpeedRpms) {
+        m_indexMotor = new CANSparkMax(m_indexPort, MotorType.kBrushless);
+        m_shooterMotor = new CANSparkMax(m_shooterPort, MotorType.kBrushless);
+
+        m_indexEncoder = m_indexMotor.getEncoder();
+        m_shooterEncoder = m_shooterMotor.getEncoder();
 
         overSpeedController = new BangBangController(50);
 
-        shooterPropulsionMotor.setIdleMode(CANSparkMax.IdleMode.kCoast);
+        m_shooterMotor.setIdleMode(CANSparkMax.IdleMode.kCoast);
         overSpeedController.setSetpoint(shooterSpeedRpms);
 
         shootHandler = new Notifier(this::_newShoot);
@@ -123,6 +122,7 @@ public class Shooter implements BaseController {
     }
 
     public void setWantedRPM(double rpm) {
+        shooterRPMs = rpm;
         overSpeedController.setSetpoint(rpm);
     }
 
@@ -131,31 +131,41 @@ public class Shooter implements BaseController {
     }
 
     public double calculateShootingSpeed() {
-        return overSpeedController.calculate(shooterPropulsionEncoder.getVelocity(), this.getWantedRPM());
+        return overSpeedController.calculate(m_shooterEncoder.getVelocity(), this.getWantedRPM());
     }
 
+    public boolean isShooting() {
+
+    }
+
+    /**
+     * Since this is used in a notifier, System.out.println does not work as intended.
+     * This is because it is being ran in a different thread than the RoboRIO's output.
+     */
     private void _newShoot() {
 
         setWantedRPM(shooterRPMs);
 
         double ballDelay = 0.25;
-        if (!Beam1.get()) {
-            ballDelay = 0.5;
-        }
-        if (!Beam2.get() && Beam1.get()) {
-            ballDelay = 0.25;
-        }
-        if (Beam1.get() && Beam2.get()) {
-            ballDelay = 0.25;
-        }
+        ballDelay = ballCount * 0.25;
 
-        shooterKickForwardMotor.set(0);
+
+        // if (!Beam1.get()) {
+        //     ballDelay = 0.5;
+        // }
+        // if (!Beam2.get() && Beam1.get()) {
+        //     ballDelay = 0.25;
+        // }
+        // if (Beam1.get() && Beam2.get()) {
+        //     ballDelay = 0.25;
+        // }
+
+        m_indexMotor.set(0);
         double startTime = Timer.getFPGATimestamp();
-        System.out.printf("Ready?: %b\n", isAtShootingSpeed());
         while (!isAtShootingSpeed() && Timer.getFPGATimestamp() - startTime < 4) {
-            shooterPropulsionMotor.set(calculateShootingSpeed());
+            m_shooterMotor.set(calculateShootingSpeed());
 
-            System.out.printf("Ready?: %b   Speed: %f\n", isAtShootingSpeed(), shooterPropulsionEncoder.getVelocity());
+            // System.out.printf("Ready?: %b   Speed: %f\n", isAtShootingSpeed(), m_shooterEncoder.getVelocity());
             // pause for ten milliseconds to not be wasteful.
             // if interrupted, break.
             try {
@@ -165,14 +175,12 @@ public class Shooter implements BaseController {
             }
         }
 
-        System.out.printf("Ready?: %b   Speed: %f\n", isAtShootingSpeed(), shooterPropulsionEncoder.getVelocity());
-
+      
         double loadingStart = Timer.getFPGATimestamp();
-        System.out.printf("Time delay: %f\n", ballDelay);
         while (Timer.getFPGATimestamp() - loadingStart < ballDelay) {
             System.out.println("We're loading teh balls now.");
-            shooterKickForwardMotor.set(0.4);
-            shooterPropulsionMotor.set(calculateShootingSpeed());
+            m_indexMotor.set(0.4);
+            m_shooterMotor.set(calculateShootingSpeed());
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -180,33 +188,30 @@ public class Shooter implements BaseController {
             }
         }
 
-        shooterKickForwardMotor.set(0);
-        shooterPropulsionMotor.set(0);
+        m_indexMotor.set(0);
+        m_shooterMotor.set(0);
 
     }
 
     public void newShoot() {
         shootHandler.startSingle(0.01);
-
     }
 
     @Override
     public void handleInputs(XboxController xController, Joystick j_operator) {
-        if (xController.getRightTriggerAxis() == 1) {
-            newShoot();
-        }
-
+        //Manual windup for testing.
         if (xController.getLeftBumper()) {
-            shooterPropulsionMotor.set(calculateShootingSpeed());
+            m_shooterMotor.set(calculateShootingSpeed());
         } else {
-            shooterPropulsionMotor.set(0);
+            m_shooterMotor.set(0);
         }
 
     }
 
     @Override
     public void resetSystem() {
-        // TODO Auto-generated method stub
+        m_indexMotor.set(0);
+        m_shooterMotor.set(0);
 
     }
 

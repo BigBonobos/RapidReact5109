@@ -4,127 +4,163 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.Robot;
 
-public class AutoShoot  {
-    
-
-    public double shooterDegrees;
-
+public class AutoShoot {
 
     public final Translation2d goal;
+    public final double[] goalVec;
+    public final double goalRadius;
     public final Robot robot;
+    public final int fps;
+    public final double initProjectileSpeed;
+    public final double gravity;
 
+    public static final double shooterPitch = 20;
+    public static final int maxFrames = 300;
+    public static final double shooterHeight = 0.5;
+    public static final double goalLipHeight = 10;
 
-    public AutoShoot(Robot robo, Translation2d goa) {
+    public AutoShoot(Robot robo, Translation2d goa, double goalRad, int framesPerSecond) {
         robot = robo;
         goal = goa;
+        goalVec = new double[] { goa.getX(), goalLipHeight, goa.getY() };
+        goalRadius = goalRad;
+        fps = framesPerSecond;
+
+        gravity = 9.81 / fps;
+        initProjectileSpeed = 20.84 / fps;
     }
 
     private Translation2d getOriginTranslation() {
         return new Translation2d(robot.m_swerve.navX.getDisplacementX(), robot.m_swerve.navX.getDisplacementY());
     }
 
-
-    public Rotation2d getYawToGoal(Translation2d destination) {
-        Translation2d origin = getOriginTranslation();
-        double xDistance = destination.getX() - origin.getX();
-        double zDistance = destination.getY() - origin.getY();
-        double yaw = Math.atan2(-xDistance, -zDistance);
+    public Rotation2d getYawToGoal() {
+        final Translation2d origin = getOriginTranslation();
+        final double xDistance = goal.getX() - origin.getX();
+        final double zDistance = goal.getY() - origin.getY();
+        final double yaw = Math.atan2(-xDistance, -zDistance);
         return new Rotation2d(yaw);
+    }
+
+    public double[] getDirFromYawPitchSpeed(final Rotation2d yaw, final Rotation2d pitch, final double speed) {
+        return getDirFromYawPitchSpeed(yaw.getRadians(), pitch.getRadians(), speed);
     }
 
     /**
      * This may be broken.
+     * 
      * @param yaw
      * @param pitch
      * @param speed
      * @return
      */
-    public double[] getDirFromYawPitchSpeed(double yaw, double pitch, double speed) {
-        double thetaY = Math.PI + yaw;
-        double thetaP = pitch;
-
-        double x = speed * Math.sin(thetaY);
-        double y = speed * Math.sin(thetaP);
-        double z = speed * Math.cos(thetaY);
-        double VxMag = Math.sqrt(x * x + z * z);
-        double VxRatio = Math.sqrt(VxMag * VxMag - y * y);
-        double allRatio = VxRatio / VxMag;
-
-        return new double[] { x * allRatio, y, z * allRatio};
-
-
+    public double[] getDirFromYawPitchSpeed(final double yaw, final double pitch, final double speed) {
+        final double thetaY = Math.PI + yaw;
+        final double thetaP = pitch;
+        final double x = speed * Math.sin(thetaY);
+        final double y = speed * Math.sin(thetaP);
+        final double z = speed * Math.cos(thetaY);
+        final double VxMag = Math.sqrt(x * x + z * z);
+        final double VxRatio = Math.sqrt(VxMag * VxMag - y * y);
+        final double allRatio = VxRatio / VxMag;
+        return new double[] { x * allRatio, y, z * allRatio };
     }
 
-  
+    private double[] add(double[] pos, final double[] vel) {
+        pos[0] = pos[0] + vel[0];
+        pos[1] = pos[1] + vel[1];
+        pos[2] = pos[2] + vel[2];
+        return pos;
+    }
 
+    private boolean madeItToGoal(final double[] current, final double[] next) {
+        final boolean flag1 = Math.sqrt(Math.pow(current[0], 2) + Math.pow(current[2], 2)) < goalRadius;
+        final boolean flag2 = Math.sqrt(Math.pow(next[0], 2) + Math.pow(next[2], 2)) < goalRadius;
+        final boolean flag3 = current[1] > goalVec[1] && next[1] < goalVec[1];
+        return flag1 && flag2 && flag3;
+    }
 
+    public boolean calculateIfShotGood(Translation2d origin, Rotation2d yaw) {
+        double[] currentPos = new double[] { origin.getX(), shooterHeight, origin.getY() };
+        double[] vel = getDirFromYawPitchSpeed(yaw.getRadians(), shooterPitch, initProjectileSpeed);
+        double[] nextPos = add(currentPos, vel);
+        double[] offsets = new double[3];
+        final double airResistanceXZ = 0;
+        final double airResistanceY = 0;
+        int frames = 0;
 
-    public void calculateIfShotGood() {
+        while (frames < maxFrames) {
+            frames += 1;
+            offsets[0] = -vel[0] * airResistanceXZ;
+            offsets[1] = -vel[1] * airResistanceY - gravity;
+            offsets[2] = -vel[2] * airResistanceXZ;
 
-        Translation2d origin = getOriginTranslation();
-        Rotation2d yaw = getYawToGoal(goal);
-        double[] currentPos = new double[]{ origin.getX(), 0, origin.getY()};
+            if (vel[1] < 0 && currentPos[1] < 0)
+                return false;
 
-        // get projectile speed, put it in here.
-        double[] vel = getDirFromYawPitchSpeed(yaw.getRadians(), shooterDegrees, 0);
-        double[] nextPos = new double[]{ origin.getX() + vel[0], vel[1], origin.getY() + vel[2]};
+            if (madeItToGoal(currentPos, nextPos))
+                return true;
 
-
-        double gravity = 9.81;
-
-
-
-        let currentPosition = this.initialPos.clone();
-        let currentVelocity = this.initialVel.clone();
-        let nextPosition = currentPosition.clone().add(currentVelocity);
-        let hitPos: Vec3 | null = null;
-        let block: Block | null = null;
-
-        let totalTicks = 0;
-        const gravity = this.gravity; // + this.gravity * airResistance.y;
-        let offsetX: number = -currentVelocity.x * airResistance.h;
-        let offsetY: number = -currentVelocity.y * airResistance.y - gravity;
-        let offsetZ: number = -currentVelocity.z * airResistance.h;
-
-        while (totalTicks < 300) {
-            totalTicks += 1;
-            offsetX = -currentVelocity.x * airResistance.h;
-            offsetY = -currentVelocity.y * airResistance.y - gravity;
-            offsetZ = -currentVelocity.z * airResistance.h;
-
-            if (blockChecking && this.interceptCalcs) {
-                block = this.interceptCalcs.check(currentPosition, nextPosition)?.block;
-            }
-
-         
-
-
-            if (currentVelocity.y < 0 && currentPosition.y < 0) break;
-
-            currentPosition.add(currentVelocity);
-            currentVelocity.translate(offsetX, offsetY, offsetZ);
-            nextPosition.add(currentVelocity);
+            currentPos = add(currentPos, vel);
+            vel = add(vel, offsets);
+            nextPos = add(currentPos, vel);
         }
 
-
-
+        return false;
     }
 
-    public void shootAtGoal(Translation2d destination, double wantedSpeed) {
+    public Translation2d getTranslation(double distanceOffset, Rotation2d yaw) {
         Translation2d origin = getOriginTranslation();
-
-
-        // // rotate to wanted yaw.
-        // robot.m_swerve.auto.rotateTo(absRot);
-
-
-
-
-
+        return new Translation2d(
+                origin.getX() + (distanceOffset * Math.sin(yaw.getRadians())),
+                origin.getY() + (distanceOffset * Math.cos(yaw.getRadians())));
 
     }
 
+    public Translation2d findShootablePos(final double incrementDistance, final Rotation2d wantedYaw) throws Exception {
+        final Translation2d origin = getOriginTranslation();
+        Translation2d testPos;
+        boolean success = false;
+
+        do {
+            testPos = getTranslation(incrementDistance, wantedYaw);
+            success = calculateIfShotGood(testPos, wantedYaw);
+        } while (origin.getDistance(goal) > origin.getDistance(testPos) && !success);
+
+        if (success)
+            return testPos;
+        Rotation2d newWanted = wantedYaw.plus(Rotation2d.fromDegrees(180));
+
+        do {
+            testPos = getTranslation(incrementDistance, newWanted);
+            success = calculateIfShotGood(testPos, newWanted);
+        } while (origin.getDistance(goal) > origin.getDistance(testPos) && !success && origin.getDistance(goal) < 20);
+
+        if (success)
+            return testPos;
+
+        throw new Exception("Fuck lol, can't find a good shot.");
+    }
+
+    public boolean shootAtGoal() {
+
+        if (robot.ballFondler.getAndUpdateBallCount() == 0) {
+            return false;
+        }
+
+        Rotation2d wantedYaw = getYawToGoal();
+        try {
+            Translation2d wantedPos = findShootablePos(0.25, wantedYaw);
+            robot.m_swerve.auto.translateTo(wantedPos);
+            robot.m_swerve.auto.rotateTo(wantedYaw);
+            robot.ballFondler.shoot();
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
 
 }
-
-

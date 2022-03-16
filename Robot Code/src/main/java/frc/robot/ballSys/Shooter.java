@@ -134,8 +134,11 @@ public class Shooter implements BaseController {
         return overSpeedController.calculate(m_shooterEncoder.getVelocity(), this.getWantedRPM());
     }
 
+    /**
+     * @return velocity of motor is less than 20 rpm AND wanted speed of motor is NOT zero. 
+     */
     public boolean isShooting() {
-
+        return m_shooterEncoder.getVelocity() < 20 && m_shooterMotor.get() != 0;
     }
 
     /**

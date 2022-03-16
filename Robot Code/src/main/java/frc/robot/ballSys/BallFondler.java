@@ -54,6 +54,7 @@ public class BallFondler implements BaseController {
 
 
         intaking = intake.isMotorIntaking();
+        shooting = shooter.isShooting();
 
 
     }

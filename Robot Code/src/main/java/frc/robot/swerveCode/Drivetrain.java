@@ -7,7 +7,9 @@ package frc.robot.swerveCode;
 import frc.robot.Limelight;
 import frc.robot.autonomous.Autonomous;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.Timer;
 
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.OptionalDouble;
 import com.kauailabs.navx.frc.*;
@@ -29,6 +31,8 @@ public class Drivetrain {
   // Network Table instantiation
   private final NetworkTableInstance ntwrkInst = NetworkTableInstance.getDefault();
   public NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
+
+  private HashMap<Double, Translation2d> velocityMap = new HashMap<Double, Translation2d>();
 
   // Bot measurements
   private final Translation2d m_frontLeftLocation = new Translation2d(0.2921, 0.2921);
@@ -101,6 +105,7 @@ public class Drivetrain {
    */
   @SuppressWarnings("ParameterName")
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
+    velocityMap.put(Timer.getFPGATimestamp(), new Translation2d(xSpeed, ySpeed));
     Rotation2d navXVal = new Rotation2d((-navX.getYaw() % 360) * Math.PI / 180);
     SwerveModuleState[] swerveModuleStates = m_kinematics.toSwerveModuleStates(
         fieldRelative
@@ -130,6 +135,22 @@ public class Drivetrain {
         m_frontRight.getState(),
         m_backLeft.getState(),
         m_backRight.getState());
+  }
+
+  public Translation2d getRobotTranslation2d() {
+    double xPose = 0;
+    double yPose = 0;
+    double prevTime = 0;
+    for (HashMap.Entry<Double, Translation2d> entry: velocityMap.entrySet()) {
+      double time = entry.getKey();
+      double vx = entry.getValue().getX();
+      double vy = entry.getValue().getY();
+      xPose += vx * (time - prevTime);
+      yPose += vy * (time - prevTime);
+      prevTime = time;
+    }
+    
+    return new Translation2d(xPose, yPose);
   }
 
   /** Limelight autoalign method */

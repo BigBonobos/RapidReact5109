@@ -34,7 +34,7 @@ public class Drivetrain {
   public NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
 
   // Map to store velocities of robot and time
-  private HashMap<Double, Translation2d> velocityMap = new HashMap<Double, Translation2d>();
+  private HashMap<Double, Translation2d[]> velocityMap = new HashMap<Double, Translation2d[]>();
   private Translation2d lastKnownVelocity = new Translation2d(0, 0);
   private double lastKnownTime = 0;
 
@@ -86,6 +86,7 @@ public class Drivetrain {
   public Drivetrain(double shooterRange, double[] swerveFrontLeftMotors, double[] swerveFrontRightMotors,
       double[] swerveBackLeftMotors, double[] swerveBackRightMotors) {
     navX.reset();
+    navX.resetDisplacement();
     shooterRangeCm = shooterRange;
     ntwrkInst.startClientTeam(5109);
     m_frontLeft = new SwerveModule((int) swerveFrontLeftMotors[0], (int) swerveFrontLeftMotors[1],
@@ -113,7 +114,10 @@ public class Drivetrain {
     // Appends velocity and timestampt to hashmap
     lastKnownTime = Timer.getFPGATimestamp();
     lastKnownVelocity = new Translation2d(xSpeed, ySpeed);
-    velocityMap.put(Timer.getFPGATimestamp(), new Translation2d(xSpeed, ySpeed));
+    Translation2d[] coordInfo = {new Translation2d(xSpeed, ySpeed), new Translation2d(navX.getDisplacementX(), navX.getDisplacementY())};
+    navX.resetDisplacement();
+
+    velocityMap.put(Timer.getFPGATimestamp(), coordInfo);
 
     Rotation2d navXVal = new Rotation2d((-navX.getYaw() % 360) * Math.PI / 180);
     SwerveModuleState[] swerveModuleStates = m_kinematics.toSwerveModuleStates(
@@ -153,11 +157,14 @@ public class Drivetrain {
     Double[] velocityArray = (Double[]) velocityMap.keySet().toArray();
     for (int i = velocityArray.length - 1; i > 0; i--) {
       double time = velocityArray[i];
-      Translation2d velocityComp = velocityMap.get(time);
+      Translation2d velocityComp = velocityMap.get(time)[0];
+      Translation2d displacementComp = velocityMap.get(time)[1];
       double vx = velocityComp.getX();
       double vy = velocityComp.getY();
-      xPose += vx * (currentTime - time);
-      yPose += vy * (currentTime - time);
+      double dispX = displacementComp.getX();
+      double dispY = displacementComp.getY();
+      xPose += vx * (currentTime - time) - dispY;
+      yPose += vy * (currentTime - time) - dispX;
       currentTime = time;
     }
     
@@ -167,9 +174,9 @@ public class Drivetrain {
   public Translation2d getRobotPoseNavX() {
     Translation2d lastKnownCoord = new Translation2d(navX.getDisplacementX(), navX.getDisplacementY());
     double currentTime = Timer.getFPGATimestamp();
-    Translation2d deltaTranslation  = new Translation2d(lastKnownVelocity.getX() * Math.abs(currentTime - lastKnownTime), lastKnownVelocity.getY() * Math.abs(currentTime - lastKnownTime));
-    lastKnownCoord.plus(deltaTranslation);
-    return lastKnownCoord;
+    Translation2d deltaTranslation  = lastKnownVelocity.times(Math.abs(currentTime-lastKnownTime));
+    Translation2d finalTranslation = lastKnownCoord.plus(deltaTranslation);
+    return finalTranslation;
   }
 
   /** Limelight autoalign method */

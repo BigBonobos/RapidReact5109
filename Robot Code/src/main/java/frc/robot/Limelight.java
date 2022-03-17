@@ -27,22 +27,27 @@ public class Limelight {
      * Uses Limelight values and trig to find the distance the robot is from the goal
      * @return Either 0 if no vision tape is in frame or the distance the robot is from the vision target
      */
-    public OptionalDouble calculateYDistance(){
-
-        // Gets the NetworkTable called limelight, containing the nessescary values
-        boolean tv = limelight.getEntry("tv").getBoolean(true);
-
-        // Checks if limelight is returning values
-        if (tv) {
-            // Returns distance from goal (calculated using trig)
-            double adjustedTlong = (100*targetSize)/(limelight.getEntry("tlong").getDouble(0)/420);
-            OptionalDouble thirdDimension = OptionalDouble.of(adjustedTlong/Math.tan(limelightFOV));
-            return thirdDimension;
-
-        } else {
-            // Returns empty if limelight isn't returning values
-            return OptionalDouble.empty();
-        }
+    public double calculateYDistance(){
+        final double limelightHeightInches = 22;
+        NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+        NetworkTableEntry ty = table.getEntry("ty");
+        double targetOffsetAngle_Vertical = ty.getDouble(0.0);
+        
+        // how many degrees back is your limelight rotated from perfectly vertical?
+        double limelightMountAngleDegrees = 25.0;
+        
+        // distance from the center of the Limelight lens to the floor
+        double limelightLensHeightInches = 20.0;
+        
+        // distance from the target to the floor
+        double goalHeightInches = 60.0;
+        
+        double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+        double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+        
+        //calculate distance
+        double distanceFromLimelightToGoalInches = (goalHeightInches - limelightHeightInches)/Math.tan(angleToGoalRadians);
+        return distanceFromLimelightToGoalInches;
     }
 
     /**

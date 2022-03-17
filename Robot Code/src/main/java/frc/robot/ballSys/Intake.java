@@ -49,7 +49,7 @@ public class Intake implements BaseController {
      * If it is, don't do anything.
      */
     public void intakeBalls() {
-        this.intakeMotor.set(ballCount == 2 ?  0 : 1);
+        this.intakeMotor.set(1);
      
     }
 
@@ -79,13 +79,11 @@ public class Intake implements BaseController {
      */
     @Override
     public void handleInputs(XboxController xController, Joystick j_operator) {
-        if (xController.getRightBumper()) {
-            intakeBalls();
-        } else if (xController.getLeftBumper()) {
-            ejectBalls();
-        } else {
-            resetSystem();
-        }
+
+
+        // else if (xController.getLeftBumper()) {
+        //     ejectBalls();
+        // }
 
     }
 

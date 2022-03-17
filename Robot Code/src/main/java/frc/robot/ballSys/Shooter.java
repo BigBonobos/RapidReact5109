@@ -18,7 +18,7 @@ public class Shooter implements BaseController {
     /**
      * This is the motor that actually shoots the ball (the bottom one).
      */
-    private final CANSparkMax m_shooterMotor;
+    public final CANSparkMax m_shooterMotor;
 
     /**
      * This is the motor that pushes the balls towards the propulsion once its up to
@@ -33,7 +33,7 @@ public class Shooter implements BaseController {
      * </pre>
      * </p>
      */
-    private final CANSparkMax m_indexMotor;
+    public final CANSparkMax m_indexMotor;
 
     /**
      * This is the encoder used to know the current velocity of the propulsion
@@ -144,8 +144,8 @@ public class Shooter implements BaseController {
 
         setWantedRPM(shooterRPMs);
 
-        double ballDelay = 0.25;
-        ballDelay = ballCount * 0.25;
+        double ballDelay = 0.375;
+        ballDelay = ballCount * 0.375;
 
         m_indexMotor.set(0);
         double startTime = Timer.getFPGATimestamp();
@@ -177,7 +177,42 @@ public class Shooter implements BaseController {
     }
 
     public void newShoot() {
-        shootHandler.startSingle(0.01);
+        // shootHandler.startSingle(0.01);
+
+        setWantedRPM(shooterRPMs);
+
+
+        System.out.println(ballCount);
+        double ballDelay = 0.25;
+        // ballDelay = ballCount * 0.25;
+
+        m_indexMotor.set(0);
+        double startTime = Timer.getFPGATimestamp();
+        while (!isAtShootingSpeed() && Timer.getFPGATimestamp() - startTime < 4) {
+            m_shooterMotor.set(calculateShootingSpeed());
+            // m_shooterMotor.setVoltage(calculateShootingVoltage());
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+
+      
+        double loadingStart = Timer.getFPGATimestamp();
+        while (Timer.getFPGATimestamp() - loadingStart < ballDelay) {
+            m_indexMotor.set(0.4);
+            m_shooterMotor.set(calculateShootingSpeed());
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                return;
+            }
+        }
+
+        m_indexMotor.set(0);
+        m_shooterMotor.set(0);
+
     }
 
 

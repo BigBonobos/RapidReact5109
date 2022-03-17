@@ -14,10 +14,10 @@ public class AutoShoot {
     public final double initProjectileSpeed;
     public final double gravity;
 
-    public static final double shooterPitch = 20;
+    public static final double shooterPitch = 70;
     public static final int maxFrames = 300;
     public static final double shooterHeight = 0.5;
-    public static final double goalLipHeight = 10;
+    public static final double goalLipHeight = 8;
 
     public AutoShoot(Robot robo, Translation2d goa, double goalRad, int framesPerSecond) {
         robot = robo;
@@ -27,7 +27,7 @@ public class AutoShoot {
         fps = framesPerSecond;
 
         gravity = 9.81 / fps;
-        initProjectileSpeed = 20.84 / fps;
+        initProjectileSpeed = 7.84 / fps;
     }
 
     private Translation2d getOriginTranslation() {
@@ -95,22 +95,29 @@ public class AutoShoot {
             offsets[1] = -vel[1] * airResistanceY - gravity;
             offsets[2] = -vel[2] * airResistanceXZ;
 
-            if (vel[1] < 0 && currentPos[1] < 0)
+            if (vel[1] < 0 && currentPos[1] < 0) {
+                System.out.printf("x: %f, y: %f, z: %f\n", currentPos[0], currentPos[1], currentPos[2]);
+                System.out.println(Math.sqrt(Math.pow(currentPos[0], 2) + Math.pow(currentPos[2], 2)));
                 return false;
+            }
 
-            if (madeItToGoal(currentPos, nextPos))
+            if (madeItToGoal(currentPos, nextPos)) {
+                System.out.printf("x: %f, y: %f, z: %f\n", currentPos[0], currentPos[1], currentPos[2]);
+                System.out.println(Math.sqrt(Math.pow(currentPos[0], 2) + Math.pow(currentPos[2], 2)));
                 return true;
+            }
 
             currentPos = add(currentPos, vel);
             vel = add(vel, offsets);
             nextPos = add(currentPos, vel);
         }
 
+        System.out.printf("x: %f, y: %f, z: %f\n", currentPos[0], currentPos[1], currentPos[2]);
+        System.out.println(Math.sqrt(Math.pow(currentPos[0], 2) + Math.pow(currentPos[2], 2)));
         return false;
     }
 
-    public Translation2d getTranslation(double distanceOffset, Rotation2d yaw) {
-        Translation2d origin = getOriginTranslation();
+    public Translation2d getTranslation(Translation2d origin, double distanceOffset, Rotation2d yaw) {
         return new Translation2d(
                 origin.getX() + (distanceOffset * Math.sin(yaw.getRadians())),
                 origin.getY() + (distanceOffset * Math.cos(yaw.getRadians())));
@@ -119,22 +126,31 @@ public class AutoShoot {
 
     public Translation2d findShootablePos(final double incrementDistance, final Rotation2d wantedYaw) throws Exception {
         final Translation2d origin = getOriginTranslation();
-        Translation2d testPos;
+        Translation2d testPos = origin;
         boolean success = false;
 
         do {
-            testPos = getTranslation(incrementDistance, wantedYaw);
+
+            System.out.println(testPos);
             success = calculateIfShotGood(testPos, wantedYaw);
-        } while (origin.getDistance(goal) > origin.getDistance(testPos) && !success);
+            if (success)
+                break;
+            testPos = getTranslation(testPos, incrementDistance, wantedYaw);
+
+        } while (origin.getDistance(goal) > origin.getDistance(testPos));
 
         if (success)
             return testPos;
         Rotation2d newWanted = wantedYaw.plus(Rotation2d.fromDegrees(180));
 
         do {
-            testPos = getTranslation(incrementDistance, newWanted);
+            System.out.println(testPos);
+            System.out.println(origin.getDistance(testPos));
             success = calculateIfShotGood(testPos, newWanted);
-        } while (origin.getDistance(goal) > origin.getDistance(testPos) && !success && origin.getDistance(goal) < 20);
+            if (success)
+                break;
+            testPos = getTranslation(testPos, incrementDistance, newWanted);
+        } while (origin.getDistance(testPos) < 20);
 
         if (success)
             return testPos;
@@ -144,14 +160,15 @@ public class AutoShoot {
 
     public boolean shootAtGoal() {
 
-        if (robot.ballFondler.getAndUpdateBallCount() == 0) {
-            return false;
-        }
+        // if (robot.ballFondler.getAndUpdateBallCount() == 0) {
+        // return false;
+        // }
 
         Rotation2d wantedYaw = getYawToGoal();
         try {
             Translation2d wantedPos = findShootablePos(0.25, wantedYaw);
-            robot.m_swerve.auto.translateTo(wantedPos);
+            System.out.printf("Wanted pos: %s", wantedPos.toString());
+            // robot.m_swerve.auto.translateTo(wantedPos);
             robot.m_swerve.auto.rotateTo(wantedYaw);
             robot.ballFondler.shoot();
             return true;

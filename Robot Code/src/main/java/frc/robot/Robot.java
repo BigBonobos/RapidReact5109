@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import frc.robot.autonomous.Autonomous;
+import frc.robot.ballSys.AutoShoot;
 import frc.robot.ballSys.BallFondler;
 import frc.robot.climb.ClimbModule;
 import frc.robot.swerveCode.Drivetrain;
@@ -14,6 +16,8 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+
+import java.util.OptionalDouble;
 
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -51,7 +55,8 @@ public class Robot extends TimedRobot {
    * A custom implementation of four SwerveModules (also custom).
    * Can omni-directionally drive.
    * 
-   * @see {@link frc.robot.Robot#driveWithJoystick(boolean) Drivetrain constructor.}
+   * @see {@link frc.robot.Robot#driveWithJoystick(boolean) Drivetrain
+   *      constructor.}
    */
   public final Drivetrain m_swerve = new Drivetrain(autoAlignRange, frontLeftIds, frontRightIds, backLeftIds,
       backRightIds);
@@ -86,7 +91,7 @@ public class Robot extends TimedRobot {
    * @see {@link frc.robot.ballSys.BallFondler#BallFondler(int, int, int, double)
    *      BallFondler constructor.}
    */
-  private final BallFondler ballFondler = new BallFondler(bfIDs[0], bfIDs[1], bfIDs[2], 3650);
+  public final BallFondler ballFondler = new BallFondler(bfIDs[0], bfIDs[1], bfIDs[2], 3650);
 
   /**
    * Setup for solenoid ports for the climb module.
@@ -109,6 +114,9 @@ public class Robot extends TimedRobot {
    */
   private int autoCounter = 1;
 
+  public final AutoShoot autoShoot = new AutoShoot(this, new Translation2d(1, 0), 3, 10);
+
+
   /**
    * Ran once on bot initialization.
    */
@@ -122,7 +130,16 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testInit() {
+    // m_swerve.navX.resetDisplacement();
+    // System.out.println(new Translation2d(m_swerve.navX.getDisplacementX(), m_swerve.navX.getDisplacementY()));
+    // m_swerve.customAutoAlign();
+    // // m_swerve.auto.rotateTo(Rotation2d.fromDegrees(45));
+    // // m_swerve.auto.translateTo(new Translation2d(.3, 0), 0.05);
+    // System.out.println(autoShoot.shootAtGoal());
+    // m_swerve.auto.stop();
     m_swerve.customAutoAlign();
+    Timer.delay(1);
+    // m_swerve.autoAlign();
   }
 
   /**
@@ -131,6 +148,9 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
     driveWithJoystick(true);
+    // System.out.printf("%s\n",
+    //     new Translation2d(m_swerve.navX.getDisplacementX(), m_swerve.navX.getDisplacementY()).toString());O
+
     handleInputs(xController, j_operator);
 
   }
@@ -191,13 +211,10 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     System.out.println(m_swerve.m_odometry.getPoseMeters());
     m_swerve.updateOdometry();
-    
+
     driveWithJoystick(true);
     handleInputs(xController, j_operator);
   }
-
-
-
 
   private void driveWithJoystick(boolean fieldRelative) {
     /**
@@ -221,11 +238,17 @@ public class Robot extends TimedRobot {
      **/
     final double rot = -m_rotLimiter.calculate(MathUtil.applyDeadband(xController.getRightX(), 0.12))
         * frc.robot.swerveCode.Drivetrain.kMaxAngularSpeed;
-
+      
     m_swerve.drive(xSpeed, ySpeed, rot, fieldRelative);
   }
 
   private void handleInputs(XboxController xController, Joystick j_operator) {
+    ballFondler.handleInputs(xController, j_operator);
+    climbModule.handleInputs(xController, j_operator);
+  }
+
+
+  private void resetSystem() {
     ballFondler.resetSystem();
     climbModule.resetSystem();
   }

@@ -42,6 +42,7 @@ public class Autonomous extends MovementUtil {
                     .minus(new Translation2d(m_swerve.navX.getDisplacementX(), m_swerve.navX.getDisplacementY()));
             yaw = Math.atan2(delta.getX(), delta.getY());
 
+            System.out.println(new Translation2d(m_swerve.navX.getDisplacementX(), m_swerve.navX.getDisplacementY()));
             xSpeed = speed * Math.sin(yaw);
             ySpeed = speed * Math.cos(yaw);
             m_swerve.drive(xSpeed, ySpeed, 0, true);

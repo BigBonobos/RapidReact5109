@@ -7,8 +7,10 @@ package frc.robot.swerveCode;
 import frc.robot.Limelight;
 import frc.robot.autonomous.Autonomous;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.Timer;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import com.kauailabs.navx.frc.*;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -25,6 +27,8 @@ public class Drivetrain {
 
   public static final double kMaxSpeed = 0.3; // 3 meters per second
   public static final double kMaxAngularSpeed = Math.PI / 6; // 1/2 rotation per second
+  public double globalX = 0;
+  public double globalY = 0;
 
   // Network Table instantiation
   private final NetworkTableInstance ntwrkInst = NetworkTableInstance.getDefault();
@@ -47,7 +51,7 @@ public class Drivetrain {
 
   // Shooter Range
   public double shooterRangeCm; // Enter shooter distance here (cm)
-  public final Limelight limelight = new Limelight(61.49125);
+  public final Limelight limelight = new Limelight(6*2.51);
 
   // Swerve drive library instantiation
   private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
@@ -133,24 +137,14 @@ public class Drivetrain {
   }
 
   /** Limelight autoalign method */
-  public void autoAlign() throws Throwable {
-
-    try {
-      // Calls limelight method to get the z-distance from goal
-      OptionalDouble straightDistanceOption = limelight.calculateYDistance();
-      double straightDistance = straightDistanceOption.getAsDouble();
-
-      // Offset variable initialization
-      double yOffset = straightDistance - shooterRangeCm;
-      double xOffset = straightDistance * Math.tan(limelight.getXOffset().getAsDouble() * Math.PI / 180);
-
-      // Control logic to drive bot into position
-      if (Math.abs(yOffset) > .5 || Math.abs(xOffset) > .5) {
-        drive(xOffset / Math.PI, yOffset / Math.PI, 0.0, true);
+  public void autoAlign() {
+    OptionalDouble xOffset = limelight.getXOffset();
+    if (xOffset.isPresent()) {
+      while(xOffset.getAsDouble() != 0) {
+        drive(0, 0, xOffset.getAsDouble(), false);
       }
-    } catch (Exception e) {
-      e.printStackTrace();
     }
+  
   }
 
   /**

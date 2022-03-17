@@ -9,7 +9,7 @@ import frc.robot.autonomous.Autonomous;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.OptionalDouble;
 import com.kauailabs.navx.frc.*;
@@ -32,7 +32,8 @@ public class Drivetrain {
   private final NetworkTableInstance ntwrkInst = NetworkTableInstance.getDefault();
   public NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
 
-  private HashMap<Double, Translation2d> velocityMap = new HashMap<Double, Translation2d>();
+  // Map to store velocities of robot and time
+  private Map<Double, Translation2d> velocityMap = new Map<Double, Translation2d>();
 
   // Bot measurements
   private final Translation2d m_frontLeftLocation = new Translation2d(0.2921, 0.2921);
@@ -141,7 +142,7 @@ public class Drivetrain {
     double xPose = 0;
     double yPose = 0;
     double prevTime = 0;
-    for (HashMap.Entry<Double, Translation2d> entry: velocityMap.entrySet()) {
+    for (Map.Entry<Double, Translation2d> entry: velocityMap.entrySet()) {
       double time = entry.getKey();
       double vx = entry.getValue().getX();
       double vy = entry.getValue().getY();

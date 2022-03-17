@@ -35,6 +35,8 @@ public class Drivetrain {
 
   // Map to store velocities of robot and time
   private HashMap<Double, Translation2d> velocityMap = new HashMap<Double, Translation2d>();
+  private Translation2d lastKnownVelocity = new Translation2d(0, 0);
+  private double lastKnownTime = 0;
 
   // Bot measurements
   private final Translation2d m_frontLeftLocation = new Translation2d(0.2921, 0.2921);
@@ -109,6 +111,8 @@ public class Drivetrain {
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
 
     // Appends velocity and timestampt to hashmap
+    lastKnownTime = Timer.getFPGATimestamp();
+    lastKnownVelocity = new Translation2d(xSpeed, ySpeed);
     velocityMap.put(Timer.getFPGATimestamp(), new Translation2d(xSpeed, ySpeed));
 
     Rotation2d navXVal = new Rotation2d((-navX.getYaw() % 360) * Math.PI / 180);
@@ -158,6 +162,14 @@ public class Drivetrain {
     }
     
     return new Translation2d(xPose, yPose);
+  }
+
+  public Translation2d getRobotPoseNavX() {
+    Translation2d lastKnownCoord = new Translation2d(navX.getDisplacementX(), navX.getDisplacementY());
+    double currentTime = Timer.getFPGATimestamp();
+    Translation2d deltaTranslation  = new Translation2d(lastKnownVelocity.getX() * Math.abs(currentTime - lastKnownTime), lastKnownVelocity.getY() * Math.abs(currentTime - lastKnownTime));
+    lastKnownCoord.plus(deltaTranslation);
+    return lastKnownCoord;
   }
 
   /** Limelight autoalign method */

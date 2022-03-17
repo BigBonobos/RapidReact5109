@@ -163,8 +163,8 @@ public class Drivetrain {
       double vy = velocityComp.getY();
       double dispX = displacementComp.getX();
       double dispY = displacementComp.getY();
-      xPose += vx * (currentTime - time) - dispY;
-      yPose += vy * (currentTime - time) - dispX;
+      xPose += (vx * (currentTime - time)) - dispY;
+      yPose += (vy * (currentTime - time)) - dispX;
       currentTime = time;
     }
     
@@ -172,7 +172,7 @@ public class Drivetrain {
   }
 
   public Translation2d getRobotPoseNavX() {
-    Translation2d lastKnownCoord = new Translation2d(navX.getDisplacementX(), navX.getDisplacementY());
+    Translation2d lastKnownCoord = new Translation2d(-navX.getDisplacementY(), -navX.getDisplacementX());
     double currentTime = Timer.getFPGATimestamp();
     Translation2d deltaTranslation  = lastKnownVelocity.times(Math.abs(currentTime-lastKnownTime));
     Translation2d finalTranslation = lastKnownCoord.plus(deltaTranslation);

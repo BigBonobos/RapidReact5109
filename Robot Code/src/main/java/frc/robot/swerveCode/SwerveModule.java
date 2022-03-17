@@ -158,7 +158,7 @@ public class SwerveModule implements RevOptimization {
     //System.out.println("Target:" + diffAngle);
     // * 180 / Math.PI
     m_turningEncoderAbsolute.setPositionToAbsolute();
-    m_drivePIDController.setReference(state.speedMetersPerSecond / kWheelRadius, ControlType.kVelocity);
-    m_turningPIDController.setReference(finalAngle, ControlType.kPosition);
+    m_drivePIDController.setReference(state.speedMetersPerSecond / kWheelRadius, ControlType.kSmartVelocity);
+    m_turningPIDController.setReference(finalAngle, ControlType.kSmartMotion);
   }
 }

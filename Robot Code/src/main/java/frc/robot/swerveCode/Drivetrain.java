@@ -9,9 +9,10 @@ import frc.robot.autonomous.Autonomous;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 
-import java.util.Map;
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.OptionalDouble;
+
 import com.kauailabs.navx.frc.*;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -33,7 +34,7 @@ public class Drivetrain {
   public NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
 
   // Map to store velocities of robot and time
-  private Map<Double, Translation2d> velocityMap = new Map<Double, Translation2d>();
+  private HashMap<Double, Translation2d> velocityMap = new HashMap<Double, Translation2d>();
 
   // Bot measurements
   private final Translation2d m_frontLeftLocation = new Translation2d(0.2921, 0.2921);
@@ -106,7 +107,10 @@ public class Drivetrain {
    */
   @SuppressWarnings("ParameterName")
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
+
+    // Appends velocity and timestampt to hashmap
     velocityMap.put(Timer.getFPGATimestamp(), new Translation2d(xSpeed, ySpeed));
+
     Rotation2d navXVal = new Rotation2d((-navX.getYaw() % 360) * Math.PI / 180);
     SwerveModuleState[] swerveModuleStates = m_kinematics.toSwerveModuleStates(
         fieldRelative
@@ -141,14 +145,16 @@ public class Drivetrain {
   public Translation2d getRobotTranslation2d() {
     double xPose = 0;
     double yPose = 0;
-    double prevTime = 0;
-    for (Map.Entry<Double, Translation2d> entry: velocityMap.entrySet()) {
-      double time = entry.getKey();
-      double vx = entry.getValue().getX();
-      double vy = entry.getValue().getY();
-      xPose += vx * (time - prevTime);
-      yPose += vy * (time - prevTime);
-      prevTime = time;
+    double currentTime = Timer.getFPGATimestamp();
+    Double[] velocityArray = (Double[]) velocityMap.keySet().toArray();
+    for (int i = velocityArray.length - 1; i > 0; i--) {
+      double time = velocityArray[i];
+      Translation2d velocityComp = velocityMap.get(time);
+      double vx = velocityComp.getX();
+      double vy = velocityComp.getY();
+      xPose += vx * (currentTime - time);
+      yPose += vy * (currentTime - time);
+      currentTime = time;
     }
     
     return new Translation2d(xPose, yPose);

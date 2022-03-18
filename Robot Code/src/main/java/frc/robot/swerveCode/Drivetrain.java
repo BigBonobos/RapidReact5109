@@ -154,8 +154,6 @@ public class Drivetrain {
   }
 
   public Translation2d getRobotTranslation2d() {
-    double xPose = 0;
-    double yPose = 0;
     double currentTime = Timer.getFPGATimestamp();
     Double[] velocityArray = (Double[]) velocityMap.keySet().toArray();
     for (int i = velocityArray.length - 1; i > 0; i--) {
@@ -166,12 +164,12 @@ public class Drivetrain {
       double vy = velocityComp.getY();
       double dispX = displacementComp.getX();
       double dispY = displacementComp.getY();
-      xPose += (vx * (currentTime - time)) - dispY;
-      yPose += (vy * (currentTime - time)) - dispX;
+      globalX += (vx * (currentTime - time)) - dispY;
+      globalY += (vy * (currentTime - time)) - dispX;
       currentTime = time;
     }
-    
-    return new Translation2d(xPose, yPose);
+    velocityMap = new HashMap<>();
+    return new Translation2d(globalX, globalY);
   }
 
   public Translation2d getRobotPoseNavX() {

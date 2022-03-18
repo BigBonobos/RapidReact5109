@@ -29,8 +29,10 @@ public class Drivetrain {
 
   public static final double kMaxSpeed = 0.3; // 3 meters per second
   public static final double kMaxAngularSpeed = Math.PI / 6; // 1/2 rotation per second
-  public double globalX = 0;
-  public double globalY = 0;
+  private double globalX = 0;
+  private double globalY = 0;
+  private static final double odometryLimiter = 0.2;
+
 
   // Network Table instantiation
   private final NetworkTableInstance ntwrkInst = NetworkTableInstance.getDefault();
@@ -86,11 +88,15 @@ public class Drivetrain {
    *                               element in the array should be the drive motor
    *                               id, the second should be the turning motor id
    */
-  public Drivetrain(double shooterRange, double[] swerveFrontLeftMotors, double[] swerveFrontRightMotors,
+  public Drivetrain(Optional<Double> shooterRange, double[] swerveFrontLeftMotors, double[] swerveFrontRightMotors,
       double[] swerveBackLeftMotors, double[] swerveBackRightMotors) {
     navX.reset();
     navX.resetDisplacement();
-    shooterRangeCm = shooterRange;
+    if (shooterRange.isPresent()) {
+      shooterRangeCm = shooterRange.get();
+    } else {
+      shooterRangeCm = 0;
+    }
     ntwrkInst.startClientTeam(5109);
     m_frontLeft = new SwerveModule((int) swerveFrontLeftMotors[0], (int) swerveFrontLeftMotors[1],
         (int) swerveFrontLeftMotors[2], swerveFrontLeftMotors[3]);
@@ -166,14 +172,14 @@ public class Drivetrain {
     double dispX = navX.getDisplacementX();
     double dispY = navX.getDisplacementY();
 
-    if (Math.abs(dispX) > 0.2) {
+    if (Math.abs(dispX) > odometryLimiter) {
       globalY -= dispX;
     } 
 
-    if (Math.abs(dispY) > 0.2) {
+    if (Math.abs(dispY) > odometryLimiter) {
       globalX -= dispY;
     }
-    
+
     navX.resetDisplacement();
     velocityMap.clear();
     return new Translation2d(globalX, globalY);

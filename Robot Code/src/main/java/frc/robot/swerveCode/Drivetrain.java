@@ -24,6 +24,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.*;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -160,7 +161,7 @@ public class Drivetrain {
         m_backRight.getState());
   }
 
-  public Translation2d getRobotTranslation2d() {
+  public Pose2d getRobotPose() {
     double currentTime = Timer.getFPGATimestamp();
     Double[] velocityArray = velocityMap.keySet().toArray(Double[]::new);
     for (int i = velocityArray.length - 1; i > 0; i--) {
@@ -185,7 +186,7 @@ public class Drivetrain {
 
     navX.resetDisplacement();
     velocityMap.clear();
-    return new Translation2d(globalX, globalY);
+    return new Pose2d(new Translation2d(globalX, globalY), new Rotation2d(-navX.getYaw()));
   }
 
   public Translation2d getRobotPoseNavX() {

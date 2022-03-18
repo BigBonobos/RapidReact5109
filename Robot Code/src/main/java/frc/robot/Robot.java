@@ -86,7 +86,7 @@ public class Robot extends TimedRobot {
    * @see {@link frc.robot.ballSys.BallFondler#BallFondler(int, int, int, double)
    *      BallFondler constructor.}
    */
-  private final BallFondler ballFondler = new BallFondler(bfIDs[0], bfIDs[1], bfIDs[2], 3650);
+  public final BallFondler ballFondler = new BallFondler(bfIDs[0], bfIDs[1], bfIDs[2], 3650);
 
   /**
    * Setup for solenoid ports for the climb module.

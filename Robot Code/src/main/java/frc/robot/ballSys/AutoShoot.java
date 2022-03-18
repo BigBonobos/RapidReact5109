@@ -11,13 +11,15 @@ public class AutoShoot {
     public final double goalRadius;
     public final Robot robot;
     public final int fps;
+    public final double invFps;
     public final double initProjectileSpeed;
     public final double gravity;
 
-    public static final double shooterPitch = 20;
+    public static final Rotation2d shooterPitch = Rotation2d.fromDegrees(70);
     public static final int maxFrames = 300;
-    public static final double shooterHeight = 0.5;
-    public static final double goalLipHeight = 10;
+    public static final double shooterHeight = 0.25;
+    public static final double goalLipHeight = 2.4384;
+    // public static final double goalLipRAdius = 0.9144;
 
     public AutoShoot(Robot robo, Translation2d goa, double goalRad, int framesPerSecond) {
         robot = robo;
@@ -25,9 +27,10 @@ public class AutoShoot {
         goalVec = new double[] { goa.getX(), goalLipHeight, goa.getY() };
         goalRadius = goalRad;
         fps = framesPerSecond;
+        invFps = 1d / fps;
 
-        gravity = 9.81 / fps;
-        initProjectileSpeed = 20.84 / fps;
+        gravity = 9.81;
+        initProjectileSpeed = 7.84;
     }
 
     private Translation2d getOriginTranslation() {
@@ -67,10 +70,15 @@ public class AutoShoot {
     }
 
     private double[] add(double[] pos, final double[] vel) {
-        pos[0] = pos[0] + vel[0];
-        pos[1] = pos[1] + vel[1];
-        pos[2] = pos[2] + vel[2];
-        return pos;
+        return add(pos, vel, 1);
+    }
+
+    private double[] add(double[] pos, final double[] vel, double scale) {
+        return new double[] {
+            pos[0] + vel[0] * scale,
+            pos[1] + vel[1] * scale,
+            pos[2] + vel[2] * scale,
+        };
     }
 
     private boolean madeItToGoal(final double[] current, final double[] next) {
@@ -82,35 +90,37 @@ public class AutoShoot {
 
     public boolean calculateIfShotGood(Translation2d origin, Rotation2d yaw) {
         double[] currentPos = new double[] { origin.getX(), shooterHeight, origin.getY() };
-        double[] vel = getDirFromYawPitchSpeed(yaw.getRadians(), shooterPitch, initProjectileSpeed);
+        double[] vel = getDirFromYawPitchSpeed(yaw, shooterPitch, initProjectileSpeed);
         double[] nextPos = add(currentPos, vel);
         double[] offsets = new double[3];
         final double airResistanceXZ = 0;
         final double airResistanceY = 0;
-        int frames = 0;
+        int frames = 1;
 
         while (frames < maxFrames) {
-            frames += 1;
+
             offsets[0] = -vel[0] * airResistanceXZ;
             offsets[1] = -vel[1] * airResistanceY - gravity;
             offsets[2] = -vel[2] * airResistanceXZ;
 
-            if (vel[1] < 0 && currentPos[1] < 0)
-                return false;
-
-            if (madeItToGoal(currentPos, nextPos))
+            if (madeItToGoal(currentPos, nextPos)) {
                 return true;
+            }
 
-            currentPos = add(currentPos, vel);
-            vel = add(vel, offsets);
-            nextPos = add(currentPos, vel);
+            if (vel[1] < 0 && nextPos[1] < 0) {
+                return false;
+            }
+
+            currentPos = add(currentPos, vel, invFps);
+            vel = add(vel, offsets, invFps);
+            nextPos = add(currentPos, vel, invFps);
         }
 
+        frames += 1;
         return false;
     }
 
-    public Translation2d getTranslation(double distanceOffset, Rotation2d yaw) {
-        Translation2d origin = getOriginTranslation();
+    public Translation2d getTranslation(Translation2d origin, double distanceOffset, Rotation2d yaw) {
         return new Translation2d(
                 origin.getX() + (distanceOffset * Math.sin(yaw.getRadians())),
                 origin.getY() + (distanceOffset * Math.cos(yaw.getRadians())));
@@ -119,39 +129,40 @@ public class AutoShoot {
 
     public Translation2d findShootablePos(final double incrementDistance, final Rotation2d wantedYaw) throws Exception {
         final Translation2d origin = getOriginTranslation();
-        Translation2d testPos;
+        Translation2d testPos = origin;
         boolean success = false;
 
         do {
-            testPos = getTranslation(incrementDistance, wantedYaw);
+
+            System.out.println(testPos);
             success = calculateIfShotGood(testPos, wantedYaw);
-        } while (origin.getDistance(goal) > origin.getDistance(testPos) && !success);
+            if (success) return testPos;
+            testPos = getTranslation(testPos, incrementDistance, wantedYaw);
 
-        if (success)
-            return testPos;
+        } while (origin.getDistance(goal) > origin.getDistance(testPos));
         Rotation2d newWanted = wantedYaw.plus(Rotation2d.fromDegrees(180));
-
         do {
-            testPos = getTranslation(incrementDistance, newWanted);
+            System.out.println(testPos);
+            System.out.println(origin.getDistance(testPos));
             success = calculateIfShotGood(testPos, newWanted);
-        } while (origin.getDistance(goal) > origin.getDistance(testPos) && !success && origin.getDistance(goal) < 20);
-
-        if (success)
-            return testPos;
+            if (success) return testPos;
+            testPos = getTranslation(testPos, incrementDistance, newWanted);
+        } while (origin.getDistance(testPos) < 20);;
 
         throw new Exception("Fuck lol, can't find a good shot.");
     }
 
     public boolean shootAtGoal() {
 
-        if (robot.ballFondler.getAndUpdateBallCount() == 0) {
-            return false;
-        }
+        // if (robot.ballFondler.getAndUpdateBallCount() == 0) {
+        // return false;
+        // }
 
         Rotation2d wantedYaw = getYawToGoal();
         try {
             Translation2d wantedPos = findShootablePos(0.25, wantedYaw);
-            robot.m_swerve.auto.translateTo(wantedPos);
+            System.out.printf("Wanted pos: %s", wantedPos.toString());
+            // robot.m_swerve.auto.translateTo(wantedPos);
             robot.m_swerve.auto.rotateTo(wantedYaw);
             robot.ballFondler.shoot();
             return true;

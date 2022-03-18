@@ -13,8 +13,8 @@ public class BallFondler implements BaseController {
     public final Intake intake;
     public final Shooter shooter;
 
-    public final DigitalInput beam1 = new DigitalInput(0); // Outside the kicker wheel
-    public final DigitalInput beam2 = new DigitalInput(1); // Inside the kicker wheel
+    public final DigitalInput beam1 = new DigitalInput(5); // Outside the kicker wheel
+    public final DigitalInput beam2 = new DigitalInput(6); // Inside the kicker wheel
 
     public final ReentrantLock lock;
 
@@ -39,14 +39,16 @@ public class BallFondler implements BaseController {
     }
 
     public int getAndUpdateBallCount() {
-        if (!beam1.get()) {
-            ballCount = 2;
+
+        // System.out.printf("beam1: %b   beam2: %b\n", beam1.get(), beam2.get());
+        if (beam1.get() && beam2.get()) {
+            ballCount = 0;
         }
         if (!beam2.get() && beam1.get()) {
             ballCount = 1;
         }
-        if (beam1.get() && beam2.get()) {
-            ballCount = 0;
+        if (!beam1.get() && !beam2.get()) {
+            ballCount = 2;
         }
 
         intake.ballCount = ballCount;
@@ -82,6 +84,7 @@ public class BallFondler implements BaseController {
 
     /**
      * WIP method. Will update index so that intake stops early.
+     * 
      * @param seconds
      */
     public void smartIntake(double seconds) {
@@ -117,7 +120,20 @@ public class BallFondler implements BaseController {
         getAndUpdateBallCount();
 
         if (xController.getLeftBumper()) {
-            shooter.newShoot();
+            shoot();
+        }
+
+        if (xController.getLeftTriggerAxis() == 1) {
+            intake.intakeBalls();
+
+            if (shooting || !beam2.get() || ballCount == 1) {
+                // System.out.println("This is being called, right?");
+                shooter.m_indexMotor.set(0);
+            } else if (!beam1.get() && !shooting) {
+                shooter.m_indexMotor.set(1);
+            }
+        } else {
+            intake.resetSystem();
         }
 
         intake.handleInputs(xController, j_operator);

@@ -9,10 +9,13 @@ import frc.robot.autonomous.Autonomous;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.stream.Collector;
 
 import com.kauailabs.navx.frc.*;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -159,7 +162,7 @@ public class Drivetrain {
 
   public Translation2d getRobotTranslation2d() {
     double currentTime = Timer.getFPGATimestamp();
-    Double[] velocityArray = (Double[]) velocityMap.keySet().toArray();
+    Double[] velocityArray = velocityMap.keySet().toArray(Double[]::new);
     for (int i = velocityArray.length - 1; i > 0; i--) {
       double time = velocityArray[i];
       Translation2d velocityComp = velocityMap.get(time);

@@ -37,7 +37,7 @@ public class Drivetrain {
   public NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
 
   // Map to store velocities of robot and time
-  private HashMap<Double, Translation2d[]> velocityMap = new HashMap<Double, Translation2d[]>();
+  private HashMap<Double, Translation2d> velocityMap = new HashMap<Double, Translation2d>();
   private Translation2d lastKnownVelocity = new Translation2d(0, 0);
   private double lastKnownTime = 0;
 
@@ -117,10 +117,8 @@ public class Drivetrain {
     // Appends velocity and timestampt to hashmap
     lastKnownTime = Timer.getFPGATimestamp();
     lastKnownVelocity = new Translation2d(xSpeed, ySpeed);
-    Translation2d[] coordInfo = {new Translation2d(xSpeed, ySpeed), new Translation2d(navX.getDisplacementX(), navX.getDisplacementY())};
-    navX.resetDisplacement();
 
-    velocityMap.put(Timer.getFPGATimestamp(), coordInfo);
+    velocityMap.put(Timer.getFPGATimestamp(), lastKnownVelocity);
 
     Rotation2d navXVal = new Rotation2d((-navX.getYaw() % 360) * Math.PI / 180);
     SwerveModuleState[] swerveModuleStates = m_kinematics.toSwerveModuleStates(
@@ -158,17 +156,26 @@ public class Drivetrain {
     Double[] velocityArray = (Double[]) velocityMap.keySet().toArray();
     for (int i = velocityArray.length - 1; i > 0; i--) {
       double time = velocityArray[i];
-      Translation2d velocityComp = velocityMap.get(time)[0];
-      Translation2d displacementComp = velocityMap.get(time)[1];
+      Translation2d velocityComp = velocityMap.get(time);
       double vx = velocityComp.getX();
       double vy = velocityComp.getY();
-      double dispX = displacementComp.getX();
-      double dispY = displacementComp.getY();
-      globalX += (vx * (currentTime - time)) - dispY;
-      globalY += (vy * (currentTime - time)) - dispX;
+      globalX += (vx * (currentTime - time));
+      globalY += (vy * (currentTime - time));
       currentTime = time;
     }
-    velocityMap = new HashMap<>();
+    double dispX = navX.getDisplacementX();
+    double dispY = navX.getDisplacementY();
+
+    if (Math.abs(dispX) > 0.2) {
+      globalY -= dispX;
+    } 
+
+    if (Math.abs(dispY) > 0.2) {
+      globalX -= dispY;
+    }
+    
+    navX.resetDisplacement();
+    velocityMap.clear();
     return new Translation2d(globalX, globalY);
   }
 

@@ -6,6 +6,7 @@ package frc.robot.swerveCode;
 
 import frc.robot.Limelight;
 import frc.robot.autonomous.Autonomous;
+import frc.robot.swerveCode.util.AccelContainer;
 import edu.wpi.first.wpilibj.SPI;
 
 import java.util.NoSuchElementException;
@@ -48,6 +49,7 @@ public class Drivetrain {
   // Shooter Range
   public double shooterRangeCm; // Enter shooter distance here (cm)
   public final Limelight limelight = new Limelight(61.49125);
+  public AccelContainer distanceMeasure = new AccelContainer(navX);
 
   // Swerve drive library instantiation
   private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
@@ -101,6 +103,7 @@ public class Drivetrain {
    */
   @SuppressWarnings("ParameterName")
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
+    distanceMeasure.appendAccelCoord(new Translation2d(xSpeed, ySpeed));
     Rotation2d navXVal = new Rotation2d((-navX.getYaw() % 360) * Math.PI / 180);
     SwerveModuleState[] swerveModuleStates = m_kinematics.toSwerveModuleStates(
         fieldRelative

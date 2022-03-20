@@ -9,13 +9,11 @@ import frc.robot.autonomous.Autonomous;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.OptionalDouble;
-import java.util.stream.Collector;
 
 import com.kauailabs.navx.frc.*;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -35,7 +33,7 @@ public class Drivetrain {
   public static final double kMaxAngularSpeed = Math.PI / 6; // 1/2 rotation per second
   private double globalX = 0;
   private double globalY = 0;
-  private static final double odometryLimiter = 0.2;
+  private static final double odometryLimiter = 0.05;
 
 
   // Network Table instantiation
@@ -124,12 +122,13 @@ public class Drivetrain {
   @SuppressWarnings("ParameterName")
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
 
-    // Appends velocity and timestampt to hashmap
+    // Appends velocity and timestampt to hashmap for odoemtry
     lastKnownTime = Timer.getFPGATimestamp();
     lastKnownVelocity = new Translation2d(xSpeed, ySpeed);
 
     velocityMap.put(Timer.getFPGATimestamp(), lastKnownVelocity);
 
+    // Driving commands
     Rotation2d navXVal = new Rotation2d((-navX.getYaw() % 360) * Math.PI / 180);
     SwerveModuleState[] swerveModuleStates = m_kinematics.toSwerveModuleStates(
         fieldRelative
@@ -161,10 +160,18 @@ public class Drivetrain {
         m_backRight.getState());
   }
 
+
+  // Function to fake odometry calc
   public Pose2d getRobotPose() {
+
+    // Gets the current time 
     double currentTime = Timer.getFPGATimestamp();
+
+    // Iterates through velocity HashMap backwards
     Double[] velocityArray = velocityMap.keySet().toArray(Double[]::new);
     for (int i = velocityArray.length - 1; i > 0; i--) {
+
+      // Multiplies velocity * time to get distance
       double time = velocityArray[i];
       Translation2d velocityComp = velocityMap.get(time);
       double vx = velocityComp.getX();
@@ -173,6 +180,8 @@ public class Drivetrain {
       globalY += (vy * (currentTime - time));
       currentTime = time;
     }
+
+    // Adds the displacement from acceleration to constant velocity calculation
     double dispX = navX.getDisplacementX();
     double dispY = navX.getDisplacementY();
 
@@ -184,8 +193,11 @@ public class Drivetrain {
       globalX -= dispY;
     }
 
+    // Resets displacement and velocityMap
     navX.resetDisplacement();
     velocityMap.clear();
+
+    // Returns RobotPose
     return new Pose2d(new Translation2d(globalX, globalY), new Rotation2d(-navX.getYaw()));
   }
 

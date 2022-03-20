@@ -1,4 +1,5 @@
 package frc.robot.swerveCode.util;
+import java.util.Optional;
 import java.util.Vector;
 
 import com.kauailabs.navx.frc.AHRS;
@@ -8,7 +9,7 @@ import edu.wpi.first.wpilibj.Notifier;
 
 public class AccelContainer {
     public Vector<AccelCoord> coordStorage = new Vector<>();
-    public Notifier accelCoordNotif;
+    public Optional<Notifier> accelCoordNotif = Optional.empty();
     public AHRS navX;
     Translation2d absolutePosition = new Translation2d(0, 0);
 
@@ -17,15 +18,20 @@ public class AccelContainer {
     }
 
     public void appendAccelCoord(Translation2d desiredVelocity) {
-        accelCoordNotif.stop();
+        if (accelCoordNotif.isPresent()) {
+            accelCoordNotif.get().stop();
+        }
         AccelCoord accelCoord = new AccelCoord(desiredVelocity, navX);
-        accelCoordNotif = new Notifier(accelCoord);
-        accelCoordNotif.startPeriodic(0.001);
+        Notifier accelCoordNotifUw = new Notifier(accelCoord);
+        accelCoordNotifUw.startPeriodic(0.001);
+        accelCoordNotif = Optional.of(accelCoordNotifUw);
         coordStorage.add(accelCoord);
     }
 
     public Translation2d getAbsolutePosTranslation2d() {
-        accelCoordNotif.stop();
+        if (accelCoordNotif.isPresent()) {
+            accelCoordNotif.get().stop();
+        }
         for (AccelCoord coord: coordStorage) {
             absolutePosition.plus(coord.getDisplacement());
         }

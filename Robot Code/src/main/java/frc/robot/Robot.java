@@ -5,7 +5,7 @@
 package frc.robot;
 
 import frc.robot.autonomous.Autonomous;
-import frc.robot.ballSys.AutoShoot;
+// import frc.robot.ballSys.AutoShoot;
 import frc.robot.ballSys.BallFondler;
 import frc.robot.climb.ClimbModule;
 import frc.robot.swerveCode.Drivetrain;
@@ -115,7 +115,7 @@ public class Robot extends TimedRobot {
    */
   private int autoCounter = 1;
 
-  public final AutoShoot autoShoot = new AutoShoot(this, new Translation2d(1, 0), 3, 10);
+  // public final AutoShoot autoShoot = new AutoShoot(this, new Translation2d(1, 0), 3, 10);
 
 
   /**

@@ -10,6 +10,7 @@ public class AccelContainer {
     public Vector<AccelCoord> coordStorage = new Vector<>();
     public Notifier accelCoordNotif;
     public AHRS navX;
+    Translation2d absolutePosition = new Translation2d(0, 0);
 
     public AccelContainer(AHRS superNav) {
         navX = superNav;
@@ -25,10 +26,10 @@ public class AccelContainer {
 
     public Translation2d getAbsolutePosTranslation2d() {
         accelCoordNotif.stop();
-        Translation2d absolutePosition = new Translation2d(0, 0);
         for (AccelCoord coord: coordStorage) {
             absolutePosition.plus(coord.getDisplacement());
         }
+        coordStorage.clear();
         return absolutePosition;
     }
 }

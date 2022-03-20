@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 
 import java.util.HashMap;
-import java.util.List;
+import frc.robot.swerveCode.util.AccelContainer;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -58,6 +58,7 @@ public class Drivetrain {
   public final SwerveModule m_backLeft;
   public final  SwerveModule m_backRight;
   public final AHRS navX = new AHRS(SPI.Port.kMXP);
+  public AccelContainer accelContainer = new AccelContainer(navX);
   private final Rotation2d initialMeasurement = Rotation2d.fromDegrees(navX.getYaw() % 360);
 
   // Shooter Range
@@ -121,12 +122,11 @@ public class Drivetrain {
    */
   @SuppressWarnings("ParameterName")
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
-
     // Appends velocity and timestampt to hashmap for odoemtry
-    lastKnownTime = Timer.getFPGATimestamp();
+    // lastKnownTime = Timer.getFPGATimestamp();
     lastKnownVelocity = new Translation2d(xSpeed, ySpeed);
-
-    velocityMap.put(Timer.getFPGATimestamp(), lastKnownVelocity);
+    accelContainer.appendAccelCoord(lastKnownVelocity);
+    // velocityMap.put(Timer.getFPGATimestamp(), lastKnownVelocity);
 
     // Driving commands
     Rotation2d navXVal = new Rotation2d((-navX.getYaw() % 360) * Math.PI / 180);
@@ -161,45 +161,45 @@ public class Drivetrain {
   }
 
 
-  // Function to fake odometry calc
-  public Pose2d getRobotPose() {
+  // // Function to fake odometry calc
+  // public Pose2d getRobotPose() {
 
-    // Gets the current time 
-    double currentTime = Timer.getFPGATimestamp();
+  //   // Gets the current time 
+  //   double currentTime = Timer.getFPGATimestamp();
 
-    // Iterates through velocity HashMap backwards
-    Double[] velocityArray = velocityMap.keySet().toArray(Double[]::new);
-    for (int i = velocityArray.length - 1; i > 0; i--) {
+  //   // Iterates through velocity HashMap backwards
+  //   Double[] velocityArray = velocityMap.keySet().toArray(Double[]::new);
+  //   for (int i = velocityArray.length - 1; i > 0; i--) {
 
-      // Multiplies velocity * time to get distance
-      double time = velocityArray[i];
-      Translation2d velocityComp = velocityMap.get(time);
-      double vx = velocityComp.getX();
-      double vy = velocityComp.getY();
-      globalX += (vx * (currentTime - time));
-      globalY += (vy * (currentTime - time));
-      currentTime = time;
-    }
+  //     // Multiplies velocity * time to get distance
+  //     double time = velocityArray[i];
+  //     Translation2d velocityComp = velocityMap.get(time);
+  //     double vx = velocityComp.getX();
+  //     double vy = velocityComp.getY();
+  //     globalX += (vx * (currentTime - time));
+  //     globalY += (vy * (currentTime - time));
+  //     currentTime = time;
+  //   }
 
-    // Adds the displacement from acceleration to constant velocity calculation
-    double dispX = navX.getDisplacementX();
-    double dispY = navX.getDisplacementY();
+  //   // Adds the displacement from acceleration to constant velocity calculation
+  //   double dispX = navX.getDisplacementX();
+  //   double dispY = navX.getDisplacementY();
 
-    if (Math.abs(dispX) > odometryLimiter) {
-      globalY -= dispX;
-    } 
+  //   if (Math.abs(dispX) > odometryLimiter) {
+  //     globalY -= dispX;
+  //   } 
 
-    if (Math.abs(dispY) > odometryLimiter) {
-      globalX -= dispY;
-    }
+  //   if (Math.abs(dispY) > odometryLimiter) {
+  //     globalX -= dispY;
+  //   }
 
-    // Resets displacement and velocityMap
-    navX.resetDisplacement();
-    velocityMap.clear();
+  //   // Resets displacement and velocityMap
+  //   navX.resetDisplacement();
+  //   velocityMap.clear();
 
-    // Returns RobotPose
-    return new Pose2d(new Translation2d(globalX, globalY), new Rotation2d(-navX.getYaw()));
-  }
+  //   // Returns RobotPose
+  //   return new Pose2d(new Translation2d(globalX, globalY), new Rotation2d(-navX.getYaw()));
+  // }
 
   public Translation2d getRobotPoseNavX() {
     Translation2d lastKnownCoord = new Translation2d(-navX.getDisplacementY(), -navX.getDisplacementX());

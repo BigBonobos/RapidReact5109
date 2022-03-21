@@ -58,16 +58,18 @@ public class AccelCoord implements Runnable {
                 double accelXPrev = -accelMap.get(prevTime).getY();
                 double accelYPrev = -accelMap.get(prevTime).getX();
                 double delta = currentTime - prevTime;
-                double jerkX = (accelXCurr + accelXPrev)/2;
-                double jerkY = (accelYCurr + accelYPrev)/2;
+
+                // Jerk calculations (assumes constant jerk)
+                double jerkX = (accelXCurr - accelXPrev)/delta;
+                double jerkY = (accelYCurr - accelYPrev)/delta;
 
                 // Calculates displacement
-                displacementDueToAccelX += (jerkX * delta * delta * delta)/6 + (accelXPrev * delta * delta)/2 + vNotX * delta;
-                displacementDueToAccelY +=  (jerkY * delta * delta * delta)/6 + (accelYPrev * delta * delta)/2 + vNotX * delta;
+                displacementDueToAccelX += (jerkX * Math.pow(delta, 3))/6 + (accelXPrev * Math.pow(delta, 2))/2 + vNotX * delta;
+                displacementDueToAccelY +=  (jerkY * Math.pow(delta, 3))/6 + (accelYPrev * Math.pow(delta, 2))/2 + vNotX * delta;
 
                 // Calculates velocity
-                vNotX += (jerkX * delta * delta)/2 + accelXPrev * delta;
-                vNotY += (jerkY * delta * delta)/2 + accelYPrev * delta;
+                vNotX += (jerkX * Math.pow(delta, 2))/2 + accelXPrev * delta;
+                vNotY += (jerkY * Math.pow(delta, 2))/2 + accelYPrev * delta;
             }
         }
         if (finalTime.isPresent() && initTime.isPresent()) {

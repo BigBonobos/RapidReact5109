@@ -31,7 +31,7 @@ public class Autonomous extends MovementUtil {
     public boolean translateTo(Translation2d fieldPoint, double speed) {
 
         Translation2d delta = fieldPoint
-                .minus(new Translation2d(m_swerve.navX.getDisplacementX(), m_swerve.navX.getDisplacementY()));
+                .minus(m_swerve.distanceMeasure.getAbsolutePosTranslation2d());
         double yaw = Math.atan2(delta.getX(), delta.getY());
 
         double xSpeed = speed * Math.sin(yaw);
@@ -39,11 +39,8 @@ public class Autonomous extends MovementUtil {
 
         while (!reachedTranslationTarget(fieldPoint)) {
             delta = fieldPoint
-                    .minus(new Translation2d(m_swerve.navX.getDisplacementX(), m_swerve.navX.getDisplacementY()));
+                    .minus(m_swerve.distanceMeasure.getAbsolutePosTranslation2d());
             yaw = Math.atan2(delta.getX(), delta.getY());
-
-            xSpeed = speed * Math.sin(yaw);
-            ySpeed = speed * Math.cos(yaw);
             m_swerve.drive(xSpeed, ySpeed, 0, true);
             try {
                 Thread.sleep(20);

@@ -6,13 +6,13 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.controllers.SolenoidController;
-import frc.robot.pneumatics.base.CDSolenoid;
+import frc.robot.pneumatics.base.SSolenoid;
 
 public class ClimbModule implements SolenoidController {
 
-    private final CDSolenoid rightSolenoid;
-    private final CDSolenoid leftSolenoid;
-    private final CDSolenoid[] sols;
+    private final SSolenoid bothSolenoids;
+    // private final SSolenoid leftSolenoid;
+    private final SSolenoid[] sols;
 
     private final CANSparkMax climbMotor;
 
@@ -30,44 +30,41 @@ public class ClimbModule implements SolenoidController {
         }
 
         climbMotor = new CANSparkMax(motorPort, MotorType.kBrushless);
-        rightSolenoid = null;
-        leftSolenoid = null;
-        // rightSolenoid = new CDSolenoid(solenoidSettings[0][0], solenoidSettings[0][1]);
-        // leftSolenoid = new CDSolenoid(solenoidSettings[1][0], solenoidSettings[1][1]);
-        sols = new CDSolenoid[]{ rightSolenoid, leftSolenoid };
+        bothSolenoids = new SSolenoid(solenoidSettings[0][0]);
+        // leftSolenoid = new SSolenoid(solenoidSettings[1][0], solenoidSettings[1][1]);
+        sols = new SSolenoid[]{ bothSolenoids };
 
     }
 
-    public ClimbModule(CANSparkMax climb, CDSolenoid right, CDSolenoid left) {
+    public ClimbModule(CANSparkMax climb, SSolenoid both) {
         climbMotor = climb;
-        rightSolenoid = right;
-        leftSolenoid = left;
-        sols = new CDSolenoid[]{ left, right };
+        bothSolenoids = both;
+        sols = new SSolenoid[]{ both };
     }
 
     @Override
     public void extendSolenoids() {
-        rightSolenoid.extendFully();
-        leftSolenoid.extendFully();
+        bothSolenoids.extendFully();
+        // leftSolenoid.extendFully();
 
     }
 
     @Override
     public void retractSolenoids() {
-        rightSolenoid.retractFully();
-        leftSolenoid.retractFully();
+        bothSolenoids.retractFully();
+        // leftSolenoid.retractFully();
 
     }
 
     @Override
     public void toggleSolenoids() {
-        rightSolenoid.toggle();
-        leftSolenoid.toggle();
+        bothSolenoids.toggle();
+        // leftSolenoid.toggle();
 
     }
 
     @Override
-    public CDSolenoid[] getAllSolenoids() {
+    public SSolenoid[] getAllSolenoids() {
         return sols;
     }
 

@@ -94,7 +94,7 @@ public class Robot extends TimedRobot {
    * @see {@link frc.robot.climb.ClimbModule#ClimbModule(int, int[][]) ClimbModule
    *      constructor.}
    */
-  private final int[][] solenoidPorts = new int[][] { { 9, 8 }, { 7, 6 } };
+  private final int[][] solenoidPorts = new int[][] {  { 7, 6 }, { 9, 8 } };
 
   /**
    * Climb module. Controls two solenoids and a motor.
@@ -226,7 +226,7 @@ public class Robot extends TimedRobot {
   }
 
   private void handleInputs(XboxController xController, Joystick j_operator) {
-    ballFondler.resetSystem();
-    climbModule.resetSystem();
+    ballFondler.handleInputs(xController, j_operator);
+    climbModule.handleInputs(xController, j_operator);
   }
 }

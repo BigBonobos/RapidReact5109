@@ -24,8 +24,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 /** Represents a swerve drive style drivetrain. */
 public class Drivetrain {
 
-  public static final double kMaxSpeed = 0.3; // 3 meters per second
-  public static final double kMaxAngularSpeed = Math.PI / 6; // 1/2 rotation per second
+  public static final double kMaxSpeed = 1; // 3 meters per second
+  public static final double kMaxAngularSpeed = 2*Math.PI; // 1/2 rotation per second
 
   // Network Table instantiation
   private final NetworkTableInstance ntwrkInst = NetworkTableInstance.getDefault();
@@ -49,7 +49,7 @@ public class Drivetrain {
   // Shooter Range
   public double shooterRangeCm; // Enter shooter distance here (cm)
   public final Limelight limelight = new Limelight(61.49125);
-  public AccelContainer distanceMeasure = new AccelContainer(navX);
+  // public AccelContainer distanceMeasure = new AccelContainer(navX);
 
   // Swerve drive library instantiation
   private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
@@ -103,7 +103,7 @@ public class Drivetrain {
    */
   @SuppressWarnings("ParameterName")
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
-    distanceMeasure.appendAccelCoord(new Translation2d(xSpeed, ySpeed));
+    // distanceMeasure.appendAccelCoord(new Translation2d(xSpeed, ySpeed));
     Rotation2d navXVal = new Rotation2d((-navX.getYaw() % 360) * Math.PI / 180);
     SwerveModuleState[] swerveModuleStates = m_kinematics.toSwerveModuleStates(
         fieldRelative

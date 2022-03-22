@@ -15,6 +15,8 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 
+import java.util.Optional;
+
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
@@ -53,7 +55,7 @@ public class Robot extends TimedRobot {
    * 
    * @see {@link frc.robot.Robot#driveWithJoystick(boolean) Drivetrain constructor.}
    */
-  public final Drivetrain m_swerve = new Drivetrain(autoAlignRange, frontLeftIds, frontRightIds, backLeftIds,
+  public final Drivetrain m_swerve = new Drivetrain(Optional.of(autoAlignRange), frontLeftIds, frontRightIds, backLeftIds,
       backRightIds);
 
   /**
@@ -189,7 +191,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    System.out.println(m_swerve.m_odometry.getPoseMeters());
+    System.out.println(m_swerve.getRobotPose());
     m_swerve.updateOdometry();
     
     driveWithJoystick(true);

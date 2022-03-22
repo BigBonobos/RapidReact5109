@@ -13,8 +13,8 @@ public class BallFondler implements BaseController {
     public final Intake intake;
     public final Shooter shooter;
 
-    public final DigitalInput beam1 = new DigitalInput(0); // Outside the kicker wheel
-    public final DigitalInput beam2 = new DigitalInput(1); // Inside the kicker wheel
+    public final DigitalInput beam1 = new DigitalInput(5); // Outside the kicker wheel
+    public final DigitalInput beam2 = new DigitalInput(6); // Inside the kicker wheel
 
     public final ReentrantLock lock;
 
@@ -39,15 +39,29 @@ public class BallFondler implements BaseController {
     }
 
     public int getAndUpdateBallCount() {
-        if (!beam1.get()) {
+        if (!beam1.get() && !beam2.get()) {
             ballCount = 2;
+            if (!shooting) {
+                shooter.turnOffIndexWheel();
+            }
         }
         if (!beam2.get() && beam1.get()) {
             ballCount = 1;
+            if (!shooting) {
+                shooter.turnOffIndexWheel();
+            }
+        }
+
+        if (beam2.get() && !beam1.get()) {
+            ballCount = 1;
+            if (!shooting) {
+                shooter.turnOnIndexWheel();
+            }
         }
         if (beam1.get() && beam2.get()) {
             ballCount = 0;
         }
+  
 
         intake.ballCount = ballCount;
         shooter.ballCount = ballCount;
@@ -114,7 +128,8 @@ public class BallFondler implements BaseController {
     public void handleInputs(XboxController xController, Joystick j_operator) {
 
         // update in here instead of separate method to ensure updated values.
-        getAndUpdateBallCount();
+        // getAndUpdateBallCount();
+        System.out.println(getAndUpdateBallCount());
 
         if (xController.getLeftBumper()) {
             shooter.newShoot();

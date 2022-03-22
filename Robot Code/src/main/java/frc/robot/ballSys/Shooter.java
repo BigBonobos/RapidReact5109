@@ -136,6 +136,19 @@ public class Shooter implements BaseController {
         return m_shooterEncoder.getVelocity() < 20 && m_shooterMotor.get() != 0;
     }
 
+    public void turnOnIndexWheel() {
+        m_indexMotor.set(0.4);
+    }
+
+    public void turnOffIndexWheel() {
+        m_indexMotor.set(0);
+    }
+
+    public void ejectFromIndex() {
+        m_indexMotor.set(-0.4);
+    }
+
+
     /**
      * Since this is used in a notifier, System.out.println does not work as intended.
      * This is because it is being ran in a different thread than the RoboRIO's output.

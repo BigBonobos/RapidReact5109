@@ -81,6 +81,11 @@ public class ClimbModule implements SolenoidController {
           } else {
             climbMotor.set(0);
           }
+        if (j_operator.getTrigger()) {
+            extendSolenoids();
+        } else if (j_operator.getRawButton(3)) {
+            retractSolenoids();
+        }
     }
 
     @Override

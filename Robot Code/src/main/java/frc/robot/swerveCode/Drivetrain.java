@@ -32,7 +32,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 public class Drivetrain {
 
   public static final double kMaxSpeed = 2.5; // 3 meters per second
-  public static final double kMaxAngularSpeed = Math.PI / 6; // 1/2 rotation per second
+  public static final double kMaxAngularSpeed = 2*Math.PI; // 1/2 rotation per second
   private double globalX = 0;
   private double globalY = 0;
   private static final double odometryLimiter = 0.2;
@@ -161,33 +161,23 @@ public class Drivetrain {
         m_backRight.getState());
   }
 
-  public Pose2d getRobotPose() {
-    double currentTime = Timer.getFPGATimestamp();
-    Double[] velocityArray = velocityMap.keySet().toArray(Double[]::new);
-    for (int i = velocityArray.length - 1; i > 0; i--) {
-      double time = velocityArray[i];
-      Translation2d velocityComp = velocityMap.get(time);
-      double vx = velocityComp.getX();
-      double vy = velocityComp.getY();
-      globalX += (vx * (currentTime - time));
-      globalY += (vy * (currentTime - time));
-      currentTime = time;
-    }
-    double dispX = navX.getDisplacementX();
-    double dispY = navX.getDisplacementY();
+  // public Pose2d getRobotPose() {
+  //   double localX = 0;
+  //   double localY = 0;
+  //   double currentTime = Timer.getFPGATimestamp();
+  //   Double[] velocityArray = velocityMap.keySet().toArray(Double[]::new);
+  //   for (int i = velocityArray.length - 1; i > 0; i--) {
+  //     double time = velocityArray[i];
+  //     Translation2d velocityComp = velocityMap.get(time);
+  //     double vx = velocityComp.getX();
+  //     double vy = velocityComp.getY();
+  //     globalX += (vx * (currentTime - time));
+  //     globalY += (vy * (currentTime - time));
+  //     currentTime = time;
+  //   }
 
-    if (Math.abs(dispX) > odometryLimiter) {
-      globalY -= dispX;
-    } 
-
-    if (Math.abs(dispY) > odometryLimiter) {
-      globalX -= dispY;
-    }
-
-    navX.resetDisplacement();
-    velocityMap.clear();
-    return new Pose2d(new Translation2d(globalX, globalY), new Rotation2d(-navX.getYaw()));
-  }
+  //   return new Pose2d(new Translation2d(localX, localY), new Rotation2d(-navX.getYaw()));
+  // }
 
   public Translation2d getRobotPoseNavX() {
     Translation2d lastKnownCoord = new Translation2d(-navX.getDisplacementY(), -navX.getDisplacementX());

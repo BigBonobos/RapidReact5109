@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Timer;
 
 import java.util.Optional;
 
+import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
@@ -57,6 +58,8 @@ public class Robot extends TimedRobot {
    */
   public final Drivetrain m_swerve = new Drivetrain(Optional.of(autoAlignRange), frontLeftIds, frontRightIds, backLeftIds,
       backRightIds);
+    
+  public final CANSparkMax testMotor = new CANSparkMax(11, MotorType.kBrushless);
 
   /**
    * SlewRateLimiters limit the ROC of an inputs strength.
@@ -133,7 +136,15 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
     driveWithJoystick(true);
+    System.out.println(m_swerve.limelight.getPose());
     handleInputs(xController, j_operator);
+    if (j_operator.getRawButton(4)) {
+      testMotor.set(0.1);
+    } else if (j_operator.getRawButton(5)) {
+      testMotor.set(-.1);
+    }else {
+      testMotor.set(0);
+    }
 
   }
 
@@ -145,6 +156,7 @@ public class Robot extends TimedRobot {
     autoCounter = 1;
     ballFondler.hardReset();
     m_swerve.customAutoAlign();
+    climbModule.extendSolenoids();
     Timer.delay(1);
   }
 
@@ -191,8 +203,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    System.out.println(m_swerve.getRobotPose());
-    m_swerve.updateOdometry();
+    System.out.println(m_swerve.limelight.getPose());
     
     driveWithJoystick(true);
     handleInputs(xController, j_operator);

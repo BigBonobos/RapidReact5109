@@ -45,20 +45,20 @@ public class BallFondler implements BaseController {
                 shooter.turnOffIndexWheel();
             }
         }
-        if (!beam2.get() && beam1.get()) {
+        else if (!beam2.get() && beam1.get()) {
             ballCount = 1;
             if (!shooting) {
                 shooter.turnOffIndexWheel();
             }
         }
 
-        if (beam2.get() && !beam1.get()) {
+        else if (beam2.get() && !beam1.get()) {
             ballCount = 1;
             if (!shooting) {
                 shooter.turnOnIndexWheel();
             }
         }
-        if (beam1.get() && beam2.get()) {
+        else if (beam1.get() && beam2.get()) {
             ballCount = 0;
         }
   

@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.*;
 import java.lang.Math;
 import java.util.OptionalDouble;
@@ -35,15 +37,50 @@ public class Limelight {
         // Checks if limelight is returning values
         if (tv) {
             // Returns distance from goal (calculated using trig)
-            double adjustedTlong = (100*targetSize)/(limelight.getEntry("tlong").getDouble(0)/420);
-            OptionalDouble thirdDimension = OptionalDouble.of(adjustedTlong/Math.tan(limelightFOV));
-            return thirdDimension;
+            NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+            NetworkTableEntry ty = table.getEntry("ty");
+            double targetOffsetAngle_Vertical = ty.getDouble(0.0);
+
+            // how many degrees back is your limelight rotated from perfectly vertical?
+            double limelightMountAngleDegrees = 54.0;
+
+            // distance from the center of the Limelight lens to the floor
+            double limelightLensHeightInches = 17.0;
+
+            // distance from the target to the floor
+            double goalHeightInches = 64.0;
+
+            double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+            double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+
+            //calculate distance
+            return OptionalDouble.of(((goalHeightInches - limelightLensHeightInches)/Math.tan(angleToGoalRadians)) * 75/45);
 
         } else {
             // Returns empty if limelight isn't returning values
             return OptionalDouble.empty();
         }
     }
+
+    public Translation2d getPose() {
+		double[] camtran = NetworkTableInstance.getDefault().getTable("limelight").getEntry("camtran").getDoubleArray(new double[]{1, 2, 3, 4});
+
+		// final double kOffset = 100;
+
+		// LinearDigitalFilter
+
+		// final double kLimelightForeOffset = 25; //inches from limelight to hatch pannel
+		// forward/backward motion, left/right motion
+        try {
+            // System.out.println(getXOffset().getAsDouble());
+            System.out.println(calculateYDistance());
+            Translation2d mTranToGoal = new Translation2d(camtran[2], camtran[0] * -1);
+		    return mTranToGoal;
+        } catch (Exception e) {
+            System.out.println(e);
+            return new Translation2d();
+        }
+	}
 
     /**
      * Calculates the angle of the vision target relative to the bot

@@ -59,7 +59,6 @@ public class Robot extends TimedRobot {
   public final Drivetrain m_swerve = new Drivetrain(Optional.of(autoAlignRange), frontLeftIds, frontRightIds, backLeftIds,
       backRightIds);
     
-  public final CANSparkMax testMotor = new CANSparkMax(11, MotorType.kBrushless);
 
   /**
    * SlewRateLimiters limit the ROC of an inputs strength.
@@ -136,15 +135,15 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
     driveWithJoystick(true);
-    System.out.println(m_swerve.limelight.getPose());
+    // System.out.println(m_swerve.limelight.getPose());
     handleInputs(xController, j_operator);
-    if (j_operator.getRawButton(4)) {
-      testMotor.set(0.1);
-    } else if (j_operator.getRawButton(5)) {
-      testMotor.set(-.1);
-    }else {
-      testMotor.set(0);
-    }
+    // if (j_operator.getRawButton(4)) {
+    //   testMotor.set(0.1);
+    // } else if (j_operator.getRawButton(5)) {
+    //   testMotor.set(-.1);
+    // }else {
+    //   testMotor.set(0);
+    // }
 
   }
 
@@ -157,6 +156,7 @@ public class Robot extends TimedRobot {
     ballFondler.hardReset();
     m_swerve.customAutoAlign();
     climbModule.extendSolenoids();
+    ballFondler.shooting = false;
     Timer.delay(1);
   }
 
@@ -167,23 +167,19 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     switch (autoCounter) {
       case 1:
-        m_swerve.auto.rotateTo(Rotation2d.fromDegrees(45), 0.1);
-        autoCounter++;
-        break;
-      case 2:
-        if (ballFondler.getAndUpdateBallCount() >= 2) {
-          ballFondler.intake.resetSystem();
-          autoCounter++;
-          break;
-        }
-        ballFondler.intake.intakeFor(1);
-        autoCounter++;
-        break;
-      case 3:
-        ballFondler.shoot();
-        autoCounter++;
+        ballFondler.shooter.shootAutoBall();
+        ballFondler.shooting = true;
+        Timer.delay(0.25);
+        ballFondler.shooter.m_indexMotor.set(0.4);
+        Timer.delay(0.25);
+        ballFondler.shooting = false;
         break;
 
+    case 2:
+      m_swerve.drive(1, 0, 0, false);
+      Timer.delay(0.25);
+      m_swerve.drive(0, 0, 0, false);
+      break;
     }
 
     m_swerve.updateOdometry();
@@ -203,7 +199,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    System.out.println(m_swerve.limelight.getPose());
+    // System.out.println(m_swerve.limelight.getPose());
     
     driveWithJoystick(true);
     handleInputs(xController, j_operator);

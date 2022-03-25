@@ -33,7 +33,7 @@ public class Shooter implements BaseController {
      * </pre>
      * </p>
      */
-    private final CANSparkMax m_indexMotor;
+    public final CANSparkMax m_indexMotor;
 
     /**
      * This is the encoder used to know the current velocity of the propulsion
@@ -124,6 +124,10 @@ public class Shooter implements BaseController {
         return overSpeedController.calculate(m_shooterEncoder.getVelocity(), this.getWantedRPM());
     }
 
+    public double calculateShootingSpeedAuto() {
+        return overSpeedController.calculate(m_shooterEncoder.getVelocity(), this.getWantedRPM());
+    }
+
     //https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/bang-bang.html
     public double calculateShootingVoltage() {
         return overSpeedController.calculate(m_shooterEncoder.getVelocity(), getWantedRPM()) * 12.0 + 0.9 * feedForward.calculate(getWantedRPM());
@@ -193,14 +197,16 @@ public class Shooter implements BaseController {
         shootHandler.startSingle(0.01);
     }
 
-
+    public void shootAutoBall() {
+        m_shooterMotor.set(calculateShootingSpeedAuto());
+    }
     /**
      * Listens to LEFT BUMPER.
      */
     @Override
     public void handleInputs(XboxController xController, Joystick j_operator) {
         //Manual windup for testing.
-        if (xController.getLeftBumper()) {
+        if (xController.getRightTriggerAxis() == 1) {
             m_shooterMotor.set(calculateShootingSpeed());
         } else {
             m_shooterMotor.set(0);

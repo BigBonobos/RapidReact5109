@@ -79,7 +79,7 @@ public class Intake implements BaseController {
      */
     @Override
     public void handleInputs(XboxController xController, Joystick j_operator) {
-        if (xController.getRightBumper()) {
+        if (xController.getLeftTriggerAxis() == 1) {
             intakeBalls();
         } else if (xController.getLeftBumper()) {
             ejectBalls();

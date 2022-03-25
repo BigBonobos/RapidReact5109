@@ -15,6 +15,7 @@ public class ClimbModule implements SolenoidController {
     private final SSolenoid[] sols;
 
     private final CANSparkMax climbMotor;
+    private final CANSparkMax hookMotor = new CANSparkMax(11, MotorType.kBrushless);
 
     public ClimbModule(int motorPort, int[][] solenoidSettings) {
         if (solenoidSettings.length != 2)
@@ -74,17 +75,26 @@ public class ClimbModule implements SolenoidController {
      */
     @Override
     public void handleInputs(XboxController xController, Joystick j_operator) {
-        if (xController.getBButton()) {
+        if (j_operator.getRawButton(4)) {
             climbMotor.set(-0.5);
-          } else if (xController.getAButton()) {
+        } else if (j_operator.getRawButton(5)) {
             climbMotor.set(0.5);
-          } else {
+        } else {
             climbMotor.set(0);
-          }
+        }
+        
         if (j_operator.getTrigger()) {
             extendSolenoids();
         } else if (j_operator.getRawButton(3)) {
             retractSolenoids();
+        }
+
+        if (j_operator.getRawButton(2)) {
+            hookMotor.set(.1);
+        } else if (j_operator.getRawButton(6)) {
+            hookMotor.set(-.1);
+        } else {
+            hookMotor.set(0);
         }
     }
 

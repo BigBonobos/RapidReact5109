@@ -71,7 +71,7 @@ public class ClimbModule implements SolenoidController {
 
 
     /**
-     * Listens to B BUTTON and A BUTTON.
+     * Listens to Joystick Input from Operator
      */
     @Override
     public void handleInputs(XboxController xController, Joystick j_operator) {
@@ -82,7 +82,7 @@ public class ClimbModule implements SolenoidController {
         } else {
             climbMotor.set(0);
         }
-        
+
         if (j_operator.getTrigger()) {
             extendSolenoids();
         } else if (j_operator.getRawButton(3)) {

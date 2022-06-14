@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 
 import java.util.HashMap;
-import frc.robot.swerveCode.util.AccelContainer;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -58,7 +57,7 @@ public class Drivetrain {
   public final SwerveModule m_backLeft;
   public final  SwerveModule m_backRight;
   public final AHRS navX = new AHRS(SPI.Port.kMXP);
-  public AccelContainer accelContainer = new AccelContainer(navX);
+ 
   private final Rotation2d initialMeasurement = Rotation2d.fromDegrees(navX.getYaw() % 360);
 
   // Shooter Range
@@ -125,7 +124,6 @@ public class Drivetrain {
     // Appends velocity and timestampt to hashmap for odoemtry
     // lastKnownTime = Timer.getFPGATimestamp();
     lastKnownVelocity = new Translation2d(xSpeed, ySpeed);
-    accelContainer.appendAccelCoord(lastKnownVelocity);
     // velocityMap.put(Timer.getFPGATimestamp(), lastKnownVelocity);
 
     // Driving commands

@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 
 import java.util.HashMap;
-import frc.robot.swerveCode.util.AccelContainer;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -31,9 +30,6 @@ public class Drivetrain {
 
   public static final double kMaxSpeed = 0.3; // 3 meters per second
   public static final double kMaxAngularSpeed = Math.PI / 6; // 1/2 rotation per second
-  private double globalX = 0;
-  private double globalY = 0;
-  private static final double odometryLimiter = 0.05;
 
 
   // Network Table instantiation
@@ -41,7 +37,6 @@ public class Drivetrain {
   public NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
 
   // Map to store velocities of robot and time
-  private HashMap<Double, Translation2d> velocityMap = new HashMap<Double, Translation2d>();
   private Translation2d lastKnownVelocity = new Translation2d(0, 0);
   private double lastKnownTime = 0;
 
@@ -58,7 +53,7 @@ public class Drivetrain {
   public final SwerveModule m_backLeft;
   public final  SwerveModule m_backRight;
   public final AHRS navX = new AHRS(SPI.Port.kMXP);
-  public AccelContainer accelContainer = new AccelContainer(navX);
+ 
   private final Rotation2d initialMeasurement = Rotation2d.fromDegrees(navX.getYaw() % 360);
 
   // Shooter Range

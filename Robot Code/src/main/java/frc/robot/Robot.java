@@ -210,7 +210,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    System.out.println(m_swerve.accelContainer.getAbsolutePosTranslation2d());
 
     driveWithJoystick(true);
     handleInputs(xController, j_operator);

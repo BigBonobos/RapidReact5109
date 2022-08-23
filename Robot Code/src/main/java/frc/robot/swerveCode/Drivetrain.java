@@ -125,7 +125,7 @@ public class Drivetrain {
     // Appends velocity and timestampt to hashmap for odoemtry
     // lastKnownTime = Timer.getFPGATimestamp();
     lastKnownVelocity = new Translation2d(xSpeed, ySpeed);
-    accelContainer.appendAccelCoord(lastKnownVelocity);
+    // accelContainer.appendAccelCoord(lastKnownVelocity);
     // velocityMap.put(Timer.getFPGATimestamp(), lastKnownVelocity);
 
     // Driving commands
@@ -213,8 +213,8 @@ public class Drivetrain {
   public void autoAlign() {
     OptionalDouble xOffset = limelight.getXOffset();
     if (xOffset.isPresent()) {
-      while(xOffset.getAsDouble() != 0) {
-        drive(0, 0, xOffset.getAsDouble(), false);
+      while(Math.abs(xOffset.getAsDouble()) > 0.5) {
+        drive(0, 0, -(xOffset.getAsDouble() * Math.PI / 180), true);
       }
     }
   

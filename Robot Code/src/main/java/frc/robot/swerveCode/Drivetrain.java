@@ -20,9 +20,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
 
 /** Represents a swerve drive style drivetrain. */
@@ -253,7 +256,7 @@ public class Drivetrain {
   public void customAutoAlign() {
 
     double testCounter = 0;
-    double degreeOffset = 10;
+    double degreeOffset = 1;
 
     double e_frontLeftPos = m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition();
     double e_frontRightPos = m_frontRight.m_turningEncoderAbsolute.getAbsolutePosition();
@@ -287,6 +290,32 @@ public class Drivetrain {
       m_frontRight.m_turningMotor.set(-1 * e_frontRightPos / 180);
       m_backRight.m_turningMotor.set(-1 * e_backRightPos / 180);
     }
+  }
+
+  public void followTrajectory(Trajectory trajectory) {
+    double startTime = Timer.getFPGATimestamp();
+
+    double timeDiff = Timer.getFPGATimestamp() - startTime;
+
+    Pose2d prevPose = trajectory.getInitialPose();
+
+    while (trajectory.getTotalTimeSeconds() > timeDiff) {
+      State state = trajectory.sample(timeDiff);
+
+      // Might be opposite depending on orientation of bot
+      Translation2d dirVector = state.poseMeters.getTranslation().minus(prevPose.getTranslation());
+      Rotation2d deltTheta = state.poseMeters.getRotation().minus(prevPose.getRotation());
+      driveTo(state.velocityMetersPerSecond, deltTheta, dirVector, state.curvatureRadPerMeter);
+      prevPose = state.poseMeters;
+      timeDiff = Timer.getFPGATimestamp() - startTime;
+    }
+  }
+
+  public void driveTo(double speed, Rotation2d rotationVector, Translation2d dirVector, double curvatureRadPerMeter) {
+    double xRatio = dirVector.getX()/dirVector.getNorm();
+    double yRatio = dirVector.getY()/dirVector.getNorm();
+
+    drive(-yRatio * speed, -xRatio * speed, curvatureRadPerMeter * speed, false);
   }
 
   public void autoAlignToGoalUsingLimelight() {

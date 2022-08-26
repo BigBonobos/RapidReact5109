@@ -68,6 +68,8 @@ public class SwerveModule implements RevOptimization {
     m_turningPIDController.setI(0);
     m_turningPIDController.setD(0);
     // m_turningPIDController.setIMaxAccum(0.1,0);
+    
+    m_driveMotor.setClosedLoopRampRate(2);
 
     // Setting turn constraints
     m_turningPIDController.setSmartMotionAccelStrategy(com.revrobotics.SparkMaxPIDController.AccelStrategy.kTrapezoidal,

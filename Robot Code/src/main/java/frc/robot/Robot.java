@@ -106,7 +106,7 @@ public class Robot extends TimedRobot {
    * Test stub. Called once upon initialization.
    */
   public void testInit() {
-    m_swerve.customAutoAlign();
+    m_swerve.customAutonAlign();
     ballSys.intakeOn = false;
     ballSys.BoolBall = false;
     ballSys.shooting = false;
@@ -186,7 +186,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_swerve.customAutoAlign();
+    m_swerve.customAutonAlign();
+    Timer.delay(1);
     m_swerve.navX.reset();
     autoCounter = 1;
     // ballSys.intakeOn = false;
@@ -222,8 +223,11 @@ public class Robot extends TimedRobot {
         autoCounter++;
         break;
       case 1:
-        m_swerve.auto.translateTo(new Translation2d(-0.1, 0), Optional.of(.05));
+        m_swerve.drive(.1, 0, 0, true);
+        Timer.delay(5);
         m_swerve.drive(0, 0, 0, true);
+        Timer.delay(3);
+        // m_swerve.drive(0, .1, 0, true);
         autoCounter++;
         break;
     }
@@ -269,7 +273,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopInit() {
-    m_swerve.customAutoAlign();
+    m_swerve.customTeleopAlign();
   }
 
   /**

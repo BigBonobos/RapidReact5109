@@ -9,6 +9,7 @@ import frc.robot.autonomous.Autonomous;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 
+import java.lang.StackWalker.Option;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -23,6 +24,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.networktables.*;
+import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -38,6 +40,8 @@ public class Drivetrain {
   // Network Table instantiation
   private final NetworkTableInstance ntwrkInst = NetworkTableInstance.getDefault();
   public NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
+
+  private RamseteController cRamseteController = new RamseteController();
 
   // Map to store velocities of robot and time
   private Translation2d lastKnownVelocity = new Translation2d(0, 0);
@@ -292,22 +296,39 @@ public class Drivetrain {
     }
   }
 
-  public void followTrajectory(Trajectory trajectory) {
-    double startTime = Timer.getFPGATimestamp();
+  public Optional<Pose2d> followTrajectory(Trajectory trajectory, double startTime, Pose2d prevPose) {
+    // double startTime = Timer.getFPGATimestamp();
 
     double timeDiff = Timer.getFPGATimestamp() - startTime;
 
-    Pose2d prevPose = trajectory.getInitialPose();
+    // Pose2d prevPose = trajectory.getInitialPose();
 
-    while (trajectory.getTotalTimeSeconds() > timeDiff) {
+    if (trajectory.getTotalTimeSeconds() > timeDiff) {
       State state = trajectory.sample(timeDiff);
 
       // Might be opposite depending on orientation of bot
       Translation2d dirVector = state.poseMeters.getTranslation().minus(prevPose.getTranslation());
       Rotation2d deltTheta = state.poseMeters.getRotation().minus(prevPose.getRotation());
       driveTo(state.velocityMetersPerSecond, deltTheta, dirVector, state.curvatureRadPerMeter);
-      prevPose = state.poseMeters;
-      timeDiff = Timer.getFPGATimestamp() - startTime;
+      // prevPose = state.poseMeters;
+      return Optional.of(state.poseMeters);
+    }  else {
+      return Optional.empty();
+    }
+  }
+
+
+  public Optional<State> followTrajectory(Trajectory trajectory, double startTime, State prevState) {
+    double timeDiff = Timer.getFPGATimestamp() - startTime;
+
+    if (trajectory.getTotalTimeSeconds() > timeDiff) {
+      State goal = trajectory.sample(timeDiff);
+      ChassisSpeeds adjustedSpeeds = cRamseteController.calculate(prevState.poseMeters, goal);
+      drive(adjustedSpeeds.vxMetersPerSecond, adjustedSpeeds.vyMetersPerSecond, adjustedSpeeds.omegaRadiansPerSecond, true);
+      return Optional.of(goal);
+    } else {
+      drive(0, 0, 0, true);
+      return Optional.empty();
     }
   }
 

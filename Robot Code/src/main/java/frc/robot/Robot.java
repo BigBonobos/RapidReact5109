@@ -12,6 +12,7 @@ import frc.robot.swerveCode.Drivetrain;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -41,6 +42,10 @@ public class Robot extends TimedRobot {
   private static final double[] frontRightIds = { 12, 13, 1, -163.213 };// (180 - 55) - 360}; // back left?
   private static final double[] backLeftIds = { 18, 19, 3, 60.6 };// -5}; //front right?
   private static final double[] backRightIds = { 16, 17, 2, -80.86 };// (180 + 40) - 360}; //front left?y
+
+  double startTime;
+  Trajectory trajectory = new Trajectory();
+  Trajectory.State prevPose;
 
   /**
    * XboxController for general movement of the robot.
@@ -165,6 +170,10 @@ public class Robot extends TimedRobot {
     ballFondler.hardReset();
     m_swerve.customAutoAlign();
     Timer.delay(1);
+    startTime = Timer.getFPGATimestamp();
+
+    // TODO get pathweaver json here
+    prevPose = trajectory.sample(0);
   }
 
   /**
@@ -174,22 +183,12 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     switch (autoCounter) {
       case 1:
-        m_swerve.auto.rotateTo(Rotation2d.fromDegrees(45), 0.1);
-        autoCounter++;
-        break;
-      case 2:
-        if (ballFondler.getAndUpdateBallCount() >= 2) {
-          ballFondler.intake.resetSystem();
+        Optional<Trajectory.State> newPose = m_swerve.followTrajectory(trajectory, startTime, prevPose);
+        if (newPose.isPresent()) {
+          prevPose = newPose.get();
+        } else {
           autoCounter++;
-          break;
         }
-        ballFondler.intake.intakeFor(1);
-        autoCounter++;
-        break;
-      case 3:
-        ballFondler.shoot();
-        autoCounter++;
-        break;
 
     }
 

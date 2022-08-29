@@ -1,21 +1,24 @@
-package frc.robot;
+package frc.robot.climb;
+
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 // imports
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
-//wpilib imports
 import edu.wpi.first.wpilibj.Solenoid;
+//wpilib imports
 import edu.wpi.first.wpilibj.XboxController;
-
 public class Climb {
 
     // // neos
     // public CANSparkMax m_Hook = new CANSparkMax(0, MotorType.kBrushless);
-    // public CANSparkMax m_Winch = new CANSparkMax(22, MotorType.kBrushless);
+    public CANSparkMax m_Winch = new CANSparkMax(10, MotorType.kBrushless);
 
     // // neo encoders
     // public RelativeEncoder e_Hook = m_Hook.getEncoder();
-    // public RelativeEncoder e_Winch = m_Winch.getEncoder();
+    //public RelativeEncoder e_Winch = m_Winch.getEncoder();
 
     // // neo pidcontrollers
     // public SparkMaxPIDController pc_Hook = m_Hook.getPIDController();
@@ -23,7 +26,10 @@ public class Climb {
 
     // solenoids
     public Solenoid s_LeftPopArm = new Solenoid(PneumaticsModuleType.CTREPCM, 7);
-    // public Solenoid s_LeftPopArm = new Solenoid(PneumaticsModuleType.CTREPCM, 5);
+    // public Solenoid s_RightPopArm = new Solenoid(PneumaticsModuleType.CTREPCM, 5);
+    // public Solenoid s_RightPopArm = new Solenoid(PneumaticsModuleType.CTREPCM, 5);
+
+    public Solenoid[] solenoids = new Solenoid[] { s_LeftPopArm };
 
     // sensors
     // return true if the circuit is open
@@ -31,6 +37,54 @@ public class Climb {
     // public DigitalInput armNotClosed = new DigitalInput(-1);
 
     // functions
+
+    public void handleInputs(Joystick j_operator) {
+        if (j_operator.getTrigger()) {
+            extendAll();
+        }
+        if (j_operator.getRawButton(3)) {
+            retractAll();
+        }
+        if (j_operator.getRawButton(4)) {
+            extendWinch();
+        } 
+        if (j_operator.getRawButton(5)) {
+            retractWinch();
+        } 
+    }
+
+    
+    public void extendAll() {
+        s_LeftPopArm.set(true);
+        // s_RightPopArm.set(true);
+
+    }
+
+    
+    public void retractAll() {
+        s_LeftPopArm.set(false);
+        // s_RightPopArm.set(false);
+    }
+
+    
+    public void toggleAll() {
+        s_LeftPopArm.toggle();
+        // s_RightPopArm.toggle();
+
+    }
+
+    public void extendWinch() {
+        m_Winch.set(-0.5);
+    }
+
+    public void retractWinch() {
+        m_Winch.set(-0.5);
+    }
+
+    
+    public Solenoid[] getAllSolenoids() {
+        return solenoids;
+    }
 
     // latch onto pole
     /*
@@ -83,24 +137,5 @@ public class Climb {
     // public void engageFrontHooks() {
     // pc_Hook.setReference(3.14, ControlType.kPosition);
     // }
-
-    public void popArmUp() {
-        s_LeftPopArm.set(true);
-        // s_RightPopArm.set(true);
-    }
-
-    public void popArmDown() {
-        s_LeftPopArm.set(false);
-        // s_RightPopArm.set(false);
-    }
-
-    public void handleInputs(XboxController xController, Joystick j_operator) {
-        if (j_operator.getTrigger()) {
-            popArmUp();
-        }
-        if (j_operator.getRawButton(3)) {
-            popArmDown();
-        }
-    }
 
 }

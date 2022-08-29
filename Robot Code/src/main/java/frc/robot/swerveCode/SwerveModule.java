@@ -19,6 +19,7 @@ public class SwerveModule implements RevOptimization {
 
   private static final double kTicksPerMotorRadian = 42 / (2 * Math.PI);
   private static final double kTicksPerWheelRadian = kTicksPerMotorRadian * 8.14;
+  private static final double maxRampUpRate = 2;
 
   private static final double kTicksPerTurnerWheelRadian = 42 / (2 * Math.PI) * 12.8;
 
@@ -46,6 +47,8 @@ public class SwerveModule implements RevOptimization {
     // Motor Instantiation
     m_driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
     m_turningMotor = new CANSparkMax(turningMotorChannel, MotorType.kBrushless);
+
+    m_driveMotor.setClosedLoopRampRate(maxRampUpRate);
 
     m_driveMotor.setIdleMode(IdleMode.kCoast);
     m_turningMotor.setIdleMode(IdleMode.kCoast);
@@ -131,7 +134,7 @@ public class SwerveModule implements RevOptimization {
     // m_drivePIDController.setFF(driveFeedforward);
     // m_turningPIDController.setFF(turnFeedforward);
     Rotation2d currentAngle = Rotation2d.fromDegrees(m_turningEncoderAbsolute.getAbsolutePosition());
-    state = RevOptimization.optimize(state, currentAngle);
+    state = optimize(state, currentAngle);
 
     final double deltaAngle = state.angle.getRadians() - currentAngle.getRadians();
 
@@ -160,7 +163,7 @@ public class SwerveModule implements RevOptimization {
     //System.out.println("Target:" + diffAngle);
     // * 180 / Math.PI
     m_turningEncoderAbsolute.setPositionToAbsolute();
-    m_drivePIDController.setReference(state.speedMetersPerSecond / kWheelRadius, ControlType.kVelocity);
+    m_drivePIDController.setReference(state.speedMetersPerSecond, ControlType.kVelocity);
     m_turningPIDController.setReference(finalAngle, ControlType.kPosition);
   }
 }

@@ -4,55 +4,36 @@
 
 package frc.robot;
 
-import frc.robot.auto.Autonomous;
-// import frc.robot.ballSys.Intake;
-// import frc.robot.ballSys.Shooter;
-// import frc.robot.ballSys.Shooter.ShooterState;
+import frc.robot.autonomous.Autonomous;
+// import frc.robot.ballSys.AutoShoot;
+import frc.robot.ballSys.BallFondler;
+import frc.robot.climb.ClimbModule;
 import frc.robot.swerveCode.Drivetrain;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 
 import java.util.Optional;
+import java.util.OptionalDouble;
 
-import javax.swing.text.StyledEditorKit;
-
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import edu.wpi.first.wpilibj.Notifier;
 
 import edu.wpi.first.math.MathUtil;
 
 public class Robot extends TimedRobot {
 
-  // public CANSparkMax motor1 = new CANSparkMax(14,MotorType.kBrushless);
-
-  // Ball Align Var
-  private int listenerHandleBall;
-  private int listenerHandleShooter;
-  private boolean intakeRunning;
-  private boolean autoAlignRunningBall;
-  private boolean autoAlignRunningShooter;
-
   /**
    * Variable assignment for limelight.
    * Currently unnused.
    */
-  // private boolean autoAlignRunningShooter = false;
-  // private boolean autoAlignRunningBall = false;
   private double autoAlignRange = 360.0;
-  private BallSystems ballSys = new BallSystems();
-  private Notifier ballSysNotif = new Notifier(ballSys);
-  public Climb climb = new Climb();
-  private int autoCounter = 1;
 
   /**
-   * Settings for drivetrainModule.
+   * Settings for our drive train.
    * 
    * @see {@link frc.robot.swerveCode.SwerveModule#SwerveModule(int, int, int, double)}
    */
@@ -61,6 +42,9 @@ public class Robot extends TimedRobot {
   private static final double[] backLeftIds = { 18, 19, 3, 60.6 };// -5}; //front right?
   private static final double[] backRightIds = { 16, 17, 2, -80.86 };// (180 + 40) - 360}; //front left?y
 
+  /**
+   * XboxController for general movement of the robot.
+   */
   private final XboxController xController = new XboxController(0);
 
   /**
@@ -72,17 +56,11 @@ public class Robot extends TimedRobot {
    * A custom implementation of four SwerveModules (also custom).
    * Can omni-directionally drive.
    * 
-   * @see {@link frc.robot.Robot#driveWithJoystick(boolean)};
+   * @see {@link frc.robot.Robot#driveWithJoystick(boolean) Drivetrain
+   *      constructor.}
    */
   public final Drivetrain m_swerve = new Drivetrain(autoAlignRange, frontLeftIds, frontRightIds, backLeftIds,
       backRightIds);
-
-  /**
-   * Custom intake module. Takes one motor and one solenoid.
-   * 
-   * @see {@link frc.robot.shooter.Intake#Intake(int, int)}
-   */
-  // private final Intake m_intake = new Intake(9, 0);
 
   /**
    * SlewRateLimiters limit the ROC of an inputs strength.
@@ -103,13 +81,62 @@ public class Robot extends TimedRobot {
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(1);
 
   /**
+   * CANSparkMax motor ports.
+   * <p>
+   * {@link com.revrobotics.CANSparkMax#CANSparkMax(int, MotorType) motor config.}
+   */
+  private final int[] bfIDs = new int[] { 4, 22, 8 };
+
+  /**
+   * Handler for intake and shooter. Uses {@link Robot#bfIDs motor ids}
+   * to set up.
+   * 
+   * @see {@link frc.robot.ballSys.BallFondler#BallFondler(int, int, int, double)
+   *      BallFondler constructor.}
+   */
+  public final BallFondler ballFondler = new BallFondler(bfIDs[0], bfIDs[1], bfIDs[2], 3650);
+
+  /**
+   * Setup for solenoid ports for the climb module.
+   * 
+   * @see {@link frc.robot.climb.ClimbModule#ClimbModule(int, int[][]) ClimbModule
+   *      constructor.}
+   */
+  private final int[][] solenoidPorts = new int[][] { { 9, 8 }, { 7, 6 } };
+
+  /**
+   * Climb module. Controls two solenoids and a motor.
+   * 
+   * @see {@link frc.robot.climb.ClimbModule#ClimbModule(int, int[][]) ClimbModule
+   *      constructor.}
+   */
+  private final ClimbModule climbModule = new ClimbModule(10, solenoidPorts);
+
+  /**
+   * Index for autonomous.
+   */
+  private int autoCounter = 1;
+
+  // public final AutoShoot autoShoot = new AutoShoot(this, new Translation2d(1, 0), 3, 10);
+
+
+  /**
+   * Ran once on bot initialization.
+   */
+  @Override
+  public void robotInit() {
+    // listenerHandleBall = m_swerve.initBallListener();
+  }
+
+  /**
    * Test stub. Called once upon initialization.
    */
+  @Override
   public void testInit() {
     m_swerve.customAutonAlign();
-    ballSys.intakeOn = false;
-    ballSys.BoolBall = false;
-    ballSys.shooting = false;
+    // ballSys.intakeOn = false;
+    // ballSys.BoolBall = false;
+    // ballSys.shooting = false;
   }
 
   /**
@@ -117,73 +144,17 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-    // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
-    // System.out.println(m_swerve.m_frontLeft.m_turningEncoderAbsolute.getAbsolutePosition());
+    driveWithJoystick(true);
+    // System.out.printf("%s\n",
+    //     new Translation2d(m_swerve.navX.getDisplacementX(), m_swerve.navX.getDisplacementY()).toString());O
 
-    ballSys.m_indexWheel.set(1);
-    ballSys.m_intakeWheel.set(1);
-    ballSys.m_shooterWheel.set(0.5);
-
-
-
-    SmartDashboard.putNumber("RPMS", ballSys.e_shooterWheel.getVelocity());
-    SmartDashboard.putNumber("BallCount", ballSys.BallCount);
-    ballSys.handleInputs(xController, j_operator);
-    climb.handleInputs(xController, j_operator);
-    // if(j_operator.getTrigger()) {
-    // climb.popArmUp();
-    // }
-    // if (j_operator.getRawButton(3)) {
-    // climb.popArmDown();
-    // }
-    // if (xController.getXButton()) {
-    // switch (intakeState) {
-    // case Stopped:
-    // ballSys.m_intakeWheel.set(0.4);
-    // intakeState = IntakeState.Go;
-    // break;
-    // case Go:
-    // ballSys.m_intakeWheel.set(-0.4);
-    // intakeState = IntakeState.Reverse;
-    // case Reverse:
-    // ballSys.m_intakeWheel.set(0);
-    // intakeState = IntakeState.Stopped;
-    // }
-    // ballSys.m_intakeWheel.set(0.4);
-    // }
-
-    // if (xController.getYButton()) {
-    // if(!ballSys.Beam2.get())
-    // ballSys.m_indexWheel.set(0.4);
-    // } else {
-    // ballSys.m_indexWheel.set(0);
-    // }
-
-    // if(xController.getBButton()) {
-    // ballSys.m_shooterWheel.set(0.9);
-    // } else if (xController.getRightTriggerAxis() == 1) {
-    // ballSys.m_shooterWheel.set(0.50);
-    // } else {
-    // ballSys.m_shooterWheel.set(0);
-    // }
-    // m_swerve.m_frontLeft.m_turningMotor.set(0.1);
-    // Timer.delay(5);
-    // m_swerve.m_frontLeft.m_turningMotor.set(0);
-    // try {
-    // Thread.sleep(100);
-    // } catch (InterruptedException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // m_swerve.drive(0.1, 0.1, 0, false);
+    handleInputs(xController, j_operator);
 
   }
 
-  // @Override
-  // public void robotInit() {
-  // listenerHandleBall = m_swerve.initBallListener();
-  // }
-
+  /**
+   * Called once when entering autonomous mode.
+   */
   @Override
   public void autonomousInit() {
     m_swerve.customAutonAlign();
@@ -191,9 +162,9 @@ public class Robot extends TimedRobot {
     m_swerve.navX.reset();
     autoCounter = 1;
     // ballSys.intakeOn = false;
-    ballSys.BoolBall = false;
-    ballSys.shooting = false;
-    ballSys.BallCount = 1;
+    // ballSys.BoolBall = false;
+    // ballSys.shooting = false;
+    // ballSys.BallCount = 1;
 
   }
 
@@ -219,7 +190,7 @@ public class Robot extends TimedRobot {
         break;
       case -2:
         Timer.delay(1);
-        ballSys.shooting2(true);
+        // ballSys.shooting2(true);
         autoCounter++;
         break;
       case 1:
@@ -231,42 +202,9 @@ public class Robot extends TimedRobot {
         autoCounter++;
         break;
     }
-    // m_swerve.updateOdometry();
+
+    m_swerve.updateOdometry();
   }
-
-  // // Remove ball aligner, and stop intaking
-  // m_swerve.ballAlignmentValues.removeEntryListener(listenerHandleBall);
-  // m_intake.intake(false);
-  // autoCounter++;
-  // break;
-
-  // case 2:
-  // // Shooter alignmnet
-  // try {
-  // listenerHandleShooter = m_swerve.initShooterListener();
-  // autoCounter++;
-  // } catch (Throwable e) {
-  // e.printStackTrace();
-  // }
-  // break;
-
-  // case 3:
-  // m_shooter.state = ShooterState.kRunning;
-  // autoCounter++;
-  // break;
-
-  // case 4:
-  // Timer.delay(5);
-  // // Put Ball deploy method here
-  // autoCounter++;
-  // break;
-
-  // case 5:
-  // m_shooter.state = ShooterState.kCoasting;
-  // break;
-  // }
-  // m_swerve.updateOdometry();
-  // }
 
   /**
    * Init when setting up teleop setting.
@@ -281,59 +219,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+
     driveWithJoystick(true);
-    // m_shooter.setShooter();
-    // // Comment the below code out for swerve testing
-
-    // // If the trigger is pressed, and autoAlign through limelight is not
-    // listening, then it will initialize the listener
-    // if (l_joystick.getTrigger() && !autoAlignRunningShooter &&
-    // !autoAlignRunningBall) {
-    // autoAlignRunningShooter = true;
-    // listenerHandleShooter = m_swerve.initShooterListener();
-    // }
-
-    // Toggles above code off
-    // else if (l_joystick.getTrigger() && autoAlignRunningShooter &&
-    // !autoAlignRunningBall ||
-    // (Math.abs(m_swerve.limelight.limelight.getEntry("tx").getDouble(0.0)) < .5 &&
-    // (Math.abs(m_swerve.limelight.limelight.getEntry("ty").getDouble(m_swerve.shooterRangeCm)
-    // - m_swerve.shooterRangeCm) < .5))) {
-    // m_swerve.limelight.limelight.removeEntryListener(listenerHandleShooter);
-    // autoAlignRunningShooter = false;
-    // }
-
-    // If button 1 is pressed, trigger alignemnet code
-    // if (l_joystick.getRawButton(1) && !autoAlignRunningBall &&
-    // m_intake.ballIndexer < 2 && !autoAlignRunningShooter) {
-    // listenerHandleBall = m_swerve.initBallListener();
-    // autoAlignRunningBall = true;
-    // }
-
-    // Toggle off for above code
-    // else if((l_joystick.getRawButton(1) && autoAlignRunningBall ||
-    // m_intake.ballIndexer >= 2) && !autoAlignRunningShooter) {
-    // m_swerve.ballAlignmentValues.removeEntryListener(listenerHandleBall);
-    // autoAlignRunningBall = false;
-    // }
-
-    // Intake toggle
-    // if(j_operator.getRawButton(1) && !intakeRunning) {
-    // m_intake.intake(!intakeRunning);
-    // } else if(j_operator.getRawButton(1) && intakeRunning){
-    // m_intake.intake(!intakeRunning);
-    // }
-
-    // if (j_operator.getTrigger()) {
-    // switch (m_shooter.state) {
-    // case kCoasting:
-    // m_shooter.state = ShooterState.kRunning;
-    // break;
-    // case kRunning:
-    // m_shooter.state = ShooterState.kCoasting;
-    // break;
-    // }
-    // }
+    handleInputs(xController, j_operator);
   }
 
   private void driveWithJoystick(boolean fieldRelative) {
@@ -344,8 +232,6 @@ public class Robot extends TimedRobot {
      **/
     final double xSpeed = -m_xspeedLimiter.calculate(MathUtil.applyDeadband(xController.getLeftY(), 0.08))
         * frc.robot.swerveCode.Drivetrain.kMaxSpeed;
-    // System.out.println(xSpeed);
-
     /**
      * Get desired Y (strafe/sideways) speed of chassis.
      * Positive = left, negative = right.
@@ -353,8 +239,6 @@ public class Robot extends TimedRobot {
      **/
     final double ySpeed = -m_yspeedLimiter.calculate(MathUtil.applyDeadband(xController.getLeftX(), 0.08))
         * frc.robot.swerveCode.Drivetrain.kMaxSpeed;
-    // System.out.println(ySpeed);
-
     /**
      * Get desired rotation speed of chassis.
      * Positive = left, negative = right.
@@ -362,7 +246,18 @@ public class Robot extends TimedRobot {
      **/
     final double rot = -m_rotLimiter.calculate(MathUtil.applyDeadband(xController.getRightX(), 0.12))
         * frc.robot.swerveCode.Drivetrain.kMaxAngularSpeed;
-    // System.out.println(rot);
+      
     m_swerve.drive(xSpeed, ySpeed, rot, fieldRelative);
+  }
+
+  private void handleInputs(XboxController xController, Joystick j_operator) {
+    ballFondler.handleInputs(xController, j_operator);
+    climbModule.handleInputs(xController, j_operator);
+  }
+
+
+  private void resetSystem() {
+    ballFondler.resetSystem();
+    climbModule.resetSystem();
   }
 }

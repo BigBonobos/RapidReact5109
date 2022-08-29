@@ -9,17 +9,23 @@ import frc.robot.auto.Autonomous;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.OptionalDouble;
+
 import com.kauailabs.navx.frc.*;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.networktables.*;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.DriverStation;
 
 /** Represents a swerve drive style drivetrain. */
@@ -32,11 +38,15 @@ public class Drivetrain {
   private final NetworkTableInstance ntwrkInst = NetworkTableInstance.getDefault();
   public NetworkTable ballAlignmentValues = ntwrkInst.getTable("ballAlignment");
 
+  // Map to store velocities of robot and time
+  private Translation2d lastKnownVelocity = new Translation2d(0, 0);
+  private double lastKnownTime = 0;
+
   // Bot measurements
-  private final Translation2d m_frontLeftLocation = new Translation2d(0.381, 0.381);
-  private final Translation2d m_frontRightLocation = new Translation2d(0.381, -0.381);
-  private final Translation2d m_backLeftLocation = new Translation2d(-0.381, 0.381);
-  private final Translation2d m_backRightLocation = new Translation2d(-0.381, -0.381);
+  private final Translation2d m_frontLeftLocation = new Translation2d(0.2921, 0.2921);
+  private final Translation2d m_frontRightLocation = new Translation2d(0.2921, -0.2921);
+  private final Translation2d m_backLeftLocation = new Translation2d(-0.2921, 0.2921);
+  private final Translation2d m_backRightLocation = new Translation2d(-0.2921, -0.2921);
   private static final DriverStation.Alliance alliance = DriverStation.getAlliance();
 
   // Swerve Module instantiation
@@ -49,7 +59,7 @@ public class Drivetrain {
 
   // Shooter Range
   public double shooterRangeCm; // Enter shooter distance here (cm)
-  public final Limelight limelight = new Limelight(61.49125);
+  public final Limelight limelight = new Limelight(6*2.51);
 
   // Swerve drive library instantiation
   public final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
@@ -80,7 +90,8 @@ public class Drivetrain {
   public Drivetrain(double shooterRange, double[] swerveFrontLeftMotors, double[] swerveFrontRightMotors,
       double[] swerveBackLeftMotors, double[] swerveBackRightMotors) {
     navX.reset();
-    shooterRangeCm = shooterRange;
+    navX.resetDisplacement();
+        
     ntwrkInst.startClientTeam(5109);
     m_frontLeft = new SwerveModule((int) swerveFrontLeftMotors[0], (int) swerveFrontLeftMotors[1],
         (int) swerveFrontLeftMotors[2], swerveFrontLeftMotors[3]);
@@ -153,25 +164,64 @@ public class Drivetrain {
         m_backRight.getState());
   }
 
+
+  // // Function to fake odometry calc
+  // public Pose2d getRobotPose() {
+
+  //   // Gets the current time 
+  //   double currentTime = Timer.getFPGATimestamp();
+
+  //   // Iterates through velocity HashMap backwards
+  //   Double[] velocityArray = velocityMap.keySet().toArray(Double[]::new);
+  //   for (int i = velocityArray.length - 1; i > 0; i--) {
+
+  //     // Multiplies velocity * time to get distance
+  //     double time = velocityArray[i];
+  //     Translation2d velocityComp = velocityMap.get(time);
+  //     double vx = velocityComp.getX();
+  //     double vy = velocityComp.getY();
+  //     globalX += (vx * (currentTime - time));
+  //     globalY += (vy * (currentTime - time));
+  //     currentTime = time;
+  //   }
+
+  //   // Adds the displacement from acceleration to constant velocity calculation
+  //   double dispX = navX.getDisplacementX();
+  //   double dispY = navX.getDisplacementY();
+
+  //   if (Math.abs(dispX) > odometryLimiter) {
+  //     globalY -= dispX;
+  //   } 
+
+  //   if (Math.abs(dispY) > odometryLimiter) {
+  //     globalX -= dispY;
+  //   }
+
+  //   // Resets displacement and velocityMap
+  //   navX.resetDisplacement();
+  //   velocityMap.clear();
+
+  //   // Returns RobotPose
+  //   return new Pose2d(new Translation2d(globalX, globalY), new Rotation2d(-navX.getYaw()));
+  // }
+
+  public Translation2d getRobotPoseNavX() {
+    Translation2d lastKnownCoord = new Translation2d(-navX.getDisplacementY(), -navX.getDisplacementX());
+    double currentTime = Timer.getFPGATimestamp();
+    Translation2d deltaTranslation  = lastKnownVelocity.times(Math.abs(currentTime-lastKnownTime));
+    Translation2d finalTranslation = lastKnownCoord.plus(deltaTranslation);
+    return finalTranslation;
+  }
+
   /** Limelight autoalign method */
-  public void autoAlign() throws Throwable {
-
-    try {
-      // Calls limelight method to get the z-distance from goal
-      OptionalDouble straightDistanceOption = limelight.calculateYDistance();
-      double straightDistance = straightDistanceOption.getAsDouble();
-
-      // Offset variable initialization
-      double yOffset = straightDistance - shooterRangeCm;
-      double xOffset = straightDistance * Math.tan(limelight.getXOffset().getAsDouble() * Math.PI / 180);
-
-      // Control logic to drive bot into position
-      if (Math.abs(yOffset) > .5 || Math.abs(xOffset) > .5) {
-        drive(xOffset / Math.PI, yOffset / Math.PI, 0.0, true);
+  public void autoAlign() {
+    OptionalDouble xOffset = limelight.getXOffset();
+    if (xOffset.isPresent()) {
+      while(Math.abs(xOffset.getAsDouble()) > 0.5) {
+        drive(0, 0, -(xOffset.getAsDouble() * Math.PI / 180), true);
       }
-    } catch (Exception e) {
-      e.printStackTrace();
     }
+  
   }
 
   /**
@@ -319,4 +369,41 @@ public class Drivetrain {
     }
 
   }
+
+  public void followTrajectory(Trajectory trajectory) {
+    double startTime = Timer.getFPGATimestamp();
+
+    double timeDiff = Timer.getFPGATimestamp() - startTime;
+
+    Pose2d prevPose = trajectory.getInitialPose();
+
+    while (trajectory.getTotalTimeSeconds() > timeDiff) {
+      State state = trajectory.sample(timeDiff);
+
+      // Might be opposite depending on orientation of bot
+      Translation2d dirVector = state.poseMeters.getTranslation().minus(prevPose.getTranslation());
+      Rotation2d deltTheta = state.poseMeters.getRotation().minus(prevPose.getRotation());
+      driveTo(state.velocityMetersPerSecond, deltTheta, dirVector, state.curvatureRadPerMeter);
+      prevPose = state.poseMeters;
+      timeDiff = Timer.getFPGATimestamp() - startTime;
+    }
+  }
+
+  public void driveTo(double speed, Rotation2d rotationVector, Translation2d dirVector, double curvatureRadPerMeter) {
+    double xRatio = dirVector.getX()/dirVector.getNorm();
+    double yRatio = dirVector.getY()/dirVector.getNorm();
+
+    drive(-yRatio * speed, -xRatio * speed, curvatureRadPerMeter * speed, false);
+  }
+
+  // public void autoAlignToGoalUsingLimelight() {
+  //   OptionalDouble posRes = limelight.getXOffset();
+  //   if (posRes.isPresent()) {
+  //     double res = posRes.getAsDouble();
+  //     auto.rotateTo(Rotation2d.fromDegrees(navX.getYaw() + res));
+  //   } else {
+  //     System.out.println("No object detected.");
+  //   }
+
+  // }
 }

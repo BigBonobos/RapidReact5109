@@ -12,11 +12,16 @@ import frc.robot.swerveCode.Drivetrain;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryUtil;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
@@ -42,12 +47,16 @@ public class Robot extends TimedRobot {
   private static final double[] backLeftIds = { 18, 19, 3, 60.6 };// -5}; //front right?
   private static final double[] backRightIds = { 16, 17, 2, -80.86 };// (180 + 40) - 360}; //front left?y
 
+  double startTime;
+  Trajectory trajectory = new Trajectory();
+  Trajectory.State prevPose;
+
   /**
    * XboxController for general movement of the robot.
    */
   private final XboxController xController = new XboxController(0);
 
-  /**
+  /*
    * Used to control other aspects of the bot (modules).
    */
   private final Joystick j_operator = new Joystick(1);
@@ -158,14 +167,16 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_swerve.customAutonAlign();
-    Timer.delay(1);
-    m_swerve.navX.reset();
-    autoCounter = 1;
-    // ballSys.intakeOn = false;
-    // ballSys.BoolBall = false;
-    // ballSys.shooting = false;
-    // ballSys.BallCount = 1;
 
+    try {
+      Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve("paths/AutonStartCollect.wplib.json");
+      trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+    } catch (IOException ex) {
+      autoCounter = -1;
+    }
+    Timer.delay(1);
+    startTime = Timer.getFPGATimestamp();
+    prevPose = trajectory.sample(0);
   }
 
   @Override
@@ -177,29 +188,30 @@ public class Robot extends TimedRobot {
     // // Moves in the periodic loop from one instruction to another, useful for
     // redundancy and testing
     switch (autoCounter) {
-      case -1:
-        m_swerve.rotateToLimelightWanted();
-        m_swerve.auto.stop();
-        // if (Math.abs(15-m_swerve.navX.getYaw()) > .5) {
+      // case -1:
+      //   m_swerve.rotateToLimelightWanted();
+      //   m_swerve.auto.stop();
+      //   // if (Math.abs(15-m_swerve.navX.getYaw()) > .5) {
 
-        // m_swerve.drive(0, 0, -.1, true);
-        // } else {
-        // m_swerve.drive(0, 0, 0, true);
-        // autoCounter++;
-        // }
-        break;
-      case -2:
-        Timer.delay(1);
-        // ballSys.shooting2(true);
-        autoCounter++;
-        break;
+      //   // m_swerve.drive(0, 0, -.1, true);
+      //   // } else {
+      //   // m_swerve.drive(0, 0, 0, true);
+      //   // autoCounter++;
+      //   // }
+      //   break;
+      // case -2:
+      //   Timer.delay(1);
+      //   // ballSys.shooting2(true);
+      //   autoCounter++;
+      //   break;
       case 1:
-        m_swerve.drive(.1, 0, 0, true);
-        Timer.delay(5);
-        m_swerve.drive(0, 0, 0, true);
-        Timer.delay(3);
-        // m_swerve.drive(0, .1, 0, true);
-        autoCounter++;
+        Optional<Trajectory.State> curr = m_swerve.followTrajectory(trajectory, startTime, prevPose);
+
+        if (curr.isPresent()){
+          prevPose = curr.get();
+        } else {
+          autoCounter++;
+        }
         break;
     }
 

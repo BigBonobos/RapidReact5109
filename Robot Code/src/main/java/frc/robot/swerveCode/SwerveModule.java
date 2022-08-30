@@ -48,6 +48,7 @@ public class SwerveModule implements RevOptimization {
     m_driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
     m_turningMotor = new CANSparkMax(turningMotorChannel, MotorType.kBrushless);
 
+    // Change this if teleop no work
     m_driveMotor.setClosedLoopRampRate(maxRampUpRate);
 
     m_driveMotor.setIdleMode(IdleMode.kCoast);

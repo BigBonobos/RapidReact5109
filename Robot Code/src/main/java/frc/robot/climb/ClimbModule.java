@@ -14,6 +14,8 @@ public class ClimbModule implements SolenoidController {
     private final CDSolenoid leftSolenoid;
     private final CDSolenoid[] sols;
 
+    // private final Climb climb = new Climb();
+
     private final CANSparkMax climbMotor;
 
     public ClimbModule(int motorPort, int[][] solenoidSettings) {
@@ -77,10 +79,11 @@ public class ClimbModule implements SolenoidController {
      */
     @Override
     public void handleInputs(XboxController xController, Joystick j_operator) {
+        // climb.handleInputs(j_operator);
         if (xController.getBButton()) {
-            climbMotor.set(-0.5);
+            climbMotor.set(-.5);
           } else if (xController.getAButton()) {
-            climbMotor.set(0.5);
+            climbMotor.set(1);
           } else {
             climbMotor.set(0);
           }

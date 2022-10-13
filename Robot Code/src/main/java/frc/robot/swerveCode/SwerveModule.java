@@ -22,7 +22,7 @@ public class SwerveModule implements RevOptimization {
   private static final double maxRampUpRate = 2;
 
   private static final double kTicksPerTurnerWheelRadian = 42 / (2 * Math.PI) * 12.8;
-
+  
   private static final double kModuleMaxAngularVelocity = Drivetrain.kMaxAngularSpeed;
   private static final double kModuleMaxAngularAcceleration = 2 * Math.PI; // radians per second squared
 
@@ -49,7 +49,7 @@ public class SwerveModule implements RevOptimization {
     m_turningMotor = new CANSparkMax(turningMotorChannel, MotorType.kBrushless);
 
     // Change this if teleop no work
-    m_driveMotor.setClosedLoopRampRate(maxRampUpRate);
+    // m_driveMotor.setClosedLoopRampRate(maxRampUpRate);
 
     m_driveMotor.setIdleMode(IdleMode.kCoast);
     m_turningMotor.setIdleMode(IdleMode.kCoast);
@@ -73,7 +73,7 @@ public class SwerveModule implements RevOptimization {
     m_turningPIDController.setD(0);
     // m_turningPIDController.setIMaxAccum(0.1,0);
     
-    m_driveMotor.setClosedLoopRampRate(2);
+    // m_driveMotor.setClosedLoopRampRate(2);
 
     // Setting turn constraints
     m_turningPIDController.setSmartMotionAccelStrategy(com.revrobotics.SparkMaxPIDController.AccelStrategy.kTrapezoidal,

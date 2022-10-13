@@ -123,7 +123,7 @@ public class BallFondler implements BaseController {
             shoot();
         }
 
-        if (xController.getLeftTriggerAxis() == 1) {
+        if (xController.getLeftTriggerAxis() > .1) {
             intake.intakeBalls();
 
             if (shooting || !beam2.get() || ballCount == 1) {
@@ -135,6 +135,12 @@ public class BallFondler implements BaseController {
         } else {
             intake.resetSystem();
         }
+
+        if (xController.getRightTriggerAxis() > .1) {
+            intake.ejectBalls();
+            shooter.m_indexMotor.set(-.75);
+        } 
+        
 
         intake.handleInputs(xController, j_operator);
         shooter.handleInputs(xController, j_operator);

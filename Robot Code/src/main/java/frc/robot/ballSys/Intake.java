@@ -41,7 +41,8 @@ public class Intake implements BaseController {
      * If it is, don't do anything.
      */
     public void ejectBalls() {
-        this.intakeMotor.set(ballCount == 0 ? 0 : -0.5);
+        //this.intakeMotor.set(ballCount == 0 ? 0 : -0.5);
+        this.intakeMotor.set(-.75);
     }
 
     /**

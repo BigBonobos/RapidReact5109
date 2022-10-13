@@ -29,7 +29,32 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
 
+//FOR NETWORK TABLE
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+
+
 public class Robot extends TimedRobot {
+
+  NetworkTableInstance inst = NetworkTableInstance.getDefault();
+  NetworkTable limelightTable = inst.getTable("limelight");
+  double xLimelightAngle = limelightTable.getEntry("tx").getDouble(0);
+  boolean xToggle = false;
+  boolean lastXToggle = false;
+
+  public boolean autoAlign(Double angle) {
+    float power = 0.12f;
+    float deadzone = 0.02f;
+    if (Math.abs(angle) > deadzone) {
+      m_swerve.drive(0, 0, -angle * power, false);
+      return false;
+    } else {
+      m_swerve.drive(0, 0, 0, false);
+      return true;
+    }
+  }
 
   /**
    * Variable assignment for limelight.
@@ -128,6 +153,7 @@ public class Robot extends TimedRobot {
 
   // public final AutoShoot autoShoot = new AutoShoot(this, new Translation2d(1, 0), 3, 10);
 
+  
 
   /**
    * Ran once on bot initialization.
@@ -135,6 +161,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     // listenerHandleBall = m_swerve.initBallListener();
+   
   }
 
   /**
@@ -218,12 +245,15 @@ public class Robot extends TimedRobot {
     m_swerve.updateOdometry();
   }
 
+  boolean aligned = false;
+
   /**
    * Init when setting up teleop setting.
    */
   @Override
   public void teleopInit() {
     m_swerve.customTeleopAlign();
+    aligned = false;
   }
 
   /**
@@ -231,9 +261,24 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-
+    xLimelightAngle = limelightTable.getEntry("tx").getDouble(0);
+    System.out.println(xLimelightAngle);
+    /*System.out.println("aligned:" + aligned);
+    System.out.println("x toggled:" + xToggle);*/
     driveWithJoystick(true);
     handleInputs(xController, j_operator);
+    if (!aligned && xToggle) {
+      aligned = autoAlign(xLimelightAngle);
+    }
+    
+    if (xController.getXButton() && !lastXToggle){
+      xToggle = !xToggle;
+      lastXToggle = true;
+      
+    } else if (!xController.getXButton() && lastXToggle){
+      lastXToggle = false;
+    }
+    System.out.println(xToggle);
   }
 
   private void driveWithJoystick(boolean fieldRelative) {
@@ -258,7 +303,7 @@ public class Robot extends TimedRobot {
      **/
     final double rot = -m_rotLimiter.calculate(MathUtil.applyDeadband(xController.getRightX(), 0.12))
         * frc.robot.swerveCode.Drivetrain.kMaxAngularSpeed;
-      
+    aligned = false;  
     m_swerve.drive(xSpeed, ySpeed, rot, fieldRelative);
   }
 

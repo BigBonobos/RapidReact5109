@@ -78,7 +78,7 @@ public class Climb {
     }
 
     public void retractWinch() {
-        m_Winch.set(-0.5);
+        m_Winch.set(-1);
     }
 
     

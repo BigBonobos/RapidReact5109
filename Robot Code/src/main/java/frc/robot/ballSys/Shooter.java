@@ -190,6 +190,8 @@ public class Shooter implements BaseController {
         double startTime = Timer.getFPGATimestamp();
         while (!isAtShootingSpeed() && Timer.getFPGATimestamp() - startTime < 4) {
             m_shooterMotor.set(calculateShootingSpeed());
+            
+
             // m_shooterMotor.setVoltage(calculateShootingVoltage());
             try {
                 Thread.sleep(10);
@@ -203,6 +205,7 @@ public class Shooter implements BaseController {
         while (Timer.getFPGATimestamp() - loadingStart < ballDelay) {
             m_indexMotor.set(0.4);
             m_shooterMotor.set(calculateShootingSpeed());
+            
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {

@@ -173,6 +173,10 @@ public class Robot extends TimedRobot {
     // ballSys.intakeOn = false;
     // ballSys.BoolBall = false;
     // ballSys.shooting = false;
+    m_swerve.m_backRight.m_turningEncoderRelative.setPosition(0);
+    m_swerve.m_backLeft.m_turningEncoderRelative.setPosition(0);
+    m_swerve.m_frontLeft.m_turningEncoderRelative.setPosition(0);
+    m_swerve.m_frontRight.m_turningEncoderRelative.setPosition(0);
   }
 
   /**
@@ -180,11 +184,13 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-    driveWithJoystick(true);
+    // driveWithJoystick(true);
     // System.out.printf("%s\n",
     //     new Translation2d(m_swerve.navX.getDisplacementX(), m_swerve.navX.getDisplacementY()).toString());O
-
-    handleInputs(xController, j_operator);
+    m_swerve.m_backRight.testEncoder();
+    m_swerve.m_backLeft.testEncoder();
+    m_swerve.m_frontLeft.testEncoder();
+    m_swerve.m_frontRight.testEncoder();
 
   }
 
@@ -253,6 +259,10 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     m_swerve.customTeleopAlign();
+    m_swerve.m_frontLeft.m_turningEncoderRelative.setPosition(0);
+    m_swerve.m_frontRight.m_turningEncoderRelative.setPosition(0);
+    m_swerve.m_backLeft.m_turningEncoderRelative.setPosition(0);
+    m_swerve.m_backRight.m_turningEncoderRelative.setPosition(0);
     aligned = false;
   }
 

@@ -14,24 +14,24 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import com.ctre.phoenix.sensors.*;
 
-public class SwerveModule implements RevOptimization {
+public class SwerveModule implements RevOptimization{
   private static final double kWheelRadius = 0.0508;
 
   private static final double kTicksPerMotorRadian = 42 / (2 * Math.PI);
   private static final double kTicksPerWheelRadian = kTicksPerMotorRadian * 8.14;
   private static final double maxRampUpRate = 2;
 
-  private static final double kTicksPerTurnerWheelRadian = 42 / (2 * Math.PI) * 12.8;
+  private static final double kTicksPerTurnerWheelRadian = 12.8 / (2 * Math.PI);
   
   private static final double kModuleMaxAngularVelocity = Drivetrain.kMaxAngularSpeed;
-  private static final double kModuleMaxAngularAcceleration = 2 * Math.PI; // radians per second squared
+  private static final double kModuleMaxAngularAcceleration = 3 * Math.PI; // radians per second squared
 
   private final CANSparkMax m_driveMotor;
   public final CANSparkMax m_turningMotor;
 
-  private final RelativeEncoder m_driveEncoder;
-  private final RelativeEncoder m_turningEncoderRelative;
-  public final CANCoder m_turningEncoderAbsolute;
+  public final RelativeEncoder m_driveEncoder;
+  public final RelativeEncoder m_turningEncoderRelative;
+  // public final CANCoder m_turningEncoderAbsolute;
 
   private final SparkMaxPIDController m_drivePIDController;
   private final SparkMaxPIDController m_turningPIDController;
@@ -57,7 +57,7 @@ public class SwerveModule implements RevOptimization {
     // Encoder Instantiation
     m_driveEncoder = m_driveMotor.getEncoder();
     m_turningEncoderRelative = m_turningMotor.getEncoder();
-    m_turningEncoderAbsolute = new CANCoder(canCoderId);
+    // m_turningEncoderAbsolute = new CANCoder(canCoderId);
 
     // PID Instantiation
     m_drivePIDController = m_driveMotor.getPIDController();
@@ -88,23 +88,23 @@ public class SwerveModule implements RevOptimization {
     // kEncoderResolution);
 
     m_driveEncoder.setVelocityConversionFactor(1 / (kTicksPerWheelRadian) * kWheelRadius);
-    m_turningEncoderRelative.setPositionConversionFactor(1 / kTicksPerTurnerWheelRadian);
+    m_turningEncoderRelative.setPositionConversionFactor(1 /kTicksPerTurnerWheelRadian);
 
     // m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
 
     // Set the distance (in this case, angle) per pulse for the turning encoder.
     // This is the the angle through an entire rotation (2 * wpi::math::pi)
     // divided by the encoder resolution.
-    CANCoderConfiguration encoderConfig = new CANCoderConfiguration();
-    encoderConfig.magnetOffsetDegrees = magOffset;
-    encoderConfig.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
-    encoderConfig.unitString = "deg";
-    encoderConfig.sensorDirection = false; // Counter clock-wise
-    encoderConfig.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180;
-    m_turningEncoderAbsolute.configAllSettings(encoderConfig);
+    // CANCoderConfiguration encoderConfig = new CANCoderConfiguration();
+    // encoderConfig.magnetOffsetDegrees = magOffset;
+    // encoderConfig.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
+    // encoderConfig.unitString = "deg";
+    // encoderConfig.sensorDirection = false; // Counter clock-wise
+    // encoderConfig.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180;
+    // m_turningEncoderAbsolute.configAllSettings(encoderConfig);
 
     // Limit the PID Controller's input range between -pi and pi and set the input
-    // to be continuous.
+    // to be continuous
     // m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
       m_turningPIDController.setOutputRange(-Math.PI, Math.PI);
   }
@@ -116,7 +116,7 @@ public class SwerveModule implements RevOptimization {
    */
   public SwerveModuleState getState() {
     return new SwerveModuleState(m_driveEncoder.getVelocity(),
-        new Rotation2d(m_turningEncoderAbsolute.getAbsolutePosition()));
+        new Rotation2d(m_turningEncoderRelative.getPosition() * 2 * Math.PI));
   }
 
   /**
@@ -125,19 +125,9 @@ public class SwerveModule implements RevOptimization {
    * @param state Desired state with speed and angle.
    */
   public void setDesiredState(SwerveModuleState state) {
-
-    // final double driveFeedforward =
-    // m_driveFeedforward.calculate(state.speedMetersPerSecond);
-
-    // final double turnFeedforward =
-    // m_turnFeedforward.calculate(m_turningEncoder.getVelocity());
-
-    // m_drivePIDController.setFF(driveFeedforward);
-    // m_turningPIDController.setFF(turnFeedforward);
-    Rotation2d currentAngle = Rotation2d.fromDegrees(m_turningEncoderAbsolute.getAbsolutePosition());
-    state = optimize(state, currentAngle);
-
-    final double deltaAngle = state.angle.getRadians() - currentAngle.getRadians();
+    state = optimize(state, new Rotation2d(m_turningEncoderRelative.getPosition()));
+    // System.out.println(state.angle.getRadians() - m_turningEncoderRelative.getPosition());
+    // final double deltaAngle = state.angle.getRadians() - currentAngle.getRadians();
 
     // System.out.println("deltaAngle " + deltaAngle);
     // System.out.println("encoderPos " + m_turningEncoderRelative.getPosition());
@@ -146,25 +136,21 @@ public class SwerveModule implements RevOptimization {
     //System.out.println("Relative:" + m_turningEncoderRelative.getPosition());
 
     
-    double diffAngle = deltaAngle + m_turningEncoderRelative.getPosition();
+    // double diffAngle = deltaAngle + m_turningEncoderRelative.getPosition();
   //  diffAngle = diffAngle % 2 * Math.PI;
   //   diffAngle = (diffAngle + 2 * Math.PI) % 2 * Math.PI;
   //   if (diffAngle > Math.PI) diffAngle -= 2 * Math.PI;
-    double finalAngle = (diffAngle) / (2 * Math.PI);
+    // double finalAngle = (deltaAngle) / (2 * Math.PI);
  
     
 
     // System.out.pr  intln("final angle: "+ diffAngle);
-    // state = SwerveModuleState.optimize(state, Rotation2d.from diffAngle);
-    // double result = diffAngle % 360;
-
-    // if (result < 0) {
-    // result += 360;
-    // }
-    //System.out.println("Target:" + diffAngle);
-    // * 180 / Math.PI
-    m_turningEncoderAbsolute.setPositionToAbsolute();
+    // state = SwerveModuleState.optimize(state, new Rotation2d(m_turningEncoderRelative.getPosition()));
     m_drivePIDController.setReference(state.speedMetersPerSecond, ControlType.kVelocity);
-    m_turningPIDController.setReference(finalAngle, ControlType.kPosition);
+    m_turningPIDController.setReference(state.angle.getRadians(), ControlType.kPosition);
+  }
+
+  public void testEncoder() {
+    System.out.println(m_turningEncoderRelative.getPosition());
   }
 }
